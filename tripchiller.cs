@@ -1,0 +1,5 @@
+/* TRIPCHILLER external CSS loaded */
+
+html.tc-external-code-loaded body {
+  /* пусто специально */
+}
