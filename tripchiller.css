@@ -1,5 +1,81 @@
-/* TRIPCHILLER external CSS loaded */
+/* =========================
+   TRIPCHILLER / LOAD MORE BUTTON
+   ========================= */
 
-html.tc-external-code-loaded body {
-  /* пусто специально */
+.t778__showmore,
+button.t778__showmore,
+.t-store__load-more-btn,
+.js-store-load-more-btn {
+  cursor: pointer !important;
+
+  background: #000 !important;
+  background-color: #000 !important;
+
+  color: #ffffff !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  text-shadow:
+    1px 0 0 rgba(255, 0, 0, 0.55),
+    -1px 0 0 rgba(0, 130, 255, 0.45) !important;
+
+  font-family: 'BetterVCR', Arial, sans-serif !important;
+
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+
+  -webkit-tap-highlight-color: transparent !important;
+
+  transition:
+    background-color .16s ease,
+    color .08s linear,
+    transform .06s ease,
+    text-shadow .16s ease !important;
+}
+
+.t778__showmore *,
+.t-store__load-more-btn *,
+.js-store-load-more-btn * {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: inherit !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  text-shadow: inherit !important;
+}
+
+.t778__showmore:hover,
+.t-store__load-more-btn:hover,
+.js-store-load-more-btn:hover {
+  background: #9d191c !important;
+  background-color: #9d191c !important;
+
+  color: #ffffff !important;
+
+  text-shadow:
+    1px 0 0 rgba(255, 255, 255, 0.18),
+    -1px 0 0 rgba(0, 130, 255, 0.35) !important;
+}
+
+.t778__showmore.tc-loadmore-pressed,
+.t-store__load-more-btn.tc-loadmore-pressed,
+.js-store-load-more-btn.tc-loadmore-pressed {
+  background: #9d191c !important;
+  background-color: #9d191c !important;
+
+  color: #bfbfbf !important;
+
+  transform: translateY(1px) scale(0.99) !important;
+
+  text-shadow:
+    1px 0 0 rgba(255, 0, 0, 0.35),
+    -1px 0 0 rgba(0, 130, 255, 0.28) !important;
+}
+
+.t778__showmore.tc-loadmore-pressed *,
+.t-store__load-more-btn.tc-loadmore-pressed *,
+.js-store-load-more-btn.tc-loadmore-pressed * {
+  color: #bfbfbf !important;
 }
