@@ -172,3 +172,22 @@ button.t778__showmore,
 
   transition: color 0s linear !important;
 }
+/* =========================
+   TRIPCHILLER / LEGAL BUTTONS HOTFIX
+   pressed background must stay visible
+   ========================= */
+
+.tc-legal-btn.tc-pressed {
+  background: #9d191c !important;
+  background-color: #9d191c !important;
+}
+
+.tc-legal-btn.tc-pressed *,
+.tc-legal-btn.tc-pressed .tn-atom,
+.tc-legal-btn.tc-pressed .t-btn,
+.tc-legal-btn.tc-pressed span,
+.tc-legal-btn.tc-pressed div {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #bfbfbf !important;
+}
