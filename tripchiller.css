@@ -79,3 +79,96 @@ button.t778__showmore,
 .js-store-load-more-btn.tc-loadmore-pressed * {
   color: #bfbfbf !important;
 }
+/* =========================
+   TRIPCHILLER / LEGAL BUTTONS
+   ========================= */
+
+.tc-legal-btn {
+  cursor: pointer !important;
+
+  background: #000 !important;
+  background-color: #000 !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+
+  -webkit-tap-highlight-color: transparent !important;
+
+  transition:
+    background-color .16s ease,
+    transform .06s ease !important;
+}
+
+.tc-legal-btn *,
+.tc-legal-btn .tn-atom,
+.tc-legal-btn .t-btn,
+.tc-legal-btn span,
+.tc-legal-btn div {
+  background: transparent !important;
+  background-color: transparent !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+
+  -webkit-tap-highlight-color: transparent !important;
+
+  transition:
+    color 0s linear,
+    transform .06s ease !important;
+}
+
+.tc-legal-btn:hover {
+  background: #9d191c !important;
+  background-color: #9d191c !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.tc-legal-btn:hover *,
+.tc-legal-btn:hover .tn-atom,
+.tc-legal-btn:hover .t-btn,
+.tc-legal-btn:hover span,
+.tc-legal-btn:hover div {
+  background: transparent !important;
+  background-color: transparent !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.tc-legal-btn.tc-pressed {
+  background: #9d191c !important;
+  background-color: #9d191c !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+
+  transform: translateY(1px) scale(0.99) !important;
+}
+
+.tc-legal-btn.tc-pressed,
+.tc-legal-btn.tc-pressed *,
+.tc-legal-btn.tc-pressed .tn-atom,
+.tc-legal-btn.tc-pressed .t-btn,
+.tc-legal-btn.tc-pressed span,
+.tc-legal-btn.tc-pressed div {
+  color: #bfbfbf !important;
+
+  background-color: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+
+  transition: color 0s linear !important;
+}
