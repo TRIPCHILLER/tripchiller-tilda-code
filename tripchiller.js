@@ -2405,7 +2405,11 @@ function setupDesktopAura() {
   const REVEAL_TIME = 650;
   const EYES_TO_CLEAN_DELAY = 1000;
   const EYES_TO_CLEAN_FADE = 1000;
-  const RED_EXPAND_TIME = 2000;
+  const NORMAL_CHARGE_TIME = 3000;
+  const RED_CHARGE_TIME = 3000;
+  const NORMAL_START_SCALE = 0.5;
+  const NORMAL_RADIUS_MULTIPLIER = 1.0;
+  const RED_START_SCALE = 0.5;
   const RED_RADIUS_MULTIPLIER = 1.5;
 
   /*
@@ -2552,9 +2556,13 @@ function setupDesktopAura() {
       redModeStartTime = 0;
     }
 
+    const focusElapsed = focusStartTime ? Math.max(0, time - focusStartTime) : 0;
+    const normalCharge = smoothstep(focusElapsed / NORMAL_CHARGE_TIME);
+    const normalRadiusMultiplier = NORMAL_START_SCALE + normalCharge * (NORMAL_RADIUS_MULTIPLIER - NORMAL_START_SCALE);
+
     const redElapsed = isRedActive && redModeStartTime ? Math.max(0, time - redModeStartTime) : 0;
-    const redExpand = isRedActive ? smoothstep(redElapsed / RED_EXPAND_TIME) : 0;
-    const redRadiusMultiplier = 1 + redExpand * (RED_RADIUS_MULTIPLIER - 1);
+    const redCharge = isRedActive ? smoothstep(redElapsed / RED_CHARGE_TIME) : 0;
+    const redRadiusMultiplier = RED_START_SCALE + redCharge * (RED_RADIUS_MULTIPLIER - RED_START_SCALE);
     const redPower = isRedActive ? 1 : 0;
 
     setDesktopReveal(totalPower, cleanFadePower, redPower);
@@ -2565,7 +2573,7 @@ function setupDesktopAura() {
     const t = time * 0.001;
     const pulse = Math.sin(t * 1.85);
 
-    const radiusMultiplier = isRedActive ? redRadiusMultiplier : 1;
+    const radiusMultiplier = isRedActive ? redRadiusMultiplier : normalRadiusMultiplier;
     const core = (BASE_CORE + pulse * 5) * radiusMultiplier;
     const soft = (BASE_SOFT + pulse * 18) * radiusMultiplier;
 
