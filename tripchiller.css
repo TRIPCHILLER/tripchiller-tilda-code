@@ -1564,3 +1564,23 @@ body {
     object-fit: contain;
   }
 }
+
+@media (min-width: 769px) {
+  .tc-user-photos__frame {
+    aspect-ratio: auto !important;
+    max-height: 68vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .tc-user-photos__img {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 68vh;
+    object-fit: contain !important;
+    object-position: center center;
+  }
+}
