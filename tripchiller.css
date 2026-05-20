@@ -1479,8 +1479,12 @@ body {
   animation: tcUserPhotosTicker 24s linear infinite;
 }
 
-.tc-user-photos__ticker--bottom .tc-user-photos__ticker-track {
+.tc-user-photos__ticker--top .tc-user-photos__ticker-track {
   animation-direction: reverse;
+}
+
+.tc-user-photos__ticker--bottom .tc-user-photos__ticker-track {
+  animation-direction: normal;
 }
 
 .tc-user-photos__ticker span {
@@ -1546,6 +1550,17 @@ body {
   }
 
   .tc-user-photos__frame {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: auto;
+    display: grid;
+    place-items: center;
+    background: #000;
+  }
+
+  .tc-user-photos__img {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: min(72vh, 720px);
+    object-fit: contain;
   }
 }
