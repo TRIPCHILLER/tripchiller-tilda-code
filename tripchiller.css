@@ -1263,9 +1263,7 @@ body {
     opacity: 0 !important;
   }
 
-  #tc-fixed-bg .tc-bg-color,
-  #tc-fixed-bg .tc-bg-color-clean,
-  #tc-fixed-bg .tc-bg-color-red {
+  #tc-fixed-bg .tc-bg-color {
     display: block !important;
     opacity: var(--mobile-color-opacity);
     filter: saturate(1.1) contrast(1.02);
@@ -1285,9 +1283,7 @@ body {
     );
   }
 
-  #tc-fixed-bg .tc-bg-aura,
-  #tc-fixed-bg .tc-bg-aura-clean,
-  #tc-fixed-bg .tc-bg-aura-red {
+  #tc-fixed-bg .tc-bg-aura {
     display: block !important;
     opacity: var(--mobile-band-opacity);
     transform: scale(1.035);
@@ -1309,6 +1305,18 @@ body {
       rgba(0, 0, 0, 0.8) var(--mobile-band-mid),
       rgba(0, 0, 0, 0) var(--mobile-band-end)
     );
+  }
+
+  #tc-fixed-bg .tc-bg-color-clean,
+  #tc-fixed-bg .tc-bg-aura-clean,
+  #tc-fixed-bg .tc-bg-ripple-clean-1,
+  #tc-fixed-bg .tc-bg-ripple-clean-2,
+  #tc-fixed-bg .tc-bg-color-red,
+  #tc-fixed-bg .tc-bg-aura-red,
+  #tc-fixed-bg .tc-bg-ripple-red-1,
+  #tc-fixed-bg .tc-bg-ripple-red-2 {
+    display: none !important;
+    opacity: 0 !important;
   }
 }
 
