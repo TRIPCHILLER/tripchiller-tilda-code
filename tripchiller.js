@@ -2236,6 +2236,23 @@ eyeUnlockTimer = setTimeout(function(){
   function setupMobileScrollReveal() {
     let scrollRaf = 0;
 
+    function getActiveProductsGrid() {
+      const body = document.body;
+      const prefersCustom = !!(body && body.classList.contains("tc-section-custom"));
+
+      if (prefersCustom) {
+        return (
+          document.querySelector(".uc-custom-grid") ||
+          document.querySelector(".uc-shop-grid")
+        );
+      }
+
+      return (
+        document.querySelector(".uc-shop-grid") ||
+        document.querySelector(".uc-custom-grid")
+      );
+    }
+
     function updateMobileReveal() {
       scrollRaf = 0;
 
@@ -2248,9 +2265,18 @@ eyeUnlockTimer = setTimeout(function(){
         0;
 
       const viewportH = window.innerHeight || document.documentElement.clientHeight || 1;
-      const maxScroll = Math.max(1, getDocumentHeight() - viewportH);
+      const grid = getActiveProductsGrid();
+      let revealStart = getDocumentHeight();
 
-      const progress = clamp01(scrollY / maxScroll);
+      if (grid) {
+        const rect = grid.getBoundingClientRect();
+        const gridBottomAbs = rect.bottom + scrollY;
+        revealStart = gridBottomAbs;
+      }
+
+      const revealEnd = getDocumentHeight() - viewportH;
+      const revealRange = Math.max(1, revealEnd - revealStart);
+      const progress = clamp01((scrollY - revealStart) / revealRange);
 
       const feather = Math.max(90, Math.min(180, viewportH * 0.18));
       const revealY = -feather + progress * (viewportH + feather * 2);
@@ -2296,12 +2322,32 @@ eyeUnlockTimer = setTimeout(function(){
       setTimeout(scheduleMobileReveal, 1200);
     }, { once: true });
 
+    document.addEventListener("click", function (event) {
+      const target = event.target;
+      if (!target || !target.closest) return;
+
+      const loadMoreBtn = target.closest(
+        ".t778__showmore, .t-store__load-more-btn, .js-store-load-more-btn"
+      );
+      if (!loadMoreBtn) return;
+
+      scheduleMobileReveal();
+      setTimeout(scheduleMobileReveal, 300);
+      setTimeout(scheduleMobileReveal, 900);
+      setTimeout(scheduleMobileReveal, 1800);
+      setTimeout(scheduleMobileReveal, 3000);
+    });
+
     const observeTarget = document.getElementById("allrecords") || document.body;
 
     if (window.MutationObserver && observeTarget) {
       const observer = new MutationObserver(function () {
         scheduleMobileReveal();
         setTimeout(scheduleMobileReveal, 120);
+        setTimeout(scheduleMobileReveal, 300);
+        setTimeout(scheduleMobileReveal, 900);
+        setTimeout(scheduleMobileReveal, 1800);
+        setTimeout(scheduleMobileReveal, 3000);
       });
 
       observer.observe(observeTarget, {
