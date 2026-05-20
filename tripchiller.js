@@ -2666,11 +2666,14 @@ function setupDesktopAura() {
     if (!textNode) return;
 
     textNode.textContent = '';
-    row.classList.add('is-visible');
     row.classList.add('is-currently-typing');
 
     for (var i = 0; i <= text.length; i++) {
       textNode.textContent = text.slice(0, i);
+
+      if (i === 1) {
+        row.classList.add('is-visible');
+      }
 
       if (i < text.length) {
         var ch = text.charAt(i);
