@@ -74,7 +74,7 @@ var opacity = 0;
       var INTRO_DX = 5;
       var INTRO_DY = 4;
 
-var INTRO_START_DELAY = EYE_START_DELAY + SCALE_DURATION + 3000;
+var INTRO_START_DELAY = EYE_START_DELAY + SCALE_DURATION + 2000;
       var INTRO_T_LEFT  = 500;
       var INTRO_T_RIGHT = 500;
       var INTRO_T_HOME  = 1000;
