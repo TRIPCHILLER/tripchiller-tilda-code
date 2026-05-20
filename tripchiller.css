@@ -1557,8 +1557,8 @@ body {
   max-width: 100%;
   overflow-x: clip;
   --tc-red: #bf1111;
-  --tc-user-photos-gap: clamp(8px, 1vw, 14px);
-  --tc-user-photos-gap-mobile: 8px;
+  --tc-user-photos-gap: clamp(10px, 1.1vw, 16px);
+  --tc-user-photos-gap-mobile: 10px;
   --tc-user-slide-step: calc(min(42vw, 700px) + clamp(80px, 10vw, 180px));
 
   position: relative;
