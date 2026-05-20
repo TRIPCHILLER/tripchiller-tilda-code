@@ -2148,7 +2148,7 @@ eyeUnlockTimer = setTimeout(function(){
 })();
 
 (function () {
-  const BG_BW = "https://static.tildacdn.com/tild3762-3133-4231-b166-306163343466/BGbw.webp";
+  const BG_BW = "https://static.tildacdn.com/tild3534-6439-4037-a361-323538303363/BGbw.webp";
   const BG_COLOR_EYES = "https://static.tildacdn.com/tild3132-3630-4434-b237-653763376365/BGColor2.webp";
   const BG_COLOR_CLEAN = "https://static.tildacdn.com/tild6165-6634-4434-b464-316436366535/BGColor.webp";
   const BG_COLOR_RED = "https://static.tildacdn.com/tild3961-6534-4636-a137-383465666237/BGred.webp";
@@ -2405,6 +2405,8 @@ function setupDesktopAura() {
   const REVEAL_TIME = 650;
   const EYES_TO_CLEAN_DELAY = 1000;
   const EYES_TO_CLEAN_FADE = 1000;
+  const RED_EXPAND_TIME = 2000;
+  const RED_RADIUS_MULTIPLIER = 1.5;
 
   /*
     Глобальный прогрев после загрузки страницы:
@@ -2419,6 +2421,7 @@ function setupDesktopAura() {
   let activityStartTime = 0;
   let cleanFadePower = 0;
   let redMode = false;
+  let redModeStartTime = 0;
 
   if (document.readyState === "complete") {
     pageLoadTime = performance.now();
@@ -2460,12 +2463,12 @@ function setupDesktopAura() {
     bg.style.setProperty("--desktop-ripple-opacity", (eyesPower * 0.52).toFixed(3));
     bg.style.setProperty("--desktop-color-opacity", (eyesPower * 0.9).toFixed(3));
 
-    bg.style.setProperty("--desktop-aura-clean-opacity", (cleanLayerPower * 0.52).toFixed(3));
-    bg.style.setProperty("--desktop-ripple-clean-opacity", (cleanLayerPower * 0.52).toFixed(3));
+    bg.style.setProperty("--desktop-aura-clean-opacity", "0");
+    bg.style.setProperty("--desktop-ripple-clean-opacity", "0");
     bg.style.setProperty("--desktop-color-clean-opacity", (cleanLayerPower * 0.9).toFixed(3));
 
-    bg.style.setProperty("--desktop-aura-red-opacity", (redLayerPower * 0.52).toFixed(3));
-    bg.style.setProperty("--desktop-ripple-red-opacity", (redLayerPower * 0.52).toFixed(3));
+    bg.style.setProperty("--desktop-aura-red-opacity", "0");
+    bg.style.setProperty("--desktop-ripple-red-opacity", "0");
     bg.style.setProperty("--desktop-color-red-opacity", (redLayerPower * 0.9).toFixed(3));
   }
 
@@ -2514,7 +2517,17 @@ function setupDesktopAura() {
     }
 
     const fallbackRedMode = document.body.classList.contains("tc-flower-dragging");
-    const redPower = (redMode || fallbackRedMode) ? 1 : 0;
+    const isRedActive = redMode || fallbackRedMode;
+    if (isRedActive && redModeStartTime === 0) {
+      redModeStartTime = time;
+    } else if (!isRedActive && redModeStartTime !== 0) {
+      redModeStartTime = 0;
+    }
+
+    const redElapsed = isRedActive && redModeStartTime ? Math.max(0, time - redModeStartTime) : 0;
+    const redExpand = isRedActive ? smoothstep(redElapsed / RED_EXPAND_TIME) : 0;
+    const redRadiusMultiplier = 1 + redExpand * (RED_RADIUS_MULTIPLIER - 1);
+    const redPower = isRedActive ? 1 : 0;
 
     setDesktopReveal(totalPower, cleanFadePower, redPower);
 
@@ -2524,8 +2537,9 @@ function setupDesktopAura() {
     const t = time * 0.001;
     const pulse = Math.sin(t * 1.85);
 
-    const core = BASE_CORE + pulse * 5;
-    const soft = BASE_SOFT + pulse * 18;
+    const radiusMultiplier = isRedActive ? redRadiusMultiplier : 1;
+    const core = (BASE_CORE + pulse * 5) * radiusMultiplier;
+    const soft = (BASE_SOFT + pulse * 18) * radiusMultiplier;
 
     const rippleSpeed = 0.28;
     const phase1 = (t * rippleSpeed) % 1;
@@ -2574,6 +2588,7 @@ function setupDesktopAura() {
     activityStartTime = 0;
     cleanFadePower = 0;
     redMode = false;
+    redModeStartTime = 0;
 
     setDesktopReveal(0, 0, 0);
     bg.classList.remove("is-active");
@@ -2592,20 +2607,25 @@ function setupDesktopAura() {
 
   function enableRedMode() {
     redMode = true;
+    redModeStartTime = performance.now();
     activityStartTime = performance.now();
     cleanFadePower = 0;
+    startRender();
   }
 
   function disableRedMode() {
-    if (!redMode) return;
     redMode = false;
+    redModeStartTime = 0;
     activityStartTime = performance.now();
     cleanFadePower = 0;
   }
 
   document.addEventListener("pointermove", activate, { passive: true });
   document.addEventListener("pointerdown", function (event) {
-    if (isFlowerTarget(event.target)) enableRedMode();
+    if (isFlowerTarget(event.target)) {
+      activate(event);
+      enableRedMode();
+    }
   }, { passive: true });
   document.addEventListener("pointerup", disableRedMode, { passive: true });
   document.addEventListener("pointercancel", disableRedMode, { passive: true });
