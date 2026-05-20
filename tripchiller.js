@@ -2857,16 +2857,54 @@ function setupDesktopAura() {
     else document.addEventListener('DOMContentLoaded', fn);
   }
 
+  function renderSection(root) {
+    root.innerHTML = '' +
+      '<section class="tc-user-photos" aria-label="НАШИ ТРИПОНАВТЫ">' +
+        '<h2 class="tc-user-photos__title">НАШИ ТРИПОНАВТЫ</h2>' +
+        '<div class="tc-user-photos__ticker tc-user-photos__ticker--top" aria-hidden="true">' +
+          '<div class="tc-user-photos__ticker-track">' +
+            '<span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>' +
+            '<span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>' +
+            '<span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>' +
+          '</div>' +
+        '</div>' +
+        '<figure class="tc-user-photos__frame">' +
+          '<img class="tc-user-photos__img" alt="">' +
+        '</figure>' +
+        '<div class="tc-user-photos__ticker tc-user-photos__ticker--bottom" aria-hidden="true">' +
+          '<div class="tc-user-photos__ticker-track">' +
+            '<span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>' +
+            '<span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>' +
+            '<span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+
+    return root.querySelector('.tc-user-photos');
+  }
+
   function loadPhotos() {
-    return fetch('user-photos.json', { cache: 'no-store' })
+    var url = 'https://tripchiller.github.io/tripchiller-tilda-code/user-photos.json?v=' + Date.now();
+
+    return fetch(url, { cache: 'no-store' })
       .then(function (res) {
         if (!res.ok) throw new Error('Failed to load user-photos.json');
         return res.json();
       })
       .then(function (items) {
         if (!Array.isArray(items)) return [];
+
         return items.filter(function (item) {
-          return item && typeof item.src === 'string' && item.src.trim();
+          if (!item || typeof item.src !== 'string') return false;
+
+          var src = item.src.trim();
+
+          return src.indexOf('http') === 0 && src.indexOf('PASTE_IMAGE') === -1;
+        }).map(function (item) {
+          return {
+            src: item.src.trim(),
+            alt: typeof item.alt === 'string' ? item.alt : 'TRIPCHILLER user photo'
+          };
         });
       })
       .catch(function () {
@@ -2874,47 +2912,71 @@ function setupDesktopAura() {
       });
   }
 
-  function initRotator(root, photos) {
-    if (!root || !photos.length) return;
+  function preloadPhoto(src) {
+    var pre = new Image();
+    pre.src = src;
+  }
 
-    var img = root.querySelector('img');
-    if (!img) return;
+  function applyPhoto(img, photo) {
+    img.src = photo.src;
+    img.alt = photo.alt || 'TRIPCHILLER user photo';
+  }
 
-    var delay = parseInt(root.getAttribute('data-tc-photos-interval'), 10);
-    if (!delay || delay < 1200) delay = 3500;
+  function pickNextIndex(current, length) {
+    if (length < 2) return current;
 
-    var index = 0;
-
-    function applyPhoto(i) {
-      var photo = photos[i];
-      if (!photo) return;
-      img.src = photo.src;
-      img.alt = photo.alt || 'TRIPCHILLER user photo';
+    var next = current;
+    while (next === current) {
+      next = Math.floor(Math.random() * length);
     }
 
-    applyPhoto(index);
+    return next;
+  }
 
-    if (photos.length < 2) return;
+  function initRotator(section, photos) {
+    if (!section) return;
+
+    var img = section.querySelector('.tc-user-photos__img');
+    if (!img) return;
+
+    if (!photos.length) {
+      section.classList.add('is-empty');
+      return;
+    }
+
+    var current = Math.floor(Math.random() * photos.length);
+    applyPhoto(img, photos[current]);
+
+    if (photos.length === 1) return;
+
+    var next = pickNextIndex(current, photos.length);
+    preloadPhoto(photos[next].src);
 
     setInterval(function () {
-      index = (index + 1) % photos.length;
-      root.classList.add('is-changing');
+      section.classList.add('is-switching');
 
       setTimeout(function () {
-        applyPhoto(index);
-        root.classList.remove('is-changing');
+        current = next;
+        applyPhoto(img, photos[current]);
       }, 180);
-    }, delay);
+
+      setTimeout(function () {
+        section.classList.remove('is-switching');
+      }, 360);
+
+      next = pickNextIndex(current, photos.length);
+      preloadPhoto(photos[next].src);
+    }, 4500);
   }
 
   ready(function () {
-    var roots = document.querySelectorAll('.tc-user-photos-rotator');
-    if (!roots.length) return;
+    var root = document.getElementById('tc-user-photos-root');
+    if (!root) return;
+
+    var section = renderSection(root);
 
     loadPhotos().then(function (photos) {
-      roots.forEach(function (root) {
-        initRotator(root, photos);
-      });
+      initRotator(section, photos);
     });
   });
 })();

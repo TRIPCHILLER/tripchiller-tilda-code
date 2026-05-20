@@ -1425,18 +1425,127 @@ body {
    TRIPCHILLER / USER PHOTOS ROTATOR
    ========================= */
 
-.tc-user-photos-rotator {
-  position: relative;
-  overflow: hidden;
+#tc-user-photos-root {
+  width: 100%;
 }
 
-.tc-user-photos-rotator img {
+.tc-user-photos {
+  --tc-red: #bf1111;
+  --tc-black: #080808;
+  --tc-frame-max: 860px;
+
+  width: min(100%, 940px);
+  margin: 26px auto 30px;
+  padding: 0 14px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  font-family: 'BetterVCR', monospace !important;
+}
+
+.tc-user-photos__title {
+  margin: 0;
+  color: #ffffff;
+  text-align: center;
+  font-size: clamp(22px, 3.1vw, 44px);
+  line-height: 1;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.tc-user-photos__ticker {
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+
+  background: var(--tc-red);
+  color: #fff;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, .16);
+  border-bottom: 1px solid rgba(0, 0, 0, .24);
+}
+
+.tc-user-photos__ticker-track {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  gap: 56px;
+  white-space: nowrap;
+  padding: 8px 0;
+  animation: tcUserPhotosTicker 24s linear infinite;
+}
+
+.tc-user-photos__ticker--bottom .tc-user-photos__ticker-track {
+  animation-direction: reverse;
+}
+
+.tc-user-photos__ticker span {
+  font-size: clamp(10px, 1.05vw, 14px);
+  line-height: 1;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  opacity: .98;
+}
+
+.tc-user-photos__frame {
+  margin: 0 auto;
+  width: min(100%, var(--tc-frame-max));
+  background: var(--tc-black);
+  border: 1px solid rgba(255, 255, 255, .08);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .45);
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+}
+
+.tc-user-photos__img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   transition: opacity 180ms ease;
 }
 
-.tc-user-photos-rotator.is-changing img {
-  opacity: 0.42;
+.tc-user-photos.is-switching .tc-user-photos__img {
+  opacity: .42;
+}
+
+.tc-user-photos.is-empty .tc-user-photos__frame {
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+}
+
+.tc-user-photos.is-empty .tc-user-photos__img {
+  opacity: 0;
+}
+
+@keyframes tcUserPhotosTicker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-33.333%);
+  }
+}
+
+@media (max-width: 768px) {
+  .tc-user-photos {
+    margin: 20px auto 22px;
+    gap: 10px;
+    padding: 0 10px;
+  }
+
+  .tc-user-photos__ticker-track {
+    gap: 30px;
+    padding: 7px 0;
+    animation-duration: 18s;
+  }
+
+  .tc-user-photos__frame {
+    aspect-ratio: 3 / 4;
+  }
 }
