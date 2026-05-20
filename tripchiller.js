@@ -2479,10 +2479,10 @@ function setupDesktopAura() {
 
     container.innerHTML =
       '<div class="tc-disk-switcher" role="tablist" aria-label="TRIPCHILLER sections">' +
-        '<button class="tc-path-row" type="button" role="tab" data-tc-tab="shop" data-label="C:\\\\TRIPCHILLER\\\\MAIN_SHOP" aria-selected="false">' +
+        '<button class="tc-path-row" type="button" role="tab" data-tc-tab="shop" data-label="C:\\TRIPCHILLER\\MAIN_SHOP" aria-selected="false">' +
           '<span class="tc-text"></span><span class="tc-caret">|</span>' +
         '</button>' +
-        '<button class="tc-path-row" type="button" role="tab" data-tc-tab="custom" data-label="C:\\\\TRIPCHILLER\\\\CUSTOM_ARCHIVE" aria-selected="false">' +
+        '<button class="tc-path-row" type="button" role="tab" data-tc-tab="custom" data-label="C:\\TRIPCHILLER\\CUSTOM_ARCHIVE" aria-selected="false">' +
           '<span class="tc-text"></span><span class="tc-caret">|</span>' +
         '</button>' +
       '</div>';

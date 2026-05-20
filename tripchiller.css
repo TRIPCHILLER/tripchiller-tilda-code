@@ -154,21 +154,10 @@
   .tw-printing {
     color: #fff !important;
     font-family: 'BetterVCR', monospace !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
     white-space: pre-wrap;
   }
-
-.uc-tw-welcome [field="text"],
-    .uc-tw-welcome .t-descr,
-    .uc-tw-welcome .t-text,
-    .uc-tw-welcome .t-title,
-    .uc-tw-welcome .tn-atom,
-    .tw-welcome [field="text"],
-    .tw-welcome .t-descr,
-    .tw-welcome .t-text,
-    .tw-welcome .t-title,
-    .tw-welcome .tn-atom {
-      visibility: visible !important;
-    }
 
 .soc1 .tn-atom,
 .soc2 .tn-atom,
@@ -1413,12 +1402,4 @@ body {
     .tc-path-row {
       visibility: visible !important;
       opacity: 1 !important;
-    }
-
-    .tc-path-row[data-tc-tab="shop"] .tc-text::after {
-      content: "C:\\TRIPCHILLER\\MAIN_SHOP";
-    }
-
-    .tc-path-row[data-tc-tab="custom"] .tc-text::after {
-      content: "C:\\TRIPCHILLER\\CUSTOM_ARCHIVE";
     }
