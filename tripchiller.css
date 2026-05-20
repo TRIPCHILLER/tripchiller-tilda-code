@@ -1048,6 +1048,12 @@ body {
   --desktop-aura-opacity: 0;
   --desktop-ripple-opacity: 0;
   --desktop-color-opacity: 0;
+  --desktop-aura-clean-opacity: 0;
+  --desktop-ripple-clean-opacity: 0;
+  --desktop-color-clean-opacity: 0;
+  --desktop-aura-red-opacity: 0;
+  --desktop-ripple-red-opacity: 0;
+  --desktop-color-red-opacity: 0;
 
   /* Mobile scroll reveal */
   --mobile-hard: -200px;
@@ -1087,6 +1093,10 @@ body {
 @media (min-width: 981px) and (pointer: fine) {
   #tc-fixed-bg .tc-bg-color,
   #tc-fixed-bg .tc-bg-aura,
+  #tc-fixed-bg .tc-bg-color-clean,
+  #tc-fixed-bg .tc-bg-aura-clean,
+  #tc-fixed-bg .tc-bg-color-red,
+  #tc-fixed-bg .tc-bg-aura-red,
   #tc-fixed-bg .tc-bg-ripple {
     opacity: 0;
     transition: opacity 120ms linear;
@@ -1094,7 +1104,11 @@ body {
   }
 
   #tc-fixed-bg .tc-bg-color,
-  #tc-fixed-bg .tc-bg-aura {
+  #tc-fixed-bg .tc-bg-aura,
+  #tc-fixed-bg .tc-bg-color-clean,
+  #tc-fixed-bg .tc-bg-aura-clean,
+  #tc-fixed-bg .tc-bg-color-red,
+  #tc-fixed-bg .tc-bg-aura-red {
     -webkit-mask-image: radial-gradient(
       circle at var(--mx) var(--my),
       rgba(0, 0, 0, 1) 0,
@@ -1112,12 +1126,16 @@ body {
     );
   }
 
-  #tc-fixed-bg .tc-bg-aura {
+  #tc-fixed-bg .tc-bg-aura,
+  #tc-fixed-bg .tc-bg-aura-clean,
+  #tc-fixed-bg .tc-bg-aura-red {
     transform: scale(1.035);
     filter: blur(30px) saturate(1.45) brightness(1.08);
   }
 
-  #tc-fixed-bg .tc-bg-color {
+  #tc-fixed-bg .tc-bg-color,
+  #tc-fixed-bg .tc-bg-color-clean,
+  #tc-fixed-bg .tc-bg-color-red {
     filter: saturate(1.08) contrast(1.02);
   }
 
@@ -1173,6 +1191,20 @@ body {
     );
   }
 
+  #tc-fixed-bg .tc-bg-aura-clean,
+  #tc-fixed-bg .tc-bg-ripple-clean-1,
+  #tc-fixed-bg .tc-bg-ripple-clean-2,
+  #tc-fixed-bg .tc-bg-color-clean {
+    z-index: 3;
+  }
+
+  #tc-fixed-bg .tc-bg-aura-red,
+  #tc-fixed-bg .tc-bg-ripple-red-1,
+  #tc-fixed-bg .tc-bg-ripple-red-2,
+  #tc-fixed-bg .tc-bg-color-red {
+    z-index: 4;
+  }
+
   #tc-fixed-bg.is-active .tc-bg-aura {
     opacity: var(--desktop-aura-opacity);
   }
@@ -1183,6 +1215,32 @@ body {
 
   #tc-fixed-bg.is-active .tc-bg-color {
     opacity: var(--desktop-color-opacity);
+  }
+
+  #tc-fixed-bg.is-active .tc-bg-aura-clean {
+    opacity: var(--desktop-aura-clean-opacity);
+  }
+
+  #tc-fixed-bg.is-active .tc-bg-ripple-clean-1,
+  #tc-fixed-bg.is-active .tc-bg-ripple-clean-2 {
+    opacity: var(--desktop-ripple-clean-opacity);
+  }
+
+  #tc-fixed-bg.is-active .tc-bg-color-clean {
+    opacity: var(--desktop-color-clean-opacity);
+  }
+
+  #tc-fixed-bg.is-active .tc-bg-aura-red {
+    opacity: var(--desktop-aura-red-opacity);
+  }
+
+  #tc-fixed-bg.is-active .tc-bg-ripple-red-1,
+  #tc-fixed-bg.is-active .tc-bg-ripple-red-2 {
+    opacity: var(--desktop-ripple-red-opacity);
+  }
+
+  #tc-fixed-bg.is-active .tc-bg-color-red {
+    opacity: var(--desktop-color-red-opacity);
   }
 }
 
@@ -1196,12 +1254,18 @@ body {
     background-position: center center;
   }
 
-  #tc-fixed-bg .tc-bg-ripple {
+  #tc-fixed-bg .tc-bg-ripple,
+  #tc-fixed-bg .tc-bg-ripple-clean-1,
+  #tc-fixed-bg .tc-bg-ripple-clean-2,
+  #tc-fixed-bg .tc-bg-ripple-red-1,
+  #tc-fixed-bg .tc-bg-ripple-red-2 {
     display: none !important;
     opacity: 0 !important;
   }
 
-  #tc-fixed-bg .tc-bg-color {
+  #tc-fixed-bg .tc-bg-color,
+  #tc-fixed-bg .tc-bg-color-clean,
+  #tc-fixed-bg .tc-bg-color-red {
     display: block !important;
     opacity: var(--mobile-color-opacity);
     filter: saturate(1.1) contrast(1.02);
@@ -1221,7 +1285,9 @@ body {
     );
   }
 
-  #tc-fixed-bg .tc-bg-aura {
+  #tc-fixed-bg .tc-bg-aura,
+  #tc-fixed-bg .tc-bg-aura-clean,
+  #tc-fixed-bg .tc-bg-aura-red {
     display: block !important;
     opacity: var(--mobile-band-opacity);
     transform: scale(1.035);
