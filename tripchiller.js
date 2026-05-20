@@ -2261,6 +2261,7 @@ eyeUnlockTimer = setTimeout(function(){
 
   function setupMobileScrollReveal() {
     let scrollRaf = 0;
+    const MOBILE_REVEAL_PRESTART_PX = 500;
 
     function getActiveProductsGrid() {
       const body = document.body;
@@ -2296,8 +2297,9 @@ eyeUnlockTimer = setTimeout(function(){
 
       if (grid) {
         const rect = grid.getBoundingClientRect();
+        const gridTopAbs = rect.top + scrollY;
         const gridBottomAbs = rect.bottom + scrollY;
-        revealStart = gridBottomAbs;
+        revealStart = Math.max(gridTopAbs, gridBottomAbs - MOBILE_REVEAL_PRESTART_PX);
       }
 
       const revealEnd = getDocumentHeight() - viewportH;
