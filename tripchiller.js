@@ -2261,7 +2261,7 @@ eyeUnlockTimer = setTimeout(function(){
 
   function setupMobileScrollReveal() {
     let scrollRaf = 0;
-    const MOBILE_REVEAL_PRESTART_PX = 500;
+    const MOBILE_REVEAL_PRESTART_PX = 1000;
 
     function getActiveProductsGrid() {
       const body = document.body;
