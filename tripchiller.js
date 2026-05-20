@@ -2991,7 +2991,7 @@ function setupDesktopAura() {
       if (reducedMotion || photos.length < 2) return;
       timerId = setInterval(function () {
         go(1, false);
-      }, 4500);
+      }, 5000);
     }
 
     function go(direction, isManual) {
