@@ -730,7 +730,6 @@ body.radio-playing .radio-on .tn-atom{
     transform: translateY(1px) scale(0.99) !important;
   }
 
-  .tc-legal-btn.tc-pressed,
   .tc-legal-btn.tc-pressed *,
   .tc-legal-btn.tc-pressed .tn-atom,
   .tc-legal-btn.tc-pressed .t-btn,
