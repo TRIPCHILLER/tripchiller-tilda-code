@@ -633,9 +633,30 @@ body.radio-playing .radio-on .tn-atom{
 #rec1223200321 .note1 .tn-atom,
 #rec1223200321 .note2 .tn-atom,
 #rec1223200321 .note3 .tn-atom,
-#rec1223200321 .note4 .tn-atom{
+  #rec1223200321 .note4 .tn-atom{
   z-index: 1000 !important;
   pointer-events: none;
+}
+
+/* TRIPCHILLER / RADIO NOTES ANTI-CLIP */
+.note1, .note2, .note3, .note4,
+.note1 .tn-atom, .note2 .tn-atom, .note3 .tn-atom, .note4 .tn-atom{
+  position: relative !important;
+  z-index: 2147482000 !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  will-change: transform, opacity;
+}
+
+.tc-radio-notes-overflow{
+  overflow: visible !important;
+}
+
+.tc-radio-notes-overflow .t396,
+.tc-radio-notes-overflow .t396__artboard,
+.tc-radio-notes-overflow .t396__carrier,
+.tc-radio-notes-overflow .t396__filter{
+  overflow: visible !important;
 }
 
 .radio-off, .radio-on { pointer-events: none !important; }
