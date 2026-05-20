@@ -2868,9 +2868,21 @@ function setupDesktopAura() {
             '<span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>' +
           '</div>' +
         '</div>' +
-        '<figure class="tc-user-photos__frame">' +
-          '<img class="tc-user-photos__img" alt="">' +
-        '</figure>' +
+        '<div class="tc-user-photos__carousel">' +
+          '<button class="tc-user-photos__nav tc-user-photos__nav--prev" type="button" aria-label="Предыдущее фото">' +
+            '<span>&lt;</span>' +
+          '</button>' +
+          '<div class="tc-user-photos__viewport">' +
+            '<div class="tc-user-photos__track">' +
+              '<figure class="tc-user-photos__slide tc-user-photos__slide--prev" aria-hidden="true"><img class="tc-user-photos__img" alt=""></figure>' +
+              '<figure class="tc-user-photos__slide tc-user-photos__slide--active"><img class="tc-user-photos__img" alt=""></figure>' +
+              '<figure class="tc-user-photos__slide tc-user-photos__slide--next" aria-hidden="true"><img class="tc-user-photos__img" alt=""></figure>' +
+            '</div>' +
+          '</div>' +
+          '<button class="tc-user-photos__nav tc-user-photos__nav--next" type="button" aria-label="Следующее фото">' +
+            '<span>&gt;</span>' +
+          '</button>' +
+        '</div>' +
         '<div class="tc-user-photos__ticker tc-user-photos__ticker--bottom" aria-hidden="true">' +
           '<div class="tc-user-photos__ticker-track">' +
             '<span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>' +
@@ -2895,10 +2907,10 @@ function setupDesktopAura() {
         if (!Array.isArray(items)) return [];
 
         return items.filter(function (item) {
-          if (!item || typeof item.src !== 'string') return false;
+          if (!item || typeof item !== 'object') return false;
+          if (typeof item.src !== 'string') return false;
 
           var src = item.src.trim();
-
           return src.indexOf('http') === 0 && src.indexOf('PASTE_IMAGE') === -1;
         }).map(function (item) {
           return {
@@ -2913,60 +2925,120 @@ function setupDesktopAura() {
   }
 
   function preloadPhoto(src) {
+    if (!src) return;
     var pre = new Image();
     pre.src = src;
   }
 
-  function applyPhoto(img, photo) {
+  function applyPhoto(img, photo, keepAlt) {
+    if (!img || !photo) return;
     img.src = photo.src;
-    img.alt = photo.alt || 'TRIPCHILLER user photo';
-  }
-
-  function pickNextIndex(current, length) {
-    if (length < 2) return current;
-
-    var next = current;
-    while (next === current) {
-      next = Math.floor(Math.random() * length);
-    }
-
-    return next;
+    img.alt = keepAlt ? (photo.alt || 'TRIPCHILLER user photo') : '';
   }
 
   function initRotator(section, photos) {
     if (!section) return;
 
-    var img = section.querySelector('.tc-user-photos__img');
-    if (!img) return;
+    var prevImg = section.querySelector('.tc-user-photos__slide--prev .tc-user-photos__img');
+    var activeImg = section.querySelector('.tc-user-photos__slide--active .tc-user-photos__img');
+    var nextImg = section.querySelector('.tc-user-photos__slide--next .tc-user-photos__img');
+    var prevBtn = section.querySelector('.tc-user-photos__nav--prev');
+    var nextBtn = section.querySelector('.tc-user-photos__nav--next');
+
+    if (!prevImg || !activeImg || !nextImg || !prevBtn || !nextBtn) return;
 
     if (!photos.length) {
       section.classList.add('is-empty');
       return;
     }
 
-    var current = Math.floor(Math.random() * photos.length);
-    applyPhoto(img, photos[current]);
+    var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var index = Math.floor(Math.random() * photos.length);
+    var isAnimating = false;
+    var timerId = null;
+    var animationDuration = reducedMotion ? 0 : 520;
 
-    if (photos.length === 1) return;
+    function getIndex(offset) {
+      return (index + offset + photos.length) % photos.length;
+    }
 
-    var next = pickNextIndex(current, photos.length);
-    preloadPhoto(photos[next].src);
+    function renderSlides() {
+      var prevIndex = getIndex(-1);
+      var nextIndex = getIndex(1);
 
-    setInterval(function () {
-      section.classList.add('is-switching');
+      applyPhoto(prevImg, photos[prevIndex], false);
+      applyPhoto(activeImg, photos[index], true);
+      applyPhoto(nextImg, photos[nextIndex], false);
+
+      preloadPhoto(photos[getIndex(-2)].src);
+      preloadPhoto(photos[getIndex(2)].src);
+    }
+
+    function clearSlideState() {
+      section.classList.remove('is-sliding-next');
+      section.classList.remove('is-sliding-prev');
+    }
+
+    function stopAuto() {
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+    }
+
+    function startAuto() {
+      stopAuto();
+      if (reducedMotion || photos.length < 2) return;
+      timerId = setInterval(function () {
+        go(1, false);
+      }, 4500);
+    }
+
+    function go(direction, isManual) {
+      if (photos.length < 2 || isAnimating) return;
+
+      var step = direction > 0 ? 1 : -1;
+      var newIndex = (index + step + photos.length) % photos.length;
+
+      if (isManual) startAuto();
+
+      if (animationDuration === 0) {
+        index = newIndex;
+        renderSlides();
+        window.dispatchEvent(new CustomEvent('tc:user-photos-updated'));
+        return;
+      }
+
+      isAnimating = true;
+      section.classList.add(step > 0 ? 'is-sliding-next' : 'is-sliding-prev');
 
       setTimeout(function () {
-        current = next;
-        applyPhoto(img, photos[current]);
-      }, 180);
+        index = newIndex;
+        renderSlides();
+        clearSlideState();
+        isAnimating = false;
+        window.dispatchEvent(new CustomEvent('tc:user-photos-updated'));
+      }, animationDuration);
+    }
 
-      setTimeout(function () {
-        section.classList.remove('is-switching');
-      }, 360);
+    prevBtn.addEventListener('click', function () {
+      go(-1, true);
+    });
 
-      next = pickNextIndex(current, photos.length);
-      preloadPhoto(photos[next].src);
-    }, 4500);
+    nextBtn.addEventListener('click', function () {
+      go(1, true);
+    });
+
+    if (photos.length === 1) {
+      section.classList.add('has-single');
+      applyPhoto(activeImg, photos[0], true);
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+      return;
+    }
+
+    renderSlides();
+    startAuto();
   }
 
   ready(function () {
