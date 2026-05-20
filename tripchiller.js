@@ -2148,7 +2148,7 @@ eyeUnlockTimer = setTimeout(function(){
 })();
 
 (function () {
-  const BG_BW = "https://static.tildacdn.com/tild3762-3133-4231-b166-306163343466/BGbw.webp";
+  const BG_BW = "https://static.tildacdn.com/tild3534-6439-4037-a361-323538303363/BGbw.webp";
   const BG_COLOR_EYES = "https://static.tildacdn.com/tild3132-3630-4434-b237-653763376365/BGColor2.webp";
   const BG_COLOR_CLEAN = "https://static.tildacdn.com/tild6165-6634-4434-b464-316436366535/BGColor.webp";
   const BG_COLOR_RED = "https://static.tildacdn.com/tild3961-6534-4636-a137-383465666237/BGred.webp";
@@ -2460,12 +2460,12 @@ function setupDesktopAura() {
     bg.style.setProperty("--desktop-ripple-opacity", (eyesPower * 0.52).toFixed(3));
     bg.style.setProperty("--desktop-color-opacity", (eyesPower * 0.9).toFixed(3));
 
-    bg.style.setProperty("--desktop-aura-clean-opacity", (cleanLayerPower * 0.52).toFixed(3));
-    bg.style.setProperty("--desktop-ripple-clean-opacity", (cleanLayerPower * 0.52).toFixed(3));
+    bg.style.setProperty("--desktop-aura-clean-opacity", "0");
+    bg.style.setProperty("--desktop-ripple-clean-opacity", "0");
     bg.style.setProperty("--desktop-color-clean-opacity", (cleanLayerPower * 0.9).toFixed(3));
 
-    bg.style.setProperty("--desktop-aura-red-opacity", (redLayerPower * 0.52).toFixed(3));
-    bg.style.setProperty("--desktop-ripple-red-opacity", (redLayerPower * 0.52).toFixed(3));
+    bg.style.setProperty("--desktop-aura-red-opacity", "0");
+    bg.style.setProperty("--desktop-ripple-red-opacity", "0");
     bg.style.setProperty("--desktop-color-red-opacity", (redLayerPower * 0.9).toFixed(3));
   }
 
