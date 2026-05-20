@@ -2425,10 +2425,14 @@ function setupDesktopAura() {
   let focusX = 0;
   let focusY = 0;
   let focusStartTime = 0;
+  let cleanFadeTarget = 0;
   let cleanFadePower = 0;
+  let lastCleanFadeTime = 0;
   let redMode = false;
   let redModeStartTime = 0;
-  const FOCUS_RESET_DISTANCE = 32;
+  // Large sticky zone: eyes should not return on tiny cursor movement.
+  const FOCUS_RESET_DISTANCE = 140;
+  const CLEAN_RETURN_FADE_TIME = 900;
 
   if (document.readyState === "complete") {
     pageLoadTime = performance.now();
@@ -2504,7 +2508,7 @@ function setupDesktopAura() {
     focusX = x;
     focusY = y;
     focusStartTime = performance.now();
-    cleanFadePower = 0;
+    cleanFadeTarget = 0;
   }
 
   function maybeResetFocusTimer(x, y) {
@@ -2541,14 +2545,23 @@ function setupDesktopAura() {
     const fallbackRedMode = document.body.classList.contains("tc-flower-dragging");
     const isRedActive = redMode || fallbackRedMode;
     if (isRedActive) {
-      cleanFadePower = 0;
+      cleanFadeTarget = 0;
     } else {
       const focusElapsed = focusStartTime ? Math.max(0, time - focusStartTime) : 0;
       if (focusElapsed <= EYES_TO_CLEAN_DELAY) {
-        cleanFadePower = 0;
+        cleanFadeTarget = 0;
       } else {
-        cleanFadePower = clamp01((focusElapsed - EYES_TO_CLEAN_DELAY) / EYES_TO_CLEAN_FADE);
+        cleanFadeTarget = clamp01((focusElapsed - EYES_TO_CLEAN_DELAY) / EYES_TO_CLEAN_FADE);
       }
+    }
+
+    const cleanFadeDt = lastCleanFadeTime ? Math.max(0, time - lastCleanFadeTime) : 16;
+    lastCleanFadeTime = time;
+    const cleanFadeStep = cleanFadeDt / CLEAN_RETURN_FADE_TIME;
+    if (cleanFadePower < cleanFadeTarget) {
+      cleanFadePower = Math.min(cleanFadeTarget, cleanFadePower + cleanFadeStep);
+    } else if (cleanFadePower > cleanFadeTarget) {
+      cleanFadePower = Math.max(cleanFadeTarget, cleanFadePower - cleanFadeStep);
     }
     if (isRedActive && redModeStartTime === 0) {
       redModeStartTime = time;
@@ -2574,8 +2587,10 @@ function setupDesktopAura() {
     const pulse = Math.sin(t * 1.85);
 
     const radiusMultiplier = isRedActive ? redRadiusMultiplier : normalRadiusMultiplier;
-    const core = (BASE_CORE + pulse * 5) * radiusMultiplier;
-    const soft = (BASE_SOFT + pulse * 18) * radiusMultiplier;
+    const baseCore = BASE_CORE + pulse * 5;
+    const baseSoft = BASE_SOFT + pulse * 18;
+    const soft = baseSoft * radiusMultiplier;
+    const core = Math.min(baseCore * radiusMultiplier, soft * 0.34);
 
     const rippleSpeed = 0.28;
     const phase1 = (t * rippleSpeed) % 1;
@@ -2628,7 +2643,9 @@ function setupDesktopAura() {
     focusStartTime = 0;
     focusX = 0;
     focusY = 0;
+    cleanFadeTarget = 0;
     cleanFadePower = 0;
+    lastCleanFadeTime = 0;
     redMode = false;
     redModeStartTime = 0;
 
@@ -2651,7 +2668,7 @@ function setupDesktopAura() {
     redMode = true;
     redModeStartTime = performance.now();
     focusStartTime = 0;
-    cleanFadePower = 0;
+    cleanFadeTarget = 0;
     startRender();
   }
 
@@ -2659,7 +2676,7 @@ function setupDesktopAura() {
     redMode = false;
     redModeStartTime = 0;
     focusStartTime = 0;
-    cleanFadePower = 0;
+    cleanFadeTarget = 0;
   }
 
   document.addEventListener("pointermove", activate, { passive: true });
