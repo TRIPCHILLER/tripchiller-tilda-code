@@ -2847,3 +2847,114 @@ function setupDesktopAura() {
     });
   }
 })();
+
+
+(function () {
+  if (window.__TC_USER_PHOTOS_ROTATOR_V1__) return;
+  window.__TC_USER_PHOTOS_ROTATOR_V1__ = true;
+
+  function ready(fn) {
+    if (document.readyState !== 'loading') fn();
+    else document.addEventListener('DOMContentLoaded', fn);
+  }
+
+  function pickRandomIndex(length, prevIndex) {
+    if (length <= 1) return 0;
+    var next = Math.floor(Math.random() * length);
+    while (next === prevIndex) {
+      next = Math.floor(Math.random() * length);
+    }
+    return next;
+  }
+
+  function setPhoto(imgEl, item) {
+    imgEl.src = item.src;
+    imgEl.alt = typeof item.alt === 'string' && item.alt.trim() ? item.alt.trim() : 'TRIPCHILLER user photo';
+    window.dispatchEvent(new CustomEvent('tc:user-photos-updated'));
+  }
+
+  ready(function () {
+    var root = document.getElementById('tc-user-photos-root');
+    if (!root) return;
+
+    root.innerHTML = [
+      '<section class="tc-user-photos" aria-label="НАШИ ТРИПОНАВТЫ">',
+      '  <h2 class="tc-user-photos__title">НАШИ ТРИПОНАВТЫ</h2>',
+      '  <div class="tc-user-photos__ticker tc-user-photos__ticker--top" aria-hidden="true">',
+      '    <div class="tc-user-photos__ticker-track">',
+      '      <span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>',
+      '      <span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>',
+      '      <span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>',
+      '    </div>',
+      '  </div>',
+      '  <figure class="tc-user-photos__frame">',
+      '    <img class="tc-user-photos__img" alt="">',
+      '  </figure>',
+      '  <div class="tc-user-photos__ticker tc-user-photos__ticker--bottom" aria-hidden="true">',
+      '    <div class="tc-user-photos__ticker-track">',
+      '      <span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>',
+      '      <span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>',
+      '      <span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>',
+      '    </div>',
+      '  </div>',
+      '</section>'
+    ].join('');
+
+    var section = root.querySelector('.tc-user-photos');
+    var imgEl = root.querySelector('.tc-user-photos__img');
+    if (!section || !imgEl) return;
+
+    var jsonUrl = 'https://tripchiller.github.io/tripchiller-tilda-code/user-photos.json?v=' + Date.now();
+
+    fetch(jsonUrl, { cache: 'no-store' })
+      .then(function (response) {
+        if (!response.ok) throw new Error('Failed to load user-photos.json');
+        return response.json();
+      })
+      .then(function (data) {
+        var list = Array.isArray(data) ? data.filter(function (item) {
+          return !!item &&
+            typeof item.src === 'string' &&
+            item.src.indexOf('http') === 0 &&
+            item.src.indexOf('PASTE_IMAGE') === -1;
+        }) : [];
+
+        if (!list.length) {
+          section.classList.add('is-empty');
+          return;
+        }
+
+        var currentIndex = pickRandomIndex(list.length, -1);
+        setPhoto(imgEl, list[currentIndex]);
+
+        if (list.length === 1) return;
+
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          return;
+        }
+
+        setInterval(function () {
+          var nextIndex = pickRandomIndex(list.length, currentIndex);
+          var next = list[nextIndex];
+
+          var preload = new Image();
+          preload.src = next.src;
+
+          section.classList.add('is-switching');
+
+          setTimeout(function () {
+            setPhoto(imgEl, next);
+            currentIndex = nextIndex;
+          }, 180);
+
+          setTimeout(function () {
+            section.classList.remove('is-switching');
+          }, 360);
+        }, 4500);
+      })
+      .catch(function () {
+        section.classList.add('is-empty');
+      });
+  });
+})();
+
