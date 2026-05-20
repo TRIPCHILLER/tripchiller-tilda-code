@@ -1559,6 +1559,7 @@ body {
   --tc-red: #bf1111;
   --tc-user-photos-gap: clamp(10px, 1.1vw, 16px);
   --tc-user-photos-gap-mobile: 10px;
+  --tc-user-photos-title-gap: clamp(30px, 3.3vw, 48px);
   --tc-user-slide-step: calc(min(42vw, 700px) + clamp(80px, 10vw, 180px));
 
   position: relative;
@@ -1579,7 +1580,7 @@ body {
 }
 
 .tc-user-photos__title {
-  margin: 0 0 var(--tc-user-photos-gap);
+  margin: 0 0 var(--tc-user-photos-title-gap);
   color: #fff;
   font-family: 'BetterVCR', Arial, monospace;
   text-transform: uppercase;
@@ -1733,6 +1734,7 @@ body {
 @media (max-width: 768px) {
   .tc-user-photos {
     --tc-user-photos-gap: var(--tc-user-photos-gap-mobile);
+    --tc-user-photos-title-gap: 28px;
     margin: 20px auto 22px;
   }
   .tc-user-photos__ticker-track { gap: 30px; padding: 7px 0; animation-duration: 18s; }
