@@ -1733,14 +1733,20 @@ body {
 
 @media (max-width: 768px) {
   .tc-user-photos {
-    --tc-user-photos-gap: var(--tc-user-photos-gap-mobile);
+    --tc-user-photos-gap: 10px;
     --tc-user-photos-title-gap: 28px;
     margin: 20px auto 22px;
   }
   .tc-user-photos__ticker-track { gap: 30px; padding: 7px 0; animation-duration: 18s; }
   .tc-user-photos__carousel { width: 100vw; margin-left: calc(50% - 50vw); overflow: hidden; }
   .tc-user-photos__track { gap: 28px; }
-  .tc-user-photos__slide { width: min(86vw, 420px); height: min(58vh, 520px); }
+  .tc-user-photos__slide { width: min(86vw, 420px); height: auto; min-height: 0; }
+  .tc-user-photos__img {
+    width: 100%;
+    height: auto;
+    max-height: 58vh;
+    object-fit: contain !important;
+  }
   .tc-user-photos__slide--prev,
   .tc-user-photos__slide--next { opacity: .45; }
   .tc-user-photos { --tc-user-slide-step: calc(min(86vw, 420px) + 28px); }
