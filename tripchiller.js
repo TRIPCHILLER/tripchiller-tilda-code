@@ -2847,3 +2847,136 @@ function setupDesktopAura() {
     });
   }
 })();
+
+(function () {
+  if (window.__TC_USER_PHOTOS_ROTATOR_V1__) return;
+  window.__TC_USER_PHOTOS_ROTATOR_V1__ = true;
+
+  function ready(fn) {
+    if (document.readyState !== 'loading') fn();
+    else document.addEventListener('DOMContentLoaded', fn);
+  }
+
+  function renderSection(root) {
+    root.innerHTML = '' +
+      '<section class="tc-user-photos" aria-label="НАШИ ТРИПОНАВТЫ">' +
+        '<h2 class="tc-user-photos__title">НАШИ ТРИПОНАВТЫ</h2>' +
+        '<div class="tc-user-photos__ticker tc-user-photos__ticker--top" aria-hidden="true">' +
+          '<div class="tc-user-photos__ticker-track">' +
+            '<span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>' +
+            '<span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>' +
+            '<span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>' +
+          '</div>' +
+        '</div>' +
+        '<figure class="tc-user-photos__frame">' +
+          '<img class="tc-user-photos__img" alt="">' +
+        '</figure>' +
+        '<div class="tc-user-photos__ticker tc-user-photos__ticker--bottom" aria-hidden="true">' +
+          '<div class="tc-user-photos__ticker-track">' +
+            '<span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>' +
+            '<span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>' +
+            '<span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+
+    return root.querySelector('.tc-user-photos');
+  }
+
+  function loadPhotos() {
+    var url = 'https://tripchiller.github.io/tripchiller-tilda-code/user-photos.json?v=' + Date.now();
+
+    return fetch(url, { cache: 'no-store' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Failed to load user-photos.json');
+        return res.json();
+      })
+      .then(function (items) {
+        if (!Array.isArray(items)) return [];
+
+        return items.filter(function (item) {
+          if (!item || typeof item.src !== 'string') return false;
+
+          var src = item.src.trim();
+
+          return src.indexOf('http') === 0 && src.indexOf('PASTE_IMAGE') === -1;
+        }).map(function (item) {
+          return {
+            src: item.src.trim(),
+            alt: typeof item.alt === 'string' ? item.alt : 'TRIPCHILLER user photo'
+          };
+        });
+      })
+      .catch(function () {
+        return [];
+      });
+  }
+
+  function preloadPhoto(src) {
+    var pre = new Image();
+    pre.src = src;
+  }
+
+  function applyPhoto(img, photo) {
+    img.src = photo.src;
+    img.alt = photo.alt || 'TRIPCHILLER user photo';
+  }
+
+  function pickNextIndex(current, length) {
+    if (length < 2) return current;
+
+    var next = current;
+    while (next === current) {
+      next = Math.floor(Math.random() * length);
+    }
+
+    return next;
+  }
+
+  function initRotator(section, photos) {
+    if (!section) return;
+
+    var img = section.querySelector('.tc-user-photos__img');
+    if (!img) return;
+
+    if (!photos.length) {
+      section.classList.add('is-empty');
+      return;
+    }
+
+    var current = Math.floor(Math.random() * photos.length);
+    applyPhoto(img, photos[current]);
+
+    if (photos.length === 1) return;
+
+    var next = pickNextIndex(current, photos.length);
+    preloadPhoto(photos[next].src);
+
+    setInterval(function () {
+      section.classList.add('is-switching');
+
+      setTimeout(function () {
+        current = next;
+        applyPhoto(img, photos[current]);
+      }, 180);
+
+      setTimeout(function () {
+        section.classList.remove('is-switching');
+      }, 360);
+
+      next = pickNextIndex(current, photos.length);
+      preloadPhoto(photos[next].src);
+    }, 4500);
+  }
+
+  ready(function () {
+    var root = document.getElementById('tc-user-photos-root');
+    if (!root) return;
+
+    var section = renderSection(root);
+
+    loadPhotos().then(function (photos) {
+      initRotator(section, photos);
+    });
+  });
+})();
