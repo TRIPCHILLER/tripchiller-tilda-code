@@ -1557,6 +1557,8 @@ body {
   max-width: 100%;
   overflow-x: clip;
   --tc-red: #bf1111;
+  --tc-user-photos-gap: clamp(10px, 1.1vw, 16px);
+  --tc-user-photos-gap-mobile: 10px;
   --tc-user-slide-step: calc(min(42vw, 700px) + clamp(80px, 10vw, 180px));
 
   position: relative;
@@ -1577,7 +1579,7 @@ body {
 }
 
 .tc-user-photos__title {
-  margin: 0 0 14px;
+  margin: 0 0 var(--tc-user-photos-gap);
   color: #fff;
   font-family: 'BetterVCR', Arial, monospace;
   text-transform: uppercase;
@@ -1587,8 +1589,10 @@ body {
   letter-spacing: .04em;
 }
 
-.tc-user-photos__ticker { position: relative; left: 50%; width: 100vw; transform: translateX(-50%); background: var(--tc-red); color: #fff; overflow: hidden; border-top: 1px solid rgba(255,255,255,.16); border-bottom: 1px solid rgba(0,0,0,.24); }
+.tc-user-photos__ticker { position: relative; left: 50%; width: 100vw; transform: translateX(-50%); margin: 0; background: var(--tc-red); color: #fff; overflow: hidden; border-top: 1px solid rgba(255,255,255,.16); border-bottom: 1px solid rgba(0,0,0,.24); }
 .tc-user-photos__ticker-track { display: inline-flex; align-items: center; width: max-content; gap: 56px; white-space: nowrap; padding: 8px 0; animation: tcUserPhotosTicker 24s linear infinite; }
+.tc-user-photos__ticker--top { margin-bottom: 0; }
+.tc-user-photos__ticker--bottom { margin-top: 0; }
 .tc-user-photos__ticker--top .tc-user-photos__ticker-track { animation-direction: reverse; }
 .tc-user-photos__ticker--bottom .tc-user-photos__ticker-track { animation-direction: normal; }
 .tc-user-photos__ticker span { font-size: clamp(10px, 1.05vw, 14px); line-height: 1; letter-spacing: .06em; text-transform: uppercase; opacity: .98; }
@@ -1597,9 +1601,9 @@ body {
   position: relative;
   width: 100vw;
   max-width: 100vw;
-  margin: 0 0 14px;
+  margin: 0;
   margin-left: calc(50% - 50vw);
-  padding: 14px 0;
+  padding: var(--tc-user-photos-gap) 0;
   overflow: hidden;
   overflow-x: hidden;
   display: flex;
@@ -1610,8 +1614,8 @@ body {
 .tc-user-photos__viewport {
   width: 100vw;
   max-width: 100vw;
-  padding: 14px 0;
-  margin: -14px 0;
+  padding: var(--tc-user-photos-gap) 0;
+  margin: calc(-1 * var(--tc-user-photos-gap)) 0;
   overflow: hidden;
   overflow-x: hidden;
   position: relative;
@@ -1727,7 +1731,10 @@ body {
 }
 
 @media (max-width: 768px) {
-  .tc-user-photos { margin: 20px auto 22px; }
+  .tc-user-photos {
+    --tc-user-photos-gap: var(--tc-user-photos-gap-mobile);
+    margin: 20px auto 22px;
+  }
   .tc-user-photos__ticker-track { gap: 30px; padding: 7px 0; animation-duration: 18s; }
   .tc-user-photos__carousel { width: 100vw; margin-left: calc(50% - 50vw); overflow: hidden; }
   .tc-user-photos__track { gap: 28px; }
