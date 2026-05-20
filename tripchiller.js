@@ -2418,10 +2418,13 @@ function setupDesktopAura() {
   const PAGE_EFFECT_RAMP_TIME = 2600;
 
   let pageLoadTime = 0;
-  let activityStartTime = 0;
+  let focusX = 0;
+  let focusY = 0;
+  let focusStartTime = 0;
   let cleanFadePower = 0;
   let redMode = false;
   let redModeStartTime = 0;
+  const FOCUS_RESET_DISTANCE = 32;
 
   if (document.readyState === "complete") {
     pageLoadTime = performance.now();
@@ -2493,6 +2496,28 @@ function setupDesktopAura() {
     bg.style.setProperty(`--${prefix}-alpha`, (waveAlpha * 0.28 * effectPower).toFixed(3));
   }
 
+  function resetFocusTimer(x, y) {
+    focusX = x;
+    focusY = y;
+    focusStartTime = performance.now();
+    cleanFadePower = 0;
+  }
+
+  function maybeResetFocusTimer(x, y) {
+    if (!focusStartTime) {
+      resetFocusTimer(x, y);
+      return;
+    }
+
+    const dx = x - focusX;
+    const dy = y - focusY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist > FOCUS_RESET_DISTANCE) {
+      resetFocusTimer(x, y);
+    }
+  }
+
   function render(time) {
     raf = 0;
 
@@ -2509,15 +2534,18 @@ function setupDesktopAura() {
     const pageWarmupPower = getPageWarmupPower(time);
     const totalPower = revealPower * pageWarmupPower;
 
-    const activeElapsed = activityStartTime ? Math.max(0, time - activityStartTime) : 0;
-    if (activeElapsed <= EYES_TO_CLEAN_DELAY) {
-      cleanFadePower = 0;
-    } else {
-      cleanFadePower = clamp01((activeElapsed - EYES_TO_CLEAN_DELAY) / EYES_TO_CLEAN_FADE);
-    }
-
     const fallbackRedMode = document.body.classList.contains("tc-flower-dragging");
     const isRedActive = redMode || fallbackRedMode;
+    if (isRedActive) {
+      cleanFadePower = 0;
+    } else {
+      const focusElapsed = focusStartTime ? Math.max(0, time - focusStartTime) : 0;
+      if (focusElapsed <= EYES_TO_CLEAN_DELAY) {
+        cleanFadePower = 0;
+      } else {
+        cleanFadePower = clamp01((focusElapsed - EYES_TO_CLEAN_DELAY) / EYES_TO_CLEAN_FADE);
+      }
+    }
     if (isRedActive && redModeStartTime === 0) {
       redModeStartTime = time;
     } else if (!isRedActive && redModeStartTime !== 0) {
@@ -2571,11 +2599,15 @@ function setupDesktopAura() {
 
     loadColorLayer();
 
+    const isRedActive = redMode || document.body.classList.contains("tc-flower-dragging");
+    if (!isRedActive) {
+      maybeResetFocusTimer(event.clientX, event.clientY);
+    }
+
     if (!isActive) {
       isActive = true;
       lastFrameTime = 0;
-      activityStartTime = performance.now();
-      cleanFadePower = 0;
+      resetFocusTimer(event.clientX, event.clientY);
       bg.classList.add("is-active");
       startRender();
     }
@@ -2585,7 +2617,9 @@ function setupDesktopAura() {
     isActive = false;
     revealPower = 0;
     lastFrameTime = 0;
-    activityStartTime = 0;
+    focusStartTime = 0;
+    focusX = 0;
+    focusY = 0;
     cleanFadePower = 0;
     redMode = false;
     redModeStartTime = 0;
@@ -2608,7 +2642,7 @@ function setupDesktopAura() {
   function enableRedMode() {
     redMode = true;
     redModeStartTime = performance.now();
-    activityStartTime = performance.now();
+    focusStartTime = 0;
     cleanFadePower = 0;
     startRender();
   }
@@ -2616,7 +2650,7 @@ function setupDesktopAura() {
   function disableRedMode() {
     redMode = false;
     redModeStartTime = 0;
-    activityStartTime = performance.now();
+    focusStartTime = 0;
     cleanFadePower = 0;
   }
 
