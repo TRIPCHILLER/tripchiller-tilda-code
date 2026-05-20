@@ -1420,3 +1420,23 @@ body {
       display: none !important;
     }
 
+
+/* =========================
+   TRIPCHILLER / USER PHOTOS ROTATOR
+   ========================= */
+
+.tc-user-photos-rotator {
+  position: relative;
+  overflow: hidden;
+}
+
+.tc-user-photos-rotator img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: opacity 180ms ease;
+}
+
+.tc-user-photos-rotator.is-changing img {
+  opacity: 0.42;
+}

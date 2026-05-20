@@ -2847,3 +2847,74 @@ function setupDesktopAura() {
     });
   }
 })();
+
+(function () {
+  if (window.__TC_USER_PHOTOS_ROTATOR_V1__) return;
+  window.__TC_USER_PHOTOS_ROTATOR_V1__ = true;
+
+  function ready(fn) {
+    if (document.readyState !== 'loading') fn();
+    else document.addEventListener('DOMContentLoaded', fn);
+  }
+
+  function loadPhotos() {
+    return fetch('user-photos.json', { cache: 'no-store' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Failed to load user-photos.json');
+        return res.json();
+      })
+      .then(function (items) {
+        if (!Array.isArray(items)) return [];
+        return items.filter(function (item) {
+          return item && typeof item.src === 'string' && item.src.trim();
+        });
+      })
+      .catch(function () {
+        return [];
+      });
+  }
+
+  function initRotator(root, photos) {
+    if (!root || !photos.length) return;
+
+    var img = root.querySelector('img');
+    if (!img) return;
+
+    var delay = parseInt(root.getAttribute('data-tc-photos-interval'), 10);
+    if (!delay || delay < 1200) delay = 3500;
+
+    var index = 0;
+
+    function applyPhoto(i) {
+      var photo = photos[i];
+      if (!photo) return;
+      img.src = photo.src;
+      img.alt = photo.alt || 'TRIPCHILLER user photo';
+    }
+
+    applyPhoto(index);
+
+    if (photos.length < 2) return;
+
+    setInterval(function () {
+      index = (index + 1) % photos.length;
+      root.classList.add('is-changing');
+
+      setTimeout(function () {
+        applyPhoto(index);
+        root.classList.remove('is-changing');
+      }, 180);
+    }, delay);
+  }
+
+  ready(function () {
+    var roots = document.querySelectorAll('.tc-user-photos-rotator');
+    if (!roots.length) return;
+
+    loadPhotos().then(function (photos) {
+      roots.forEach(function (root) {
+        initRotator(root, photos);
+      });
+    });
+  });
+})();
