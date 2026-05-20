@@ -2149,7 +2149,9 @@ eyeUnlockTimer = setTimeout(function(){
 
 (function () {
   const BG_BW = "https://static.tildacdn.com/tild3762-3133-4231-b166-306163343466/BGbw.webp";
-  const BG_COLOR = "https://static.tildacdn.com/tild6165-6634-4434-b464-316436366535/BGColor.webp";
+  const BG_COLOR_EYES = "https://static.tildacdn.com/tild3132-3630-4434-b237-653763376365/BGColor2.webp";
+  const BG_COLOR_CLEAN = "https://static.tildacdn.com/tild6165-6634-4434-b464-316436366535/BGColor.webp";
+  const BG_COLOR_RED = "https://static.tildacdn.com/tild3961-6534-4636-a137-383465666237/BGred.webp";
 
   const DESKTOP_QUERY = "(min-width: 981px) and (pointer: fine)";
   const MOBILE_QUERY = "(max-width: 980px), (pointer: coarse)";
@@ -2176,6 +2178,14 @@ eyeUnlockTimer = setTimeout(function(){
     <div class="tc-bg-layer tc-bg-ripple tc-bg-ripple-1"></div>
     <div class="tc-bg-layer tc-bg-ripple tc-bg-ripple-2"></div>
     <div class="tc-bg-layer tc-bg-color"></div>
+    <div class="tc-bg-layer tc-bg-aura-clean"></div>
+    <div class="tc-bg-layer tc-bg-ripple tc-bg-ripple-clean-1"></div>
+    <div class="tc-bg-layer tc-bg-ripple tc-bg-ripple-clean-2"></div>
+    <div class="tc-bg-layer tc-bg-color-clean"></div>
+    <div class="tc-bg-layer tc-bg-aura-red"></div>
+    <div class="tc-bg-layer tc-bg-ripple tc-bg-ripple-red-1"></div>
+    <div class="tc-bg-layer tc-bg-ripple tc-bg-ripple-red-2"></div>
+    <div class="tc-bg-layer tc-bg-color-red"></div>
   `;
 
   document.body.prepend(bg);
@@ -2183,7 +2193,13 @@ eyeUnlockTimer = setTimeout(function(){
   const bwLayer = bg.querySelector(".tc-bg-bw");
   const auraLayer = bg.querySelector(".tc-bg-aura");
   const colorLayer = bg.querySelector(".tc-bg-color");
-  const rippleLayers = bg.querySelectorAll(".tc-bg-ripple");
+  const auraCleanLayer = bg.querySelector(".tc-bg-aura-clean");
+  const colorCleanLayer = bg.querySelector(".tc-bg-color-clean");
+  const auraRedLayer = bg.querySelector(".tc-bg-aura-red");
+  const colorRedLayer = bg.querySelector(".tc-bg-color-red");
+  const rippleEyesLayers = bg.querySelectorAll(".tc-bg-ripple-1, .tc-bg-ripple-2");
+  const rippleCleanLayers = bg.querySelectorAll(".tc-bg-ripple-clean-1, .tc-bg-ripple-clean-2");
+  const rippleRedLayers = bg.querySelectorAll(".tc-bg-ripple-red-1, .tc-bg-ripple-red-2");
 
   bwLayer.style.backgroundImage = `url("${BG_BW}")`;
 
@@ -2195,11 +2211,21 @@ eyeUnlockTimer = setTimeout(function(){
 
     colorLoaded = true;
 
-    auraLayer.style.backgroundImage = `url("${BG_COLOR}")`;
-    colorLayer.style.backgroundImage = `url("${BG_COLOR}")`;
+    auraLayer.style.backgroundImage = `url("${BG_COLOR_EYES}")`;
+    colorLayer.style.backgroundImage = `url("${BG_COLOR_EYES}")`;
+    auraCleanLayer.style.backgroundImage = `url("${BG_COLOR_CLEAN}")`;
+    colorCleanLayer.style.backgroundImage = `url("${BG_COLOR_CLEAN}")`;
+    auraRedLayer.style.backgroundImage = `url("${BG_COLOR_RED}")`;
+    colorRedLayer.style.backgroundImage = `url("${BG_COLOR_RED}")`;
 
-    rippleLayers.forEach(function (layer) {
-      layer.style.backgroundImage = `url("${BG_COLOR}")`;
+    rippleEyesLayers.forEach(function (layer) {
+      layer.style.backgroundImage = `url("${BG_COLOR_EYES}")`;
+    });
+    rippleCleanLayers.forEach(function (layer) {
+      layer.style.backgroundImage = `url("${BG_COLOR_CLEAN}")`;
+    });
+    rippleRedLayers.forEach(function (layer) {
+      layer.style.backgroundImage = `url("${BG_COLOR_RED}")`;
     });
   }
 
@@ -2377,6 +2403,8 @@ function setupDesktopAura() {
     650ms = цветная область не вспыхивает сразу, а постепенно заряжается.
   */
   const REVEAL_TIME = 650;
+  const EYES_TO_CLEAN_DELAY = 1000;
+  const EYES_TO_CLEAN_FADE = 1000;
 
   /*
     Глобальный прогрев после загрузки страницы:
@@ -2388,6 +2416,9 @@ function setupDesktopAura() {
   const PAGE_EFFECT_RAMP_TIME = 2600;
 
   let pageLoadTime = 0;
+  let activityStartTime = 0;
+  let cleanFadePower = 0;
+  let redMode = false;
 
   if (document.readyState === "complete") {
     pageLoadTime = performance.now();
@@ -2418,10 +2449,24 @@ function setupDesktopAura() {
     return smoothstep((elapsed - PAGE_EFFECT_DELAY) / PAGE_EFFECT_RAMP_TIME);
   }
 
-  function setDesktopReveal(power) {
-    bg.style.setProperty("--desktop-aura-opacity", (power * 0.52).toFixed(3));
-    bg.style.setProperty("--desktop-ripple-opacity", (power * 0.52).toFixed(3));
-    bg.style.setProperty("--desktop-color-opacity", (power * 0.9).toFixed(3));
+  function setDesktopReveal(power, cleanPower, redPower) {
+    const safeClean = clamp01(cleanPower || 0);
+    const safeRed = clamp01(redPower || 0);
+    const eyesPower = power * (1 - safeClean) * (1 - safeRed);
+    const cleanLayerPower = power * safeClean * (1 - safeRed);
+    const redLayerPower = power * safeRed;
+
+    bg.style.setProperty("--desktop-aura-opacity", (eyesPower * 0.52).toFixed(3));
+    bg.style.setProperty("--desktop-ripple-opacity", (eyesPower * 0.52).toFixed(3));
+    bg.style.setProperty("--desktop-color-opacity", (eyesPower * 0.9).toFixed(3));
+
+    bg.style.setProperty("--desktop-aura-clean-opacity", (cleanLayerPower * 0.52).toFixed(3));
+    bg.style.setProperty("--desktop-ripple-clean-opacity", (cleanLayerPower * 0.52).toFixed(3));
+    bg.style.setProperty("--desktop-color-clean-opacity", (cleanLayerPower * 0.9).toFixed(3));
+
+    bg.style.setProperty("--desktop-aura-red-opacity", (redLayerPower * 0.52).toFixed(3));
+    bg.style.setProperty("--desktop-ripple-red-opacity", (redLayerPower * 0.52).toFixed(3));
+    bg.style.setProperty("--desktop-color-red-opacity", (redLayerPower * 0.9).toFixed(3));
   }
 
   function setRipple(prefix, phase, effectPower) {
@@ -2461,7 +2506,17 @@ function setupDesktopAura() {
     const pageWarmupPower = getPageWarmupPower(time);
     const totalPower = revealPower * pageWarmupPower;
 
-    setDesktopReveal(totalPower);
+    const activeElapsed = activityStartTime ? Math.max(0, time - activityStartTime) : 0;
+    if (activeElapsed <= EYES_TO_CLEAN_DELAY) {
+      cleanFadePower = 0;
+    } else {
+      cleanFadePower = clamp01((activeElapsed - EYES_TO_CLEAN_DELAY) / EYES_TO_CLEAN_FADE);
+    }
+
+    const fallbackRedMode = document.body.classList.contains("tc-flower-dragging");
+    const redPower = (redMode || fallbackRedMode) ? 1 : 0;
+
+    setDesktopReveal(totalPower, cleanFadePower, redPower);
 
     currentX += (targetX - currentX) * 0.18;
     currentY += (targetY - currentY) * 0.18;
@@ -2505,6 +2560,8 @@ function setupDesktopAura() {
     if (!isActive) {
       isActive = true;
       lastFrameTime = 0;
+      activityStartTime = performance.now();
+      cleanFadePower = 0;
       bg.classList.add("is-active");
       startRender();
     }
@@ -2514,8 +2571,11 @@ function setupDesktopAura() {
     isActive = false;
     revealPower = 0;
     lastFrameTime = 0;
+    activityStartTime = 0;
+    cleanFadePower = 0;
+    redMode = false;
 
-    setDesktopReveal(0);
+    setDesktopReveal(0, 0, 0);
     bg.classList.remove("is-active");
 
     if (raf) {
@@ -2524,11 +2584,37 @@ function setupDesktopAura() {
     }
   }
 
-  setDesktopReveal(0);
+  setDesktopReveal(0, 0, 0);
+
+  function isFlowerTarget(node) {
+    return !!(node && node.closest && node.closest(".flower, .eye-desktop"));
+  }
+
+  function enableRedMode() {
+    redMode = true;
+    activityStartTime = performance.now();
+    cleanFadePower = 0;
+  }
+
+  function disableRedMode() {
+    if (!redMode) return;
+    redMode = false;
+    activityStartTime = performance.now();
+    cleanFadePower = 0;
+  }
 
   document.addEventListener("pointermove", activate, { passive: true });
+  document.addEventListener("pointerdown", function (event) {
+    if (isFlowerTarget(event.target)) enableRedMode();
+  }, { passive: true });
+  document.addEventListener("pointerup", disableRedMode, { passive: true });
+  document.addEventListener("pointercancel", disableRedMode, { passive: true });
+  document.addEventListener("mouseout", function (event) {
+    if (!event.relatedTarget) disableRedMode();
+  }, { passive: true });
   document.addEventListener("mouseleave", deactivate);
   window.addEventListener("blur", deactivate);
+  window.addEventListener("blur", disableRedMode);
 
   window.addEventListener("resize", function () {
     targetX = window.innerWidth / 2;
