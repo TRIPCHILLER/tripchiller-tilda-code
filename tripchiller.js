@@ -1,6 +1,1940 @@
-/* =========================
-   TRIPCHILLER / LOAD MORE BUTTON
-   ========================= */
+(function(){
+  "use strict";
+
+  function ready(fn){
+    if(document.readyState !== "loading") fn();
+    else document.addEventListener("DOMContentLoaded", fn);
+  }
+
+  function qInner(root){
+    return root ? (root.querySelector(".tn-atom, img, svg") || root) : null;
+  }
+function isEyeParallaxLocked(){
+  return (
+    window.__TC_EYE_PARALLAX_LOCKED__ === true ||
+    document.body.classList.contains('tc-eye-parallax-locked') ||
+    document.body.classList.contains('egg-on') ||
+    document.body.classList.contains('egg-returning')
+  );
+}
+function forceEyeCenterInstant(){
+  ['.eye-desktop', '.eye-mobile'].forEach(function(sel){
+    var wrap = document.querySelector(sel);
+    var eye = qInner(wrap);
+
+    if (!eye) return;
+
+    eye.style.transition = 'none';
+    eye.style.transform = 'translate(0,0) scale(1,1)';
+    eye.style.opacity = '1';
+  });
+}
+
+window.__TC_FORCE_EYE_CENTER__ = forceEyeCenterInstant;
+  ready(function(){
+
+    (function(){
+      if (window.innerWidth <= 768) return;
+
+      var wrap  = document.querySelector(".eye-desktop");
+      if (!wrap) return;
+      var eye   = qInner(wrap);
+      if (!eye) return;
+
+
+      var flowerWrap = document.querySelector(".flower");
+      var flowerEl   = qInner(flowerWrap);
+      var baseFlowerTf = flowerEl ? getComputedStyle(flowerEl).transform : '';
+      if (baseFlowerTf === 'none') baseFlowerTf = '';
+
+
+      var anchor = flowerEl || wrap;
+
+
+      var curX = 0;
+      var curY = 0;
+      var targetX = 0;
+      var targetY = 0;
+      var idleTimer = null;
+
+      var COEF = 0.015;
+      var MAX = 5;
+      var EASE = 0.16;
+
+
+var SCALE_DURATION = 500;
+var FLOWER_SCALE_DURATION = 1000;
+var EYE_START_DELAY = 500;
+
+var startTs = performance.now();
+var scaleUni = 0;
+var opacity = 0;
+
+
+      var INTRO_DX = 5;
+      var INTRO_DY = 4;
+
+var INTRO_START_DELAY = EYE_START_DELAY + SCALE_DURATION + 3000;
+      var INTRO_T_LEFT  = 500;
+      var INTRO_T_RIGHT = 500;
+      var INTRO_T_HOME  = 1000;
+
+      var introX = 0;
+      var introY = 0;
+      var introTargetX = 0;
+      var introTargetY = 0;
+      var INTRO_EASE = 0.16;
+
+      var introDone = false;
+      var lastMouseEvent = null;
+
+      function setIntroTarget(x, y) {
+        introTargetX = x;
+        introTargetY = y;
+      }
+
+      function runIntroRoll() {
+
+        setTimeout(function(){
+          setIntroTarget(-INTRO_DX, INTRO_DY);
+        }, INTRO_START_DELAY);
+
+
+        setTimeout(function(){
+          setIntroTarget(INTRO_DX, INTRO_DY);
+        }, INTRO_START_DELAY + INTRO_T_LEFT);
+
+
+        setTimeout(function(){
+          setIntroTarget(0, 0);
+        }, INTRO_START_DELAY + INTRO_T_LEFT + INTRO_T_RIGHT);
+
+
+        setTimeout(function(){
+          introDone = true;
+
+          introX = 0;
+          introY = 0;
+          introTargetX = 0;
+          introTargetY = 0;
+
+          if (lastMouseEvent) {
+            applyMouse(lastMouseEvent);
+          }
+        }, INTRO_START_DELAY + INTRO_T_LEFT + INTRO_T_RIGHT + INTRO_T_HOME);
+      }
+
+
+      var blinkCur = 1;
+      var blinkTgt = 1;
+
+      var BLINK_MIN = 0.15;
+      var BLINK_IN = 120;
+      var BLINK_OUT = 180;
+      var BLINK_EASE = 0.25;
+
+      var blinkTimeout = null;
+
+      function scheduleIdleBlink(){
+        clearTimeout(blinkTimeout);
+
+        blinkTimeout = setTimeout(function(){
+          blinkTgt = BLINK_MIN;
+
+          setTimeout(function(){
+            blinkTgt = 1;
+            scheduleIdleBlink();
+          }, BLINK_IN);
+        }, 5000);
+      }
+
+      scheduleIdleBlink();
+
+      function resetIdle(){
+        clearTimeout(idleTimer);
+        scheduleIdleBlink();
+      }
+
+
+      var wakeCur = 1;
+      var wakeTgt = 1;
+      var WAKE_EASE = 0.14;
+
+      function triggerWake(){
+        wakeTgt = 1.05;
+        setTimeout(function(){
+          wakeTgt = 1;
+        }, 220);
+      }
+
+
+      var pressCur = 1;
+      var pressTgt = 1;
+      var PRESS_EASE = 0.28;
+
+function triggerPress(){
+  pressTgt = 0.94;
+  setTimeout(function(){
+    pressTgt = 1;
+  }, 160);
+}
+
+function eyeGrowBounce(x){
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+
+  var c1 = 1.08;
+  var c3 = c1 + 1;
+
+  return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+}
+
+function animate(now){
+
+var t = Math.min(1, Math.max(0, (now - startTs - EYE_START_DELAY) / SCALE_DURATION));
+var eased = 1 - Math.pow(1 - t, 3);
+
+scaleUni = eyeGrowBounce(t);
+opacity = eased;
+var flowerT = Math.min(1, (now - startTs) / FLOWER_SCALE_DURATION);
+var flowerOpacity = 1 - Math.pow(1 - flowerT, 3);
+var flowerScale = eyeGrowBounce(flowerT);
+
+if (isEyeParallaxLocked()) {
+  curX = 0;
+  curY = 0;
+  targetX = 0;
+  targetY = 0;
+
+  introX = 0;
+  introY = 0;
+  introTargetX = 0;
+  introTargetY = 0;
+}
+
+
+curX += (targetX - curX) * EASE;
+curY += (targetY - curY) * EASE;
+
+
+        introX += (introTargetX - introX) * INTRO_EASE;
+        introY += (introTargetY - introY) * INTRO_EASE;
+
+
+        blinkCur += (blinkTgt - blinkCur) * BLINK_EASE;
+        wakeCur  += (wakeTgt  - wakeCur ) * WAKE_EASE;
+        pressCur += (pressTgt - pressCur) * PRESS_EASE;
+
+        var common = wakeCur * pressCur;
+
+        var sx = scaleUni * common;
+        var sy = scaleUni * common * blinkCur;
+
+        var finalX = curX + introX;
+        var finalY = curY + introY;
+
+        eye.style.transform = "translate("+finalX+"px,"+finalY+"px) scale("+sx+","+sy+")";
+        eye.style.opacity = String(opacity);
+
+if (flowerEl){
+  flowerEl.style.opacity = String(flowerOpacity);
+  flowerEl.style.transform = (baseFlowerTf ? baseFlowerTf + ' ' : '') + "scale("+(flowerScale * common)+")";
+}
+
+        requestAnimationFrame(animate);
+      }
+
+requestAnimationFrame(animate);
+runIntroRoll();
+
+function runReturnIntroRoll(){
+  introDone = false;
+  lastMouseEvent = null;
+
+  curX = 0;
+  curY = 0;
+  targetX = 0;
+  targetY = 0;
+
+  introX = 0;
+  introY = 0;
+  introTargetX = 0;
+  introTargetY = 0;
+
+  setIntroTarget(0, 0);
+
+  setTimeout(function(){
+    setIntroTarget(-INTRO_DX, INTRO_DY);
+  }, 40);
+
+  setTimeout(function(){
+    setIntroTarget(INTRO_DX, INTRO_DY);
+  }, 40 + INTRO_T_LEFT);
+
+  setTimeout(function(){
+    setIntroTarget(0, 0);
+  }, 40 + INTRO_T_LEFT + INTRO_T_RIGHT);
+
+  setTimeout(function(){
+    introDone = true;
+
+    introX = 0;
+    introY = 0;
+    introTargetX = 0;
+    introTargetY = 0;
+
+    if (lastMouseEvent) {
+      applyMouse(lastMouseEvent);
+    }
+  }, 40 + INTRO_T_LEFT + INTRO_T_RIGHT + INTRO_T_HOME);
+}
+
+window.addEventListener('tc:eye-after-grow-roll', runReturnIntroRoll);
+
+function applyMouse(e){
+        var r = anchor.getBoundingClientRect();
+        var cx = r.left + r.width / 2;
+        var cy = r.top  + r.height / 2;
+
+        var dx = (e.clientX - cx) * COEF;
+        var dy = (e.clientY - cy) * COEF;
+
+        if (dx >  MAX) dx =  MAX;
+        if (dx < -MAX) dx = -MAX;
+        if (dy >  MAX) dy =  MAX;
+        if (dy < -MAX) dy = -MAX;
+
+        targetX = dx;
+        targetY = dy;
+
+        idleTimer = setTimeout(function(){
+          targetX = 0;
+          targetY = 0;
+        }, 500);
+      }
+
+function onMove(e){
+  resetIdle();
+
+  if (isEyeParallaxLocked()) {
+    lastMouseEvent = null;
+    toCenter();
+    return;
+  }
+
+  lastMouseEvent = e;
+
+
+  if (!introDone) return;
+
+  applyMouse(e);
+}
+
+      function toCenter(){
+        targetX = 0;
+        targetY = 0;
+      }
+
+
+      eye.style.transform = "translate(0,0) scale(0)";
+      eye.style.opacity = "0";
+
+      document.addEventListener("mousemove", onMove);
+
+      document.addEventListener("mouseleave", function(){
+        toCenter();
+        resetIdle();
+      });
+
+      window.addEventListener("blur", function(){
+        toCenter();
+        resetIdle();
+      });
+
+
+      if (window.matchMedia && window.matchMedia('(pointer:fine)').matches){
+        wrap.addEventListener('click', function(){
+          blinkTgt = 0.10;
+
+          setTimeout(function(){
+            blinkTgt = 1;
+          }, BLINK_IN);
+
+          triggerPress();
+        });
+      }
+
+
+      document.addEventListener("visibilitychange", function(){
+        if (document.visibilityState === 'visible') triggerWake();
+      });
+
+      window.addEventListener("focus", triggerWake);
+      window.addEventListener("pageshow", triggerWake);
+    })();
+
+
+    (function(){
+      if (window.innerWidth > 768) return;
+
+      var wrap = document.querySelector(".eye-mobile");
+      if (!wrap) return;
+
+      var eye = qInner(wrap);
+      if (!eye) return;
+
+
+      var flowerWrap = document.querySelector(".flower");
+      var flowerEl   = qInner(flowerWrap);
+      var baseFlowerTf = flowerEl ? getComputedStyle(flowerEl).transform : '';
+
+      if (baseFlowerTf === 'none') baseFlowerTf = '';
+
+
+      var DX = 5;
+      var DY = 4;
+
+
+      var T1 = 500;
+      var T2 = 500;
+      var T3 = 500;
+      var T4 = 1000;
+var EYE_START_DELAY_MOBILE = 500;
+
+      var BLINK_DELAY = 1000;
+      var BLINK_IN = 120;
+      var BLINK_OUT = 180;
+
+
+      var blinkCur = 1;
+      var blinkTgt = 1;
+      var BLINK_EASE = 0.25;
+
+      var wakeCur = 1;
+      var wakeTgt = 1;
+      var WAKE_EASE = 0.14;
+
+      var idleBlinkTimeout = null;
+
+      function scheduleIdleBlinkMobile(){
+        clearTimeout(idleBlinkTimeout);
+
+        idleBlinkTimeout = setTimeout(function(){
+          blinkTgt = 0.15;
+
+          setTimeout(function(){
+            blinkTgt = 1;
+            scheduleIdleBlinkMobile();
+          }, BLINK_IN);
+        }, 5000);
+      }
+
+      function resetIdleMobile(){
+        clearTimeout(idleBlinkTimeout);
+        scheduleIdleBlinkMobile();
+      }
+
+
+      eye.style.transition = "none";
+      eye.style.transform  = "translate(0,0) scale(0)";
+      eye.style.opacity    = "0";
+if (flowerEl){
+  flowerEl.style.transition = "none";
+  flowerEl.style.opacity = "0";
+  flowerEl.style.transform = (baseFlowerTf ? baseFlowerTf + ' ' : '') + "scale(0)";
+}
+
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          setTimeout(function(){
+
+
+if (flowerEl){
+  flowerEl.style.transition = "transform 0.34s cubic-bezier(.2,.9,.2,1), opacity 0.34s ease";
+  flowerEl.style.opacity = "1";
+  flowerEl.style.transform = (baseFlowerTf ? baseFlowerTf + ' ' : '') + "scale(1.08)";
+
+  setTimeout(function(){
+    flowerEl.style.transition = "transform 0.18s cubic-bezier(.25,.85,.25,1)";
+    flowerEl.style.transform = (baseFlowerTf ? baseFlowerTf + ' ' : '') + "scale(1)";
+  }, 340);
+}
+
+setTimeout(function(){
+  eye.style.transition = "transform 0.34s cubic-bezier(.2,.9,.2,1), opacity 0.34s ease";
+  eye.style.opacity = "1";
+  eye.style.transform = "translate(0,0) scale(1.1)";
+
+  setTimeout(function(){
+    eye.style.transition = "transform 0.18s cubic-bezier(.25,.85,.25,1)";
+    eye.style.transform = "translate(0,0) scale(1)";
+  }, 340);
+}, EYE_START_DELAY_MOBILE);
+
+            setTimeout(function(){
+              eye.style.transition = "transform "+(T2/1000)+"s ease";
+              eye.style.transform = "translate("+(-DX)+"px,"+DY+"px) scale(1)";
+}, EYE_START_DELAY_MOBILE + T1);
+
+
+            setTimeout(function(){
+              eye.style.transition = "transform "+(T3/1000)+"s ease";
+              eye.style.transform = "translate("+DX+"px,"+DY+"px) scale(1)";
+}, EYE_START_DELAY_MOBILE + T1 + T2);
+
+
+            setTimeout(function(){
+              eye.style.transition = "transform "+(T4/1000)+"s ease";
+              eye.style.transform = "translate(0,0) scale(1)";
+}, EYE_START_DELAY_MOBILE + T1 + T2 + T3);
+
+
+            setTimeout(function(){
+              eye.style.transition = "transform "+(BLINK_IN/1000)+"s ease";
+              eye.style.transform = "translate(0,0) scale(1, 0.15)";
+
+              setTimeout(function(){
+                eye.style.transition = "transform "+(BLINK_OUT/1000)+"s ease";
+                eye.style.transform = "translate(0,0) scale(1, 1)";
+              }, BLINK_IN);
+}, EYE_START_DELAY_MOBILE + T1 + T2 + T3 + T4 + BLINK_DELAY);
+
+
+var START_SCROLL_AFTER = EYE_START_DELAY_MOBILE + T1 + T2 + T3 + T4 + BLINK_DELAY + BLINK_IN + BLINK_OUT + 80;
+
+            setTimeout(function(){
+              eye.style.transition = "none";
+
+var curY = 0;
+var targetY = 0;
+var lastY = window.scrollY;
+var resetTimer = null;
+
+var rollX = 0;
+var rollY = 0;
+var rollTargetX = 0;
+var rollTargetY = 0;
+var rollActive = false;
+
+var SCROLL_COEF = 0.15;
+var SCROLL_MAX = 6;
+var EASE = 0.18;
+var ROLL_EASE = 0.16;
+
+function setReturnRollTarget(x, y){
+  rollTargetX = x;
+  rollTargetY = y;
+}
+
+function runReturnIntroRollMobile(){
+  rollActive = true;
+
+  curY = 0;
+  targetY = 0;
+  lastY = window.scrollY;
+
+  rollX = 0;
+  rollY = 0;
+  rollTargetX = 0;
+  rollTargetY = 0;
+
+  clearTimeout(resetTimer);
+
+  setReturnRollTarget(0, 0);
+
+  setTimeout(function(){
+    setReturnRollTarget(-DX, DY);
+  }, 40);
+
+  setTimeout(function(){
+    setReturnRollTarget(DX, DY);
+  }, 40 + T2);
+
+  setTimeout(function(){
+    setReturnRollTarget(0, 0);
+  }, 40 + T2 + T3);
+
+  setTimeout(function(){
+    rollActive = false;
+
+    rollX = 0;
+    rollY = 0;
+    rollTargetX = 0;
+    rollTargetY = 0;
+  }, 40 + T2 + T3 + T4);
+}
+
+window.addEventListener('tc:eye-after-grow-roll', runReturnIntroRollMobile);
+
+              function triggerWakeMob(){
+                wakeTgt = 1.05;
+
+                setTimeout(function(){
+                  wakeTgt = 1;
+                }, 220);
+              }
+
+              function userActivity(){
+                resetIdleMobile();
+              }
+
+              window.addEventListener("scroll", userActivity, {passive:true});
+              window.addEventListener("touchstart", userActivity, {passive:true});
+              window.addEventListener("touchmove", userActivity, {passive:true});
+
+              scheduleIdleBlinkMobile();
+
+function raf(){
+  if (isEyeParallaxLocked()) {
+    curY = 0;
+    targetY = 0;
+    lastY = window.scrollY;
+
+    blinkCur = 1;
+    blinkTgt = 1;
+
+    wakeCur = 1;
+    wakeTgt = 1;
+
+    clearTimeout(resetTimer);
+    eye.style.transition = 'none';
+  }
+
+curY += (targetY - curY) * EASE;
+
+rollX += (rollTargetX - rollX) * ROLL_EASE;
+rollY += (rollTargetY - rollY) * ROLL_EASE;
+
+blinkCur += (blinkTgt - blinkCur) * BLINK_EASE;
+wakeCur  += (wakeTgt  - wakeCur ) * WAKE_EASE;
+
+var finalX = rollX;
+var finalY = curY + rollY;
+
+eye.style.transform = "translate("+finalX+"px,"+finalY+"px) scale("+wakeCur+","+(wakeCur*blinkCur)+")";
+
+                if (flowerEl){
+                  flowerEl.style.transform = (baseFlowerTf ? baseFlowerTf + ' ' : '') + "scale("+wakeCur+")";
+                }
+
+                requestAnimationFrame(raf);
+              }
+
+              requestAnimationFrame(raf);
+
+
+              var lastTapTs = 0;
+
+function tapPulse(){
+  if (isEyeParallaxLocked()) return;
+
+  blinkTgt = 0.15;
+
+                setTimeout(function(){
+                  blinkTgt = 1;
+                }, BLINK_IN);
+
+                wakeTgt = 0.94;
+
+                setTimeout(function(){
+                  wakeTgt = 1;
+                }, 180);
+              }
+
+              function handleTapOnce(){
+                var now = Date.now();
+
+                if (now - lastTapTs < 300) return;
+
+                lastTapTs = now;
+                tapPulse();
+              }
+
+              [wrap, flowerEl].forEach(function(el){
+                if (!el) return;
+
+                el.addEventListener('touchstart', handleTapOnce, {passive:true});
+                el.addEventListener('click', handleTapOnce);
+              });
+
+function onScroll(){
+  if (rollActive) {
+    targetY = 0;
+    lastY = window.scrollY;
+    clearTimeout(resetTimer);
+    return;
+  }
+
+  if (isEyeParallaxLocked()) {
+    targetY = 0;
+    lastY = window.scrollY;
+    clearTimeout(resetTimer);
+    return;
+  }
+
+  var y = window.scrollY;
+  var dy = y - lastY;
+
+                lastY = y;
+
+                var add = dy * SCROLL_COEF;
+                targetY += add;
+
+                if (targetY >  SCROLL_MAX) targetY =  SCROLL_MAX;
+                if (targetY < -SCROLL_MAX) targetY = -SCROLL_MAX;
+
+                clearTimeout(resetTimer);
+
+                resetTimer = setTimeout(function(){
+                  targetY = 0;
+                }, 140);
+              }
+
+              window.addEventListener("scroll", onScroll, {passive:true});
+
+              function onResize(){
+                if (window.innerWidth > 768){
+                  window.removeEventListener("scroll", onScroll);
+                  window.removeEventListener("resize", onResize);
+                  window.removeEventListener("scroll", userActivity);
+                  window.removeEventListener("touchstart", userActivity);
+                  window.removeEventListener("touchmove", userActivity);
+                }
+              }
+
+              window.addEventListener("resize", onResize);
+
+              document.addEventListener("visibilitychange", function(){
+                if (document.visibilityState === 'visible') triggerWakeMob();
+              });
+
+              window.addEventListener("focus", triggerWakeMob);
+              window.addEventListener("pageshow", triggerWakeMob);
+            }, START_SCROLL_AFTER);
+          }, 20);
+        });
+      });
+    })();
+  });
+})();
+
+(function(){
+  if (window.__TC_FLOWER_DESKTOP_DRAG_V1__) return;
+  window.__TC_FLOWER_DESKTOP_DRAG_V1__ = true;
+
+  if (!window.matchMedia || !window.matchMedia('(min-width:769px) and (pointer:fine)').matches) {
+    return;
+  }
+
+  function ready(fn){
+    if (document.readyState !== 'loading') fn();
+    else document.addEventListener('DOMContentLoaded', fn);
+  }
+
+  function getBaseTransform(el){
+    var tf = window.getComputedStyle(el).transform;
+    return tf && tf !== 'none' ? tf : '';
+  }
+
+  function isLocked(){
+    return (
+      window.__TC_EYE_PARALLAX_LOCKED__ === true ||
+      document.body.classList.contains('tc-eye-parallax-locked') ||
+      document.body.classList.contains('egg-on') ||
+      document.body.classList.contains('egg-returning')
+    );
+  }
+
+  ready(function(){
+    var flower = document.querySelector('.flower');
+    var eye = document.querySelector('.eye-desktop');
+
+    if (!flower || !eye) return;
+
+    var parts = [flower, eye];
+
+    var baseTransforms = new Map();
+
+    parts.forEach(function(el){
+      baseTransforms.set(el, getBaseTransform(el));
+      el.style.transformOrigin = 'center center';
+      el.style.willChange = 'transform';
+    });
+
+    var dragging = false;
+    var returning = false;
+
+    var startX = 0;
+    var startY = 0;
+    var downX = 0;
+    var downY = 0;
+
+    var posX = 0;
+    var posY = 0;
+    var dragStartX = 0;
+    var dragStartY = 0;
+
+var lastScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+
+function getScrollY(){
+  return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+}
+
+function syncDragWithPageScroll(){
+  var y = getScrollY();
+  var delta = y - lastScrollY;
+
+  lastScrollY = y;
+
+  if (!dragging || delta === 0) return;
+
+  /*
+    Manual wheel/trackpad scroll does not fire pointermove.
+    So we compensate element transform manually.
+  */
+  dragStartY += delta;
+  posY += delta;
+
+  startLoop();
+}
+
+    var returnFromX = 0;
+    var returnFromY = 0;
+    var returnStartTime = 0;
+
+    var raf = 0;
+    var suppressClickUntil = 0;
+    var movedEnough = false;
+
+    var previousEyeLock = false;
+    var eyeLagX = 0;
+var eyeLagY = 0;
+var eyeLagVX = 0;
+var eyeLagVY = 0;
+
+var lastEyeLagTime = 0;
+var lastEyeLagPosX = 0;
+var lastEyeLagPosY = 0;
+
+/*
+  Pupil drag inertia:
+  EYE_LAG_MAX = max extra pupil offset in px.
+  EYE_LAG_PULL = how strongly pupil reacts to fast dragging.
+  STIFFNESS/DAMPING = spring feel.
+*/
+var EYE_LAG_MAX = 6;
+var EYE_LAG_PULL = 0.012;
+var EYE_LAG_STIFFNESS = 72;
+var EYE_LAG_DAMPING = 9.5;
+
+function clampEyeLag(value, min, max){
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+}
+
+function resetEyeLag(){
+  eyeLagX = 0;
+  eyeLagY = 0;
+  eyeLagVX = 0;
+  eyeLagVY = 0;
+  lastEyeLagTime = 0;
+  lastEyeLagPosX = posX;
+  lastEyeLagPosY = posY;
+}
+
+function startEyeLagSession(){
+  resetEyeLag();
+}
+
+function updateEyeLag(time, active){
+  var dt = lastEyeLagTime
+    ? Math.min(0.032, (time - lastEyeLagTime) / 1000)
+    : 0.016;
+
+  lastEyeLagTime = time;
+
+  var dx = posX - lastEyeLagPosX;
+  var dy = posY - lastEyeLagPosY;
+
+  lastEyeLagPosX = posX;
+  lastEyeLagPosY = posY;
+
+  var targetX = 0;
+  var targetY = 0;
+
+  if (active && dt > 0) {
+    var vx = dx / dt;
+    var vy = dy / dt;
+
+    /*
+      When flower moves right, pupil lags left.
+      When movement stops, spring carries it forward and pulls it back.
+    */
+    targetX = clampEyeLag(-vx * EYE_LAG_PULL, -EYE_LAG_MAX, EYE_LAG_MAX);
+    targetY = clampEyeLag(-vy * EYE_LAG_PULL, -EYE_LAG_MAX, EYE_LAG_MAX);
+  }
+
+  var ax = (targetX - eyeLagX) * EYE_LAG_STIFFNESS - eyeLagVX * EYE_LAG_DAMPING;
+  var ay = (targetY - eyeLagY) * EYE_LAG_STIFFNESS - eyeLagVY * EYE_LAG_DAMPING;
+
+  eyeLagVX += ax * dt;
+  eyeLagVY += ay * dt;
+
+  eyeLagX += eyeLagVX * dt;
+  eyeLagY += eyeLagVY * dt;
+
+  if (
+    !active &&
+    Math.abs(eyeLagX) < 0.02 &&
+    Math.abs(eyeLagY) < 0.02 &&
+    Math.abs(eyeLagVX) < 0.02 &&
+    Math.abs(eyeLagVY) < 0.02
+  ) {
+    eyeLagX = 0;
+    eyeLagY = 0;
+    eyeLagVX = 0;
+    eyeLagVY = 0;
+  }
+}
+/* Auto-scroll while dragging flower near viewport edges */
+var dragClientY = 0;
+
+var AUTO_SCROLL_EDGE = 110;
+var AUTO_SCROLL_MAX_SPEED = 9;
+
+function updateDragAutoScroll(){
+  if (!dragging) return;
+
+  var viewportH = window.innerHeight || document.documentElement.clientHeight || 0;
+  if (!viewportH) return;
+
+  var power = 0;
+
+  if (dragClientY > viewportH - AUTO_SCROLL_EDGE) {
+    power = (dragClientY - (viewportH - AUTO_SCROLL_EDGE)) / AUTO_SCROLL_EDGE;
+  } else if (dragClientY < AUTO_SCROLL_EDGE) {
+    power = -((AUTO_SCROLL_EDGE - dragClientY) / AUTO_SCROLL_EDGE);
+  }
+
+  if (power > 1) power = 1;
+  if (power < -1) power = -1;
+
+  if (Math.abs(power) < 0.03) return;
+
+  var prevScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+  var scrollAmount = power * AUTO_SCROLL_MAX_SPEED;
+
+  window.scrollBy(0, scrollAmount);
+
+  var nextScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+  var actualScroll = nextScrollY - prevScrollY;
+
+  /*
+    Important:
+    when page scrolls, the element's document position shifts visually.
+    We compensate dragStartY/posY so the flower stays under the cursor.
+  */
+  if (actualScroll !== 0) {
+    dragStartY += actualScroll;
+    posY += actualScroll;
+  }
+}
+    var liftedRoots = [];
+
+    function addLiftRoot(el, className){
+      if (!el || liftedRoots.indexOf(el) !== -1) return;
+
+      liftedRoots.push(el);
+      el.classList.add(className);
+    }
+
+    function releaseFlowerFront(){
+      liftedRoots.forEach(function(el){
+        el.classList.remove('tc-flower-rec-front');
+        el.classList.remove('tc-flower-artboard-front');
+      });
+
+      liftedRoots = [];
+    }
+
+    function liftFlowerToFront(){
+      releaseFlowerFront();
+
+      parts.forEach(function(el){
+        if (!el || !el.closest) return;
+
+        addLiftRoot(el.closest('.t-rec'), 'tc-flower-rec-front');
+        addLiftRoot(el.closest('.t396__artboard'), 'tc-flower-artboard-front');
+      });
+    }
+
+    var RETURN_TIME = 1200;
+    var MOVE_THRESHOLD = 4;
+
+    function magneticReturnFactor(t){
+      if (t >= 1) return 0;
+
+
+      var envelope = Math.pow(1 - t, 2.15);
+      var wave = Math.cos(t * Math.PI * 4.5);
+      var f = envelope * wave;
+
+      if (f < 0) {
+        f *= 0.5;
+      }
+
+      return f;
+    }
+
+function applyTransform(x, y, shakeX, shakeY, rot){
+  parts.forEach(function(el){
+    var base = baseTransforms.get(el);
+
+    /*
+      Extra inertia only for pupil layer.
+      Flower keeps original drag position.
+    */
+    var extraX = el === eye ? eyeLagX : 0;
+    var extraY = el === eye ? eyeLagY : 0;
+
+    var transform =
+      'translate3d(' + (x + shakeX + extraX).toFixed(2) + 'px,' + (y + shakeY + extraY).toFixed(2) + 'px,0) ' +
+      'rotate(' + rot.toFixed(3) + 'deg)';
+
+    el.style.transform = (base ? base + ' ' : '') + transform;
+  });
+}
+
+    function startLoop(){
+      if (!raf) {
+        raf = requestAnimationFrame(loop);
+      }
+    }
+
+    function loop(time){
+      raf = 0;
+
+if (dragging) {
+  updateDragAutoScroll();
+  updateEyeLag(time, true);
+
+  var shakeX =
+          Math.sin(time * 0.052) * 1.35 +
+          Math.sin(time * 0.109) * 0.45;
+
+        var shakeY =
+          Math.cos(time * 0.061) * 1.15 +
+          Math.sin(time * 0.083) * 0.35;
+
+        var rot = Math.sin(time * 0.045) * 0.75;
+
+        applyTransform(posX, posY, shakeX, shakeY, rot);
+        startLoop();
+        return;
+      }
+
+      if (returning) {
+        var t = Math.min(1, (time - returnStartTime) / RETURN_TIME);
+        var f = magneticReturnFactor(t);
+
+        posX = returnFromX * f;
+        posY = returnFromY * f;
+updateEyeLag(time, false);
+        applyTransform(posX, posY, 0, 0, 0);
+
+        if (t < 1) {
+          startLoop();
+        } else {
+          returning = false;
+posX = 0;
+posY = 0;
+resetEyeLag();
+applyTransform(0, 0, 0, 0, 0);
+
+          document.body.classList.remove('tc-flower-returning');
+          releaseFlowerFront();
+
+          if (!previousEyeLock) {
+            window.__TC_EYE_PARALLAX_LOCKED__ = false;
+            document.body.classList.remove('tc-eye-parallax-locked');
+          }
+        }
+      }
+    }
+
+    function startDrag(e){
+      if (e.button !== 0) return;
+      if (isLocked()) return;
+
+      var target = e.target && e.target.closest && e.target.closest('.flower, .eye-desktop');
+      if (!target) return;
+
+      previousEyeLock = window.__TC_EYE_PARALLAX_LOCKED__ === true;
+
+      window.__TC_EYE_PARALLAX_LOCKED__ = true;
+      document.body.classList.add('tc-eye-parallax-locked');
+
+      dragging = true;
+      returning = false;
+      movedEnough = false;
+
+      startX = e.clientX;
+      startY = e.clientY;
+      downX = e.clientX;
+      downY = e.clientY;
+dragClientY = e.clientY;
+
+dragStartX = posX;
+dragStartY = posY;
+lastScrollY = getScrollY();
+
+startEyeLagSession();
+
+
+      document.body.classList.remove('tc-flower-returning');
+      document.body.classList.add('tc-flower-dragging');
+
+      liftFlowerToFront();
+
+      e.preventDefault();
+      startLoop();
+    }
+
+function moveDrag(e){
+  if (!dragging) return;
+
+  dragClientY = e.clientY;
+
+  var dx = e.clientX - startX;
+      var dy = e.clientY - startY;
+
+      posX = dragStartX + dx;
+      posY = dragStartY + dy;
+
+      if (
+        Math.abs(e.clientX - downX) > MOVE_THRESHOLD ||
+        Math.abs(e.clientY - downY) > MOVE_THRESHOLD
+      ) {
+        movedEnough = true;
+      }
+
+      e.preventDefault();
+      startLoop();
+    }
+
+    function endDrag(){
+      if (!dragging) return;
+
+      dragging = false;
+      returning = true;
+dragClientY = 0;
+
+      document.body.classList.remove('tc-flower-dragging');
+      document.body.classList.add('tc-flower-returning');
+
+      returnFromX = posX;
+      returnFromY = posY;
+      returnStartTime = performance.now();
+
+      if (movedEnough) {
+        suppressClickUntil = Date.now() + 450;
+      }
+
+      startLoop();
+    }
+
+    document.addEventListener('pointerdown', startDrag, true);
+    window.addEventListener('pointermove', moveDrag, { passive:false });
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+    window.addEventListener('blur', endDrag);
+    window.addEventListener('scroll', syncDragWithPageScroll, { passive: true });
+
+    document.addEventListener('click', function(e){
+      if (Date.now() > suppressClickUntil) return;
+
+      var target = e.target && e.target.closest && e.target.closest('.flower, .eye-desktop');
+      if (!target) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    }, true);
+  });
+})();
+
+(function(){
+  ['.eye-desktop', '.eye-mobile', '.flower'].forEach(function(sel){
+    var el = document.querySelector(sel);
+
+    if(!el) return;
+
+    el.addEventListener('selectstart', function(e){
+      e.preventDefault();
+    });
+
+    el.addEventListener('dragstart', function(e){
+      e.preventDefault();
+    });
+
+    el.addEventListener('mousedown', function(e){
+      e.preventDefault();
+    });
+
+    el.addEventListener('contextmenu', function(e){
+      e.preventDefault();
+    }, {passive:false});
+
+    el.querySelectorAll('img, svg').forEach(function(node){
+      node.setAttribute('draggable','false');
+
+      node.addEventListener('contextmenu', function(e){
+        e.preventDefault();
+      }, {passive:false});
+    });
+  });
+})();
+
+(function () {
+  if (window.__TC_PREVENT_FLOWER_MOBILE_MENU_V1__) return;
+  window.__TC_PREVENT_FLOWER_MOBILE_MENU_V1__ = true;
+
+  function matchFlowerTarget(target) {
+    return (
+      target &&
+      target.closest &&
+      target.closest('.flower, .eye-desktop, .eye-mobile')
+    );
+  }
+
+  function preventNativeMenu(e) {
+    if (!matchFlowerTarget(e.target)) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  /*
+    Самое важное:
+    contextmenu — именно то событие, которое Chrome/Android вызывает
+    после долгого зажатия картинки.
+  */
+  document.addEventListener('contextmenu', preventNativeMenu, {
+    capture: true
+  });
+
+  document.addEventListener('dragstart', preventNativeMenu, {
+    capture: true
+  });
+
+  document.addEventListener('selectstart', preventNativeMenu, {
+    capture: true
+  });
+
+  /*
+    Мобильный страховочный слой.
+    Не ставим stopImmediatePropagation, чтобы твоя пасхалка по touchstart
+    продолжала получать касания.
+  */
+  document.addEventListener('touchstart', function (e) {
+    if (!matchFlowerTarget(e.target)) return;
+
+    e.preventDefault();
+  }, {
+    passive: false,
+    capture: true
+  });
+
+  /*
+    Запрещаем браузеру считать внутренние img/svg перетаскиваемыми.
+  */
+  function hardenFlowerAssets() {
+    document
+      .querySelectorAll('.flower img, .flower svg, .eye-desktop img, .eye-desktop svg, .eye-mobile img, .eye-mobile svg')
+      .forEach(function (node) {
+        node.setAttribute('draggable', 'false');
+        node.setAttribute('aria-hidden', 'true');
+
+        node.style.webkitUserDrag = 'none';
+        node.style.userDrag = 'none';
+        node.style.webkitTouchCallout = 'none';
+        node.style.webkitUserSelect = 'none';
+        node.style.userSelect = 'none';
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hardenFlowerAssets);
+  } else {
+    hardenFlowerAssets();
+  }
+
+  window.addEventListener('load', hardenFlowerAssets);
+
+  if (window.MutationObserver) {
+    var observer = new MutationObserver(hardenFlowerAssets);
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
+  }
+})();
+
+(function () {
+  if (window.__TC_WELCOME_TYPE_V2__) return;
+  window.__TC_WELCOME_TYPE_V2__ = true;
+
+  window.__TC_WELCOME_FINISHED__ = false;
+
+  var SEL_WELCOME = '.uc-tw-welcome, .tw-welcome';
+
+  function ready(fn) {
+    if (document.readyState !== 'loading') fn();
+    else document.addEventListener('DOMContentLoaded', fn);
+  }
+
+  function sleep(ms) {
+    return new Promise(function(resolve) {
+      setTimeout(resolve, ms);
+    });
+  }
+
+  function announceDone() {
+    window.__TC_WELCOME_FINISHED__ = true;
+
+    try {
+      window.dispatchEvent(new CustomEvent('tc:welcome-done'));
+    } catch (e) {
+      var ev = document.createEvent('Event');
+      ev.initEvent('tc:welcome-done', true, true);
+      window.dispatchEvent(ev);
+    }
+  }
+
+  function waitFor(selector, timeout) {
+    return new Promise(function(resolve) {
+      var first = document.querySelector(selector);
+      if (first) return resolve(first);
+
+      var done = false;
+
+      var mo = new MutationObserver(function() {
+        var el = document.querySelector(selector);
+        if (el) {
+          done = true;
+          mo.disconnect();
+          resolve(el);
+        }
+      });
+
+      mo.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+      });
+
+      if (timeout) {
+        setTimeout(function() {
+          if (done) return;
+          mo.disconnect();
+          resolve(null);
+        }, timeout);
+      }
+    });
+  }
+
+  function getTextNode(root) {
+    if (!root) return null;
+
+    return root.querySelector(
+      '[field="text"], .t-descr, .t-text, .t-title, .t-name, .tn-atom, h1, h2, h3, p, div'
+    );
+  }
+
+  async function typeInto(node, text, speed) {
+    node.style.visibility = 'visible';
+    node.classList.add('tw-printing');
+    node.textContent = '';
+
+    for (var i = 0; i <= text.length; i++) {
+      node.textContent = text.slice(0, i);
+
+      if (i < text.length) {
+        await sleep(speed + Math.random() * speed * 0.25);
+      }
+    }
+  }
+
+  async function run() {
+    var welcomeBlock = await waitFor(SEL_WELCOME, 8000);
+
+    if (!welcomeBlock) {
+      announceDone();
+      return;
+    }
+
+    var textNode = getTextNode(welcomeBlock);
+
+    if (!textNode) {
+      announceDone();
+      return;
+    }
+
+    var text = (
+      textNode.getAttribute('data-tc-welcome-text') ||
+      textNode.textContent ||
+      ''
+    ).trim();
+
+    textNode.setAttribute('data-tc-welcome-text', text);
+
+
+    await sleep(650);
+
+    await typeInto(textNode, text, 50);
+
+    await sleep(140);
+
+    announceDone();
+  }
+
+  ready(run);
+})();
+
+(function(){
+  var NEED = 10;
+  var count = 0;
+  var lastTouch = 0;
+  var armed = false;
+
+  var eggActive = false;
+  var eggTimer = null;
+  var eggReturnTimer = null;
+  var eyeUnlockTimer = null;
+  var eyeGrowTimer = null;
+  var eyeGrowEndTimer = null;
+
+  var EGG_HOLD_TIME = 5000;
+  var EGG_RETURN_TIME = 1000;
+  var EGG_FALL_TIME = 900;
+
+  var EYE_APPEAR_DELAY_AFTER_RETURN = 1000;
+  var EYE_GROW_TIME = 560;
+
+  function q(s) {
+    return document.querySelector(s);
+  }
+
+  function lockEyeParallax() {
+    clearTimeout(eyeUnlockTimer);
+    window.__TC_EYE_PARALLAX_LOCKED__ = true;
+    document.body.classList.add('tc-eye-parallax-locked');
+  }
+
+  function unlockEyeParallax() {
+    window.__TC_EYE_PARALLAX_LOCKED__ = false;
+    document.body.classList.remove('tc-eye-parallax-locked');
+  }
+
+  function forceEyeCenter() {
+    if (window.__TC_FORCE_EYE_CENTER__) {
+      window.__TC_FORCE_EYE_CENTER__();
+    }
+  }
+
+  function hardHideEyeForReturn() {
+    clearTimeout(eyeGrowTimer);
+    clearTimeout(eyeGrowEndTimer);
+
+    document.body.classList.remove('tc-eye-grow-after-egg');
+    document.body.classList.add('tc-eye-hard-hidden');
+
+    forceEyeCenter();
+  }
+
+  function startEyeGrowAfterReturn() {
+    forceEyeCenter();
+
+    document.body.classList.remove('tc-eye-hard-hidden');
+
+    requestAnimationFrame(function(){
+      document.body.classList.add('tc-eye-grow-after-egg');
+    });
+
+    clearTimeout(eyeGrowEndTimer);
+    eyeGrowEndTimer = setTimeout(function(){
+      document.body.classList.remove('tc-eye-grow-after-egg');
+      forceEyeCenter();
+    }, EYE_GROW_TIME + 80);
+  }
+
+  function isVisibleElement(el) {
+    if (!el) return false;
+
+    var r = el.getBoundingClientRect();
+    var st = window.getComputedStyle(el);
+
+    return (
+      r.width > 1 &&
+      r.height > 1 &&
+      st.display !== 'none' &&
+      st.visibility !== 'hidden' &&
+      Number(st.opacity) !== 0
+    );
+  }
+
+  function removeFallOverlay() {
+    var old = q('#tc-egg-fall-overlay');
+
+    if (old && old.parentNode) {
+      old.parentNode.removeChild(old);
+    }
+  }
+
+  function restoreOriginalLogo() {
+    document.querySelectorAll('.tc-egg-original-hidden').forEach(function(el){
+      el.classList.remove('tc-egg-original-hidden');
+    });
+  }
+
+  function clearFallOverlay() {
+    removeFallOverlay();
+    restoreOriginalLogo();
+  }
+
+function createFallOverlay() {
+  clearFallOverlay();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'tc-egg-fall-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+
+  document.body.appendChild(overlay);
+
+  ['.flower', '.eye-desktop', '.eye-mobile'].forEach(function(sel){
+    var el = q(sel);
+
+    if (!isVisibleElement(el)) return;
+
+    var r = el.getBoundingClientRect();
+    var clone = el.cloneNode(true);
+
+    clone.classList.add('tc-egg-fall-piece');
+
+    if (sel === '.flower') {
+      clone.classList.add('tc-egg-fall-flower');
+    } else {
+      clone.classList.add('tc-egg-fall-eye');
+    }
+
+    /*
+      КРИТИЧНО:
+      убираем оригинальные классы, иначе body.tc-eye-hard-hidden
+      прячет падающий клон зрачка вместе с настоящим зрачком.
+    */
+    clone.classList.remove('flower');
+    clone.classList.remove('eye-desktop');
+    clone.classList.remove('eye-mobile');
+
+    clone.removeAttribute('id');
+
+    clone.querySelectorAll('[id]').forEach(function(node){
+      node.removeAttribute('id');
+    });
+
+    clone.querySelectorAll('.tn-atom, img, svg').forEach(function(node){
+      node.style.opacity = '1';
+      node.style.visibility = 'visible';
+      node.style.pointerEvents = 'none';
+      node.style.animation = 'none';
+      node.style.transition = 'none';
+    });
+
+    clone.style.cssText =
+      'position:fixed !important;' +
+      'left:' + r.left + 'px !important;' +
+      'top:' + r.top + 'px !important;' +
+      'width:' + r.width + 'px !important;' +
+      'height:' + r.height + 'px !important;' +
+      'margin:0 !important;' +
+      'z-index:' + (sel === '.flower' ? '2147483000' : '2147483004') + ' !important;' +
+      'pointer-events:none !important;' +
+      'opacity:1 !important;' +
+      'visibility:visible !important;';
+
+    overlay.appendChild(clone);
+
+    el.classList.add('tc-egg-original-hidden');
+  });
+
+  setTimeout(removeFallOverlay, EGG_FALL_TIME + 240);
+}
+  function match(node) {
+    return node && node.closest && node.closest('.flower, .eye-desktop, .eye-mobile');
+  }
+
+  function hideEgg() {
+    if (!eggActive) return;
+
+    lockEyeParallax();
+    hardHideEyeForReturn();
+
+    document.body.classList.add('egg-returning');
+
+    removeFallOverlay();
+
+    forceEyeCenter();
+
+
+    restoreOriginalLogo();
+
+    clearTimeout(eggReturnTimer);
+    clearTimeout(eyeUnlockTimer);
+    clearTimeout(eyeGrowTimer);
+    clearTimeout(eyeGrowEndTimer);
+
+    eggReturnTimer = setTimeout(function(){
+      forceEyeCenter();
+
+      document.body.classList.remove('egg-on');
+      document.body.classList.remove('egg-returning');
+
+      eggActive = false;
+
+
+      eyeGrowTimer = setTimeout(function(){
+        startEyeGrowAfterReturn();
+      }, EYE_APPEAR_DELAY_AFTER_RETURN);
+    }, EGG_RETURN_TIME);
+
+
+eyeUnlockTimer = setTimeout(function(){
+  forceEyeCenter();
+  unlockEyeParallax();
+
+  try {
+    window.dispatchEvent(new CustomEvent('tc:eye-after-grow-roll'));
+  } catch (e) {
+    var ev = document.createEvent('Event');
+    ev.initEvent('tc:eye-after-grow-roll', true, true);
+    window.dispatchEvent(ev);
+  }
+}, EGG_RETURN_TIME + EYE_APPEAR_DELAY_AFTER_RETURN + EYE_GROW_TIME + 180);
+  }
+
+  function showEgg() {
+    if (eggActive) return;
+
+    eggActive = true;
+    count = 0;
+
+    clearTimeout(eggTimer);
+    clearTimeout(eggReturnTimer);
+    clearTimeout(eyeUnlockTimer);
+    clearTimeout(eyeGrowTimer);
+    clearTimeout(eyeGrowEndTimer);
+
+    document.body.classList.remove('egg-returning');
+    document.body.classList.remove('tc-eye-grow-after-egg');
+    document.body.classList.remove('tc-eye-hard-hidden');
+
+    lockEyeParallax();
+
+    createFallOverlay();
+
+
+    hardHideEyeForReturn();
+
+    document.body.classList.add('egg-on');
+
+    eggTimer = setTimeout(hideEgg, EGG_HOLD_TIME);
+  }
+
+  function onTouch(e) {
+    if (!match(e.target)) return;
+
+    lastTouch = Date.now();
+
+    if (eggActive) return;
+
+    count += 1;
+
+    if (count >= NEED) {
+      showEgg();
+    }
+  }
+
+  function onClick(e) {
+    if (Date.now() - lastTouch < 400) return;
+    if (!match(e.target)) return;
+
+    if (eggActive) return;
+
+    count += 1;
+
+    if (count >= NEED) {
+      showEgg();
+    }
+  }
+
+  function arm() {
+    if (armed) return;
+
+    armed = true;
+
+    if (!q('.easter')) return;
+
+    if (location.search.indexOf('egg=1') > -1) {
+      showEgg();
+      return;
+    }
+
+    document.addEventListener('touchstart', onTouch, {
+      passive: true,
+      capture: true
+    });
+
+    document.addEventListener('click', onClick, {
+      capture: true
+    });
+  }
+
+  if (document.readyState === 'complete') {
+    arm();
+  } else {
+    window.addEventListener('load', arm);
+  }
+})();
+
+(function () {
+
+  if (window.__TRIP_RADIO__ && window.__TRIP_RADIO__.destroy) {
+    try { window.__TRIP_RADIO__.destroy(); } catch(e){}
+  }
+  var RADIO = window.__TRIP_RADIO__ = {};
+
+
+  var PLAYLIST = [
+    'https://tripchiller.github.io/radio/RADIO/track1.mp3',
+    'https://tripchiller.github.io/radio/RADIO/track2.mp3',
+    'https://tripchiller.github.io/radio/RADIO/track3.mp3',
+    'https://tripchiller.github.io/radio/RADIO/track4.mp3',
+    'https://tripchiller.github.io/radio/RADIO/track5.mp3'
+  ];
+  var START_RANDOM = true;
+  var VOLUME = 1.0;
+
+  function q(s){ return document.querySelector(s); }
+  function unbind(el){ if(!el) return el; var c=el.cloneNode(true); el.parentNode.replaceChild(c,el); return c; }
+
+
+  var audio = RADIO.audio || new Audio();
+  RADIO.audio = audio;
+  audio.preload = 'auto';
+  audio.loop = false;
+  audio.volume = VOLUME;
+
+  var idx = START_RANDOM ? Math.floor(Math.random()*PLAYLIST.length) : 0;
+  var srcInitialized = false;
+
+  function ensureSrc(){
+    if (!srcInitialized) {
+      audio.src = PLAYLIST[idx];
+      srcInitialized = true;
+    }
+  }
+
+  var bumpTimer = 0;
+  function bump(){
+    clearTimeout(bumpTimer);
+    document.body.classList.add('radio-bump');
+    bumpTimer = setTimeout(function(){
+      document.body.classList.remove('radio-bump');
+    }, 350);
+  }
+
+  function play(){
+
+    ensureSrc();
+    var p = audio.play();
+    if (p && p.catch) p.catch(function(){});
+    document.body.classList.add('radio-playing');
+    bump();
+  }
+
+  function pause(){
+    audio.pause();
+    document.body.classList.remove('radio-playing');
+    bump();
+  }
+
+  function toggle(){
+    audio.paused ? play() : pause();
+  }
+
+  function next(){
+
+    idx = (idx + 1) % PLAYLIST.length;
+    audio.src = PLAYLIST[idx];
+    audio.currentTime = 0;
+    srcInitialized = true;
+    var p = audio.play();
+    if (p && p.catch) p.catch(function(){});
+    document.body.classList.add('radio-playing');
+    bump();
+  }
+
+  function bind(){
+    var power = q('.radio-power');
+    var nextBtn = q('.radio-next');
+    var onUI   = q('.radio-on');
+    var offUI  = q('.radio-off');
+    if (!power || !nextBtn || !onUI || !offUI) return false;
+
+
+    power   = unbind(power);
+    nextBtn = unbind(nextBtn);
+
+    var lastTouch = 0;
+    function dedupe(ev){
+      if (ev.type==='touchstart'){ lastTouch = Date.now(); return true; }
+      return (Date.now() - lastTouch) > 350;
+    }
+
+    power.addEventListener('touchstart', function(){ toggle(); }, {passive:true});
+    power.addEventListener('click', function(ev){ if(dedupe(ev)) toggle(); });
+
+    nextBtn.addEventListener('touchstart', function(){ if (!audio.paused) next(); }, {passive:true});
+    nextBtn.addEventListener('click', function(ev){ if(dedupe(ev) && !audio.paused) next(); });
+
+    audio.addEventListener('ended', next);
+
+    RADIO.destroy = function(){
+      try{ audio.pause(); }catch(e){}
+      document.body.classList.remove('radio-playing','radio-bump');
+      try{ power && unbind(power); }catch(e){}
+      try{ nextBtn && unbind(nextBtn); }catch(e){}
+    };
+    return true;
+  }
+
+  function arm(){
+    if (bind()) return;
+    var mo = new MutationObserver(function(){
+      if (bind()) mo.disconnect();
+    });
+    mo.observe(document.documentElement, {childList:true, subtree:true});
+    window.addEventListener('load', function(){ if (bind()) mo.disconnect(); });
+  }
+  arm();
+})();
+
+(function () {
+  if (window.__RADIO_POWER_TAP_NORMALIZED__) return;
+  window.__RADIO_POWER_TAP_NORMALIZED__ = true;
+
+  function bind() {
+    var power = document.querySelector('.radio-power');
+    if (!power) { requestAnimationFrame(bind); return; }
+
+    var lastTouch = 0;
+    var allowSynthetic = false;
+
+
+    power.addEventListener('click', function (e) {
+
+      if (allowSynthetic) { allowSynthetic = false; return; }
+
+      if (Date.now() - lastTouch < 500) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    }, true);
+
+
+    power.addEventListener('touchstart', function (e) {
+      lastTouch = Date.now();
+      e.preventDefault();
+      e.stopPropagation();
+    }, { passive: false, capture: true });
+
+
+    power.addEventListener('touchend', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      allowSynthetic = true;
+
+      power.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    }, { passive: false, capture: true });
+  }
+
+  if (document.readyState === 'complete') bind();
+  else window.addEventListener('load', bind);
+})();
+
+(function () {
+  if (window.__TC_CARD_INFO_BUTTON_FORCE_V3__) return;
+  window.__TC_CARD_INFO_BUTTON_FORCE_V3__ = true;
+
+  var SELECTOR =
+    '#allrecords .t778__btn-wrapper a.t778__btn:not(.t778__btn_second),' +
+    '#allrecords .t778__btn-wrapper button.t778__btn:not(.t778__btn_second)';
+
+  function getInfoButton(target) {
+    if (!target || !target.closest) return null;
+    return target.closest(SELECTOR);
+  }
+
+  function press(btn) {
+    if (!btn) return;
+    btn.classList.add('tc-info-card-pressed');
+  }
+
+  function release(btn) {
+    if (!btn) return;
+
+    setTimeout(function () {
+      btn.classList.remove('tc-info-card-pressed');
+    }, 140);
+  }
+
+  document.addEventListener('pointerdown', function (e) {
+    var btn = getInfoButton(e.target);
+    if (!btn) return;
+
+    press(btn);
+  }, true);
+
+  document.addEventListener('pointerup', function (e) {
+    var btn = getInfoButton(e.target);
+    if (!btn) return;
+
+    release(btn);
+  }, true);
+
+  document.addEventListener('pointercancel', function (e) {
+    var btn = getInfoButton(e.target);
+    if (!btn) return;
+
+    release(btn);
+  }, true);
+
+  document.addEventListener('pointerleave', function (e) {
+    var btn = getInfoButton(e.target);
+    if (!btn) return;
+
+    release(btn);
+  }, true);
+
+  document.addEventListener('click', function (e) {
+    var btn = getInfoButton(e.target);
+    if (!btn) return;
+
+    press(btn);
+    release(btn);
+  }, true);
+})();
 
 (function () {
   if (window.__TC_LOAD_MORE_BUTTON_STYLE_V1__) return;
@@ -76,9 +2010,635 @@
     });
   }
 })();
-/* =========================
-   TRIPCHILLER / LEGAL BUTTONS
-   ========================= */
+
+(function () {
+  if (window.__TC_PRODUCT_POPUP_SAFE_BG_V1__) return;
+  window.__TC_PRODUCT_POPUP_SAFE_BG_V1__ = true;
+
+  function removeOldBrokenBg() {
+    var old = document.getElementById("tc-store-popup-bg");
+    if (old && old.parentNode) {
+      old.parentNode.removeChild(old);
+    }
+  }
+
+  function isProductUrl() {
+    var href = String(location.href || "");
+    var hash = String(location.hash || "");
+
+    return (
+      href.indexOf("/tproduct/") !== -1 ||
+      hash.indexOf("tproduct") !== -1 ||
+      href.indexOf("#!/tproduct/") !== -1 ||
+      href.indexOf("#/tproduct/") !== -1
+    );
+  }
+
+  function hasVisibleProductPopup() {
+    var selectors = [
+      ".t-store__prod-popup",
+      ".js-store-prod-popup",
+      ".t-popup.t-popup_show"
+    ];
+
+    for (var i = 0; i < selectors.length; i++) {
+      var el = document.querySelector(selectors[i]);
+      if (!el) continue;
+
+      var st = window.getComputedStyle(el);
+      var r = el.getBoundingClientRect();
+
+      if (
+        st.display !== "none" &&
+        st.visibility !== "hidden" &&
+        Number(st.opacity) !== 0 &&
+        r.width > 10 &&
+        r.height > 10
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function update() {
+    removeOldBrokenBg();
+
+    var open = isProductUrl() || hasVisibleProductPopup();
+
+    document.body.classList.toggle("tc-product-popup-open", open);
+  }
+
+  function scheduleUpdate() {
+    requestAnimationFrame(function () {
+      update();
+      setTimeout(update, 80);
+      setTimeout(update, 250);
+      setTimeout(update, 700);
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", scheduleUpdate);
+  } else {
+    scheduleUpdate();
+  }
+
+  window.addEventListener("load", scheduleUpdate);
+  window.addEventListener("hashchange", scheduleUpdate);
+  window.addEventListener("popstate", scheduleUpdate);
+
+  document.addEventListener("click", scheduleUpdate, true);
+  document.addEventListener("keydown", scheduleUpdate, true);
+
+  if (window.MutationObserver) {
+    var observer = new MutationObserver(scheduleUpdate);
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style"]
+    });
+  }
+})();
+
+(function () {
+  const BG_BW = "https://static.tildacdn.com/tild3762-3133-4231-b166-306163343466/BGbw.webp";
+  const BG_COLOR = "https://static.tildacdn.com/tild3132-3630-4434-b237-653763376365/BGColor2.webp";
+
+  const DESKTOP_QUERY = "(min-width: 981px) and (pointer: fine)";
+  const MOBILE_QUERY = "(max-width: 980px), (pointer: coarse)";
+
+  const desktopMedia = window.matchMedia(DESKTOP_QUERY);
+  const mobileMedia = window.matchMedia(MOBILE_QUERY);
+
+  const isDesktop = desktopMedia.matches;
+  const isMobile = mobileMedia.matches;
+
+  if (document.getElementById("tc-fixed-bg")) return;
+
+  const supportsMask =
+    CSS.supports("-webkit-mask-image", "linear-gradient(to bottom, black, transparent)") ||
+    CSS.supports("mask-image", "linear-gradient(to bottom, black, transparent)");
+
+  const bg = document.createElement("div");
+  bg.id = "tc-fixed-bg";
+  bg.setAttribute("aria-hidden", "true");
+
+  bg.innerHTML = `
+    <div class="tc-bg-layer tc-bg-bw"></div>
+    <div class="tc-bg-layer tc-bg-aura"></div>
+    <div class="tc-bg-layer tc-bg-ripple tc-bg-ripple-1"></div>
+    <div class="tc-bg-layer tc-bg-ripple tc-bg-ripple-2"></div>
+    <div class="tc-bg-layer tc-bg-color"></div>
+  `;
+
+  document.body.prepend(bg);
+
+  const bwLayer = bg.querySelector(".tc-bg-bw");
+  const auraLayer = bg.querySelector(".tc-bg-aura");
+  const colorLayer = bg.querySelector(".tc-bg-color");
+  const rippleLayers = bg.querySelectorAll(".tc-bg-ripple");
+
+  bwLayer.style.backgroundImage = `url("${BG_BW}")`;
+
+  let colorLoaded = false;
+
+  function loadColorLayer() {
+    if (colorLoaded) return;
+    if (!supportsMask) return;
+
+    colorLoaded = true;
+
+    auraLayer.style.backgroundImage = `url("${BG_COLOR}")`;
+    colorLayer.style.backgroundImage = `url("${BG_COLOR}")`;
+
+    rippleLayers.forEach(function (layer) {
+      layer.style.backgroundImage = `url("${BG_COLOR}")`;
+    });
+  }
+
+  window.addEventListener("load", function () {
+    setTimeout(function () {
+      bg.classList.add("is-visible");
+    }, 1000);
+
+    if (supportsMask && (isDesktop || isMobile)) {
+      setTimeout(loadColorLayer, 1400);
+    }
+  }, { once: true });
+
+  function clamp01(value) {
+    if (value < 0) return 0;
+    if (value > 1) return 1;
+    return value;
+  }
+
+  function getDocumentHeight() {
+    const doc = document.documentElement;
+    const body = document.body;
+
+    return Math.max(
+      body.scrollHeight,
+      doc.scrollHeight,
+      body.offsetHeight,
+      doc.offsetHeight,
+      body.clientHeight,
+      doc.clientHeight
+    );
+  }
+
+  function setupMobileScrollReveal() {
+    let scrollRaf = 0;
+
+    function updateMobileReveal() {
+      scrollRaf = 0;
+
+      loadColorLayer();
+
+      const scrollY =
+        window.pageYOffset ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop ||
+        0;
+
+      const viewportH = window.innerHeight || document.documentElement.clientHeight || 1;
+      const maxScroll = Math.max(1, getDocumentHeight() - viewportH);
+
+      const progress = clamp01(scrollY / maxScroll);
+
+      const feather = Math.max(90, Math.min(180, viewportH * 0.18));
+      const revealY = -feather + progress * (viewportH + feather * 2);
+
+      const hard = revealY - feather * 0.55;
+      const soft = revealY + feather * 0.9;
+
+      const bandStart = revealY - feather * 1.25;
+      const bandMid = revealY;
+      const bandEnd = revealY + feather * 1.35;
+
+      let bandOpacity = 0;
+
+      if (progress > 0.01 && progress < 0.995) {
+        bandOpacity = 0.34;
+      } else if (progress >= 0.995) {
+        bandOpacity = 0.14;
+      }
+
+      bg.style.setProperty("--mobile-hard", hard.toFixed(2) + "px");
+      bg.style.setProperty("--mobile-soft", soft.toFixed(2) + "px");
+
+      bg.style.setProperty("--mobile-band-start", bandStart.toFixed(2) + "px");
+      bg.style.setProperty("--mobile-band-mid", bandMid.toFixed(2) + "px");
+      bg.style.setProperty("--mobile-band-end", bandEnd.toFixed(2) + "px");
+
+      bg.style.setProperty("--mobile-color-opacity", progress <= 0.003 ? "0" : "1");
+      bg.style.setProperty("--mobile-band-opacity", bandOpacity.toFixed(3));
+    }
+
+    function scheduleMobileReveal() {
+      if (!scrollRaf) {
+        scrollRaf = requestAnimationFrame(updateMobileReveal);
+      }
+    }
+
+    window.addEventListener("scroll", scheduleMobileReveal, { passive: true });
+    window.addEventListener("resize", scheduleMobileReveal);
+    window.addEventListener("orientationchange", scheduleMobileReveal);
+
+    window.addEventListener("load", function () {
+      setTimeout(scheduleMobileReveal, 300);
+      setTimeout(scheduleMobileReveal, 1200);
+    }, { once: true });
+
+    const observeTarget = document.getElementById("allrecords") || document.body;
+
+    if (window.MutationObserver && observeTarget) {
+      const observer = new MutationObserver(function () {
+        scheduleMobileReveal();
+        setTimeout(scheduleMobileReveal, 120);
+      });
+
+      observer.observe(observeTarget, {
+        childList: true,
+        subtree: true,
+        attributes: true
+      });
+    }
+
+    scheduleMobileReveal();
+  }
+
+function setupDesktopAura() {
+  let currentX = window.innerWidth / 2;
+  let currentY = window.innerHeight / 2;
+  let targetX = currentX;
+  let targetY = currentY;
+
+  let raf = 0;
+  let isActive = false;
+
+  let revealPower = 0;
+  let lastFrameTime = 0;
+
+  /*
+    Локальное проявление при удержании курсора.
+    650ms = цветная область не вспыхивает сразу, а постепенно заряжается.
+  */
+  const REVEAL_TIME = 650;
+
+  /*
+    Глобальный прогрев после загрузки страницы:
+    0-1 секунда: эффект вообще не проявляется;
+    1-3.6 секунды: эффект плавно набирает силу;
+    после этого работает как обычно.
+  */
+  const PAGE_EFFECT_DELAY = 1000;
+  const PAGE_EFFECT_RAMP_TIME = 2600;
+
+  let pageLoadTime = 0;
+
+  if (document.readyState === "complete") {
+    pageLoadTime = performance.now();
+  } else {
+    window.addEventListener("load", function () {
+      pageLoadTime = performance.now();
+    }, { once: true });
+  }
+
+  const BASE_CORE = 50;
+  const BASE_SOFT = 140;
+
+  function smoothstep(value) {
+    if (value <= 0) return 0;
+    if (value >= 1) return 1;
+    return value * value * (3 - 2 * value);
+  }
+
+  function getPageWarmupPower(time) {
+    if (!pageLoadTime) return 0;
+
+    const elapsed = time - pageLoadTime;
+
+    if (elapsed <= PAGE_EFFECT_DELAY) {
+      return 0;
+    }
+
+    return smoothstep((elapsed - PAGE_EFFECT_DELAY) / PAGE_EFFECT_RAMP_TIME);
+  }
+
+  function setDesktopReveal(power) {
+    bg.style.setProperty("--desktop-aura-opacity", (power * 0.52).toFixed(3));
+    bg.style.setProperty("--desktop-ripple-opacity", (power * 0.52).toFixed(3));
+    bg.style.setProperty("--desktop-color-opacity", (power * 0.9).toFixed(3));
+  }
+
+  function setRipple(prefix, phase, effectPower) {
+    const waveAlpha = Math.sin(Math.PI * phase);
+
+    /*
+      Профиль кольца:
+      - кольцо стартует чуть ближе к основному пятну
+      - толщина меньше
+      - хвост короче
+      - заметность чуть выше
+      - alpha умножается и на локальный hover, и на общий прогрев страницы
+    */
+    const inner = BASE_SOFT * 0.72 + phase * 96;
+    const mid = inner + 24;
+    const outer = inner + 84;
+
+    bg.style.setProperty(`--${prefix}-in`, inner.toFixed(2) + "px");
+    bg.style.setProperty(`--${prefix}-mid`, mid.toFixed(2) + "px");
+    bg.style.setProperty(`--${prefix}-out`, outer.toFixed(2) + "px");
+    bg.style.setProperty(`--${prefix}-alpha`, (waveAlpha * 0.28 * effectPower).toFixed(3));
+  }
+
+  function render(time) {
+    raf = 0;
+
+    const dt = lastFrameTime ? Math.min(64, time - lastFrameTime) : 0;
+    lastFrameTime = time;
+
+    /*
+      revealPower = сила удержания курсора.
+      pageWarmupPower = общий прогрев после загрузки страницы.
+      totalPower = реальная сила эффекта.
+    */
+    revealPower = Math.min(1, revealPower + dt / REVEAL_TIME);
+
+    const pageWarmupPower = getPageWarmupPower(time);
+    const totalPower = revealPower * pageWarmupPower;
+
+    setDesktopReveal(totalPower);
+
+    currentX += (targetX - currentX) * 0.18;
+    currentY += (targetY - currentY) * 0.18;
+
+    const t = time * 0.001;
+    const pulse = Math.sin(t * 1.85);
+
+    const core = BASE_CORE + pulse * 5;
+    const soft = BASE_SOFT + pulse * 18;
+
+    const rippleSpeed = 0.28;
+    const phase1 = (t * rippleSpeed) % 1;
+    const phase2 = (phase1 + 0.5) % 1;
+
+    bg.style.setProperty("--mx", currentX + "px");
+    bg.style.setProperty("--my", currentY + "px");
+
+    bg.style.setProperty("--spot-core", core.toFixed(2) + "px");
+    bg.style.setProperty("--spot-soft", soft.toFixed(2) + "px");
+
+    setRipple("r1", phase1, totalPower);
+    setRipple("r2", phase2, totalPower);
+
+    if (isActive) {
+      raf = requestAnimationFrame(render);
+    }
+  }
+
+  function startRender() {
+    if (!raf) {
+      raf = requestAnimationFrame(render);
+    }
+  }
+
+  function activate(event) {
+    targetX = event.clientX;
+    targetY = event.clientY;
+
+    loadColorLayer();
+
+    if (!isActive) {
+      isActive = true;
+      lastFrameTime = 0;
+      bg.classList.add("is-active");
+      startRender();
+    }
+  }
+
+  function deactivate() {
+    isActive = false;
+    revealPower = 0;
+    lastFrameTime = 0;
+
+    setDesktopReveal(0);
+    bg.classList.remove("is-active");
+
+    if (raf) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
+  }
+
+  setDesktopReveal(0);
+
+  document.addEventListener("pointermove", activate, { passive: true });
+  document.addEventListener("mouseleave", deactivate);
+  window.addEventListener("blur", deactivate);
+
+  window.addEventListener("resize", function () {
+    targetX = window.innerWidth / 2;
+    targetY = window.innerHeight / 2;
+
+    if (isActive) {
+      startRender();
+    }
+  });
+}
+  if (isMobile && supportsMask) {
+    setupMobileScrollReveal();
+  }
+
+  if (isDesktop && supportsMask) {
+    setupDesktopAura();
+  }
+})();
+
+(function () {
+  if (window.__TC_DISK_SWITCHER_V5__) return;
+  window.__TC_DISK_SWITCHER_V5__ = true;
+
+  function ensureDiskSwitcherMarkup() {
+    if (document.querySelector('.tc-disk-switcher')) return;
+
+    var container = document.getElementById('tc-disk-switcher-root');
+
+    if (!container) {
+      var grid = document.querySelector('.uc-shop-grid');
+      if (!grid || !grid.parentNode) return;
+
+      container = document.createElement('div');
+      container.id = 'tc-disk-switcher-root';
+      grid.parentNode.insertBefore(container, grid);
+    }
+
+    container.innerHTML =
+      '<div class="tc-disk-switcher" role="tablist" aria-label="TRIPCHILLER sections">' +
+        '<button class="tc-path-row" type="button" role="tab" data-tc-tab="shop" data-label="C:\\TRIPCHILLER\\MAIN_SHOP" aria-selected="false">' +
+          '<span class="tc-text"></span><span class="tc-caret">|</span>' +
+        '</button>' +
+        '<button class="tc-path-row" type="button" role="tab" data-tc-tab="custom" data-label="C:\\TRIPCHILLER\\CUSTOM_ARCHIVE" aria-selected="false">' +
+          '<span class="tc-text"></span><span class="tc-caret">|</span>' +
+        '</button>' +
+      '</div>';
+  }
+
+  function ready(fn) {
+    if (document.readyState !== 'loading') fn();
+    else document.addEventListener('DOMContentLoaded', fn);
+  }
+
+  function sleep(ms) {
+    return new Promise(function(resolve) {
+      setTimeout(resolve, ms);
+    });
+  }
+
+  function refreshTildaLayout() {
+    setTimeout(function() {
+      try {
+        if (window.t_lazyload_update) window.t_lazyload_update();
+      } catch (e) {}
+
+      try {
+        window.dispatchEvent(new Event('resize'));
+      } catch (e) {}
+    }, 80);
+  }
+
+  function waitWelcomeDone(maxWait) {
+    return new Promise(function(resolve) {
+      if (window.__TC_WELCOME_FINISHED__ === true) {
+        resolve();
+        return;
+      }
+
+      var finished = false;
+
+      function done() {
+        if (finished) return;
+        finished = true;
+        window.removeEventListener('tc:welcome-done', done);
+        resolve();
+      }
+
+      window.addEventListener('tc:welcome-done', done);
+      setTimeout(done, maxWait || 4200);
+    });
+  }
+
+  function getInitialSection() {
+    var hash = String(location.hash || '').toLowerCase();
+
+    if (
+      hash === '#custom_archive' ||
+      hash === '#custom' ||
+      hash === '#archive'
+    ) {
+      return 'custom';
+    }
+
+    return 'shop';
+  }
+
+  function setProductSection(name) {
+    var isCustom = name === 'custom';
+
+    document.body.classList.toggle('tc-section-shop', !isCustom);
+    document.body.classList.toggle('tc-section-custom', isCustom);
+
+    refreshTildaLayout();
+  }
+
+  function setActiveRow(name, updateHash) {
+    var isCustom = name === 'custom';
+
+    document.querySelectorAll('[data-tc-tab]').forEach(function(btn) {
+      var active = btn.getAttribute('data-tc-tab') === name;
+
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+
+    if (updateHash && window.history && window.history.replaceState) {
+      history.replaceState(null, '', isCustom ? '#custom_archive' : '#main_shop');
+    }
+  }
+
+  async function typeRow(row, speed) {
+    var text = row.getAttribute('data-label') || '';
+    var textNode = row.querySelector('.tc-text');
+
+    if (!textNode) return;
+
+    textNode.textContent = '';
+    row.classList.add('is-visible');
+    row.classList.add('is-currently-typing');
+
+    for (var i = 0; i <= text.length; i++) {
+      textNode.textContent = text.slice(0, i);
+
+      if (i < text.length) {
+        var ch = text.charAt(i);
+        var pause = speed + Math.random() * speed * 0.45;
+
+        if (ch === '\\' || ch === ':' || ch === '_') {
+          pause += 24;
+        }
+
+        await sleep(pause);
+      }
+    }
+
+    row.classList.remove('is-currently-typing');
+  }
+
+  ready(async function() {
+    ensureDiskSwitcherMarkup();
+
+    var switcher = document.querySelector('.tc-disk-switcher');
+    if (!switcher) return;
+
+    var rows = Array.prototype.slice.call(
+      switcher.querySelectorAll('.tc-path-row')
+    );
+
+    if (!rows.length) return;
+
+    var initialSection = getInitialSection();
+
+    setProductSection(initialSection);
+    switcher.classList.add('is-typing');
+
+    await waitWelcomeDone(4200);
+
+    var TYPE_SPEED = 35;
+
+    for (var i = 0; i < rows.length; i++) {
+      await typeRow(rows[i], TYPE_SPEED);
+      await sleep(130);
+    }
+
+    switcher.classList.remove('is-typing');
+
+    await sleep(180);
+    setActiveRow(initialSection, false);
+
+    rows.forEach(function(row) {
+      row.addEventListener('click', function() {
+        var section = row.getAttribute('data-tc-tab');
+
+        setProductSection(section);
+        setActiveRow(section, true);
+      });
+    });
+  });
+})();
 
 (function () {
   if (window.__TC_LEGAL_BUTTONS_SINGLE_FILL_V5__) return;
@@ -90,17 +2650,11 @@
   }
 
   function normalizeText(str) {
-    return String(str || '')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .toUpperCase();
+    return String(str || '').replace(/\s+/g, ' ').trim().toUpperCase();
   }
 
   function getButtonRoot(el) {
-    return el.closest('a') ||
-           el.closest('button') ||
-           el.closest('.tn-atom') ||
-           el;
+    return el.closest('a') || el.closest('button') || el.closest('.tn-atom') || el;
   }
 
   function markLegalButtons() {
@@ -109,21 +2663,17 @@
       'ПОЛИТИКА ОБРАБОТКИ ДАННЫХ',
       'ПОЛИТИКА ОБРАБОТКИ ДАННЫХ 2026'
     ];
-
     var candidates = document.querySelectorAll('a, button, .tn-atom, .t-btn');
 
     candidates.forEach(function (el) {
       var text = normalizeText(el.textContent);
-
       var matched = targets.some(function (target) {
         return text.indexOf(target) !== -1;
       });
-
       if (!matched) return;
 
       var btn = getButtonRoot(el);
       if (!btn || btn.__tcLegalButtonSingleFillReadyV5) return;
-
       btn.__tcLegalButtonSingleFillReadyV5 = true;
       btn.classList.add('tc-legal-btn');
 
@@ -142,34 +2692,13 @@
         }, 140);
       }
 
-      btn.addEventListener('pointerdown', function () {
-        press();
-      }, true);
+      btn.addEventListener('pointerdown', press, true);
+      btn.addEventListener('pointerup', releaseSoon, true);
+      btn.addEventListener('pointerleave', releaseSoon, true);
+      btn.addEventListener('pointercancel', releaseSoon, true);
+      btn.addEventListener('touchstart', press, { passive: true, capture: true });
+      btn.addEventListener('touchend', releaseSoon, { passive: true, capture: true });
 
-      btn.addEventListener('pointerup', function () {
-        releaseSoon();
-      }, true);
-
-      btn.addEventListener('pointerleave', function () {
-        releaseSoon();
-      }, true);
-
-      btn.addEventListener('pointercancel', function () {
-        releaseSoon();
-      }, true);
-
-      btn.addEventListener('touchstart', function () {
-        press();
-      }, { passive: true, capture: true });
-
-      btn.addEventListener('touchend', function () {
-        releaseSoon();
-      }, { passive: true, capture: true });
-
-      /*
-        Gives 130ms for visible press animation,
-        then opens the link.
-      */
       btn.addEventListener('click', function (e) {
         var link = btn.closest('a') || btn.querySelector('a');
         if (!link) return;
