@@ -2149,7 +2149,7 @@ eyeUnlockTimer = setTimeout(function(){
 
 (function () {
   const BG_BW = "https://static.tildacdn.com/tild3762-3133-4231-b166-306163343466/BGbw.webp";
-  const BG_COLOR = "https://static.tildacdn.com/tild3132-3630-4434-b237-653763376365/BGColor2.webp";
+  const BG_COLOR = "https://static.tildacdn.com/tild6165-6634-4434-b464-316436366535/BGColor.webp";
 
   const DESKTOP_QUERY = "(min-width: 981px) and (pointer: fine)";
   const MOBILE_QUERY = "(max-width: 980px), (pointer: coarse)";
