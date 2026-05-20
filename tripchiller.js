@@ -1831,6 +1831,49 @@ eyeUnlockTimer = setTimeout(function(){
 })();
 
 (function () {
+  if (window.__TC_RADIO_NOTES_ANTI_CLIP_V1__) return;
+  window.__TC_RADIO_NOTES_ANTI_CLIP_V1__ = true;
+
+  var NOTES_SELECTOR = '.note1, .note2, .note3, .note4';
+
+  function applyAntiClip() {
+    var notes = document.querySelectorAll(NOTES_SELECTOR);
+    if (!notes.length) return false;
+
+    notes.forEach(function (note) {
+      var rec = note.closest('.t-rec');
+      if (rec) {
+        rec.classList.add('tc-radio-notes-overflow');
+      }
+
+      var artboard = note.closest('.t396__artboard');
+      if (artboard) {
+        artboard.classList.add('tc-radio-notes-overflow');
+      }
+    });
+
+    return true;
+  }
+
+  function arm() {
+    if (applyAntiClip()) return;
+    var mo = new MutationObserver(function () {
+      if (applyAntiClip()) mo.disconnect();
+    });
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+    window.addEventListener('load', function () {
+      if (applyAntiClip()) mo.disconnect();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', arm);
+  } else {
+    arm();
+  }
+})();
+
+(function () {
   if (window.__RADIO_POWER_TAP_NORMALIZED__) return;
   window.__RADIO_POWER_TAP_NORMALIZED__ = true;
 
