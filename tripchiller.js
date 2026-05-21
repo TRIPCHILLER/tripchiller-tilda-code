@@ -3419,3 +3419,68 @@ function setupDesktopAura() {
     });
   });
 })();
+
+
+(function () {
+  if (window.__TC_UI_ACTION_PRESS_V1__) return;
+  window.__TC_UI_ACTION_PRESS_V1__ = true;
+
+  var TARGET_SELECTOR =
+    '.tc-action, .tc-ui-btn, .tc-legal-btn, .t778__showmore, .t-store__load-more-btn, .js-store-load-more-btn, ' +
+    '#allrecords .t778__btn-wrapper .t778__btn, .soc1 .tn-atom, .soc2 .tn-atom, .soc3 .tn-atom, .soc4 .tn-atom';
+
+  var activeTarget = null;
+
+  function getTarget(el) {
+    if (!el || !el.closest) return null;
+    var node = el.closest(TARGET_SELECTOR);
+    if (!node) return null;
+    if (node.matches(':disabled') || node.getAttribute('aria-disabled') === 'true') return null;
+    return node;
+  }
+
+  function press(el) {
+    if (!el) return;
+    el.classList.add('tc-ui-pressed');
+  }
+
+  function release(el) {
+    if (!el) return;
+    el.classList.remove('tc-ui-pressed');
+  }
+
+  function releaseActiveTarget() {
+    if (!activeTarget) return;
+    release(activeTarget);
+    activeTarget = null;
+  }
+
+  document.addEventListener('pointerdown', function (e) {
+    var target = getTarget(e.target);
+    if (!target) return;
+
+    if (activeTarget && activeTarget !== target) {
+      release(activeTarget);
+    }
+
+    activeTarget = target;
+    press(target);
+  }, true);
+
+  document.addEventListener('pointerup', function () {
+    releaseActiveTarget();
+  }, true);
+
+  document.addEventListener('pointercancel', function () {
+    releaseActiveTarget();
+  }, true);
+
+  document.addEventListener('pointerleave', function () {
+    releaseActiveTarget();
+  }, true);
+
+  window.addEventListener('blur', function () {
+    document.querySelectorAll('.tc-ui-pressed').forEach(release);
+    activeTarget = null;
+  });
+})();

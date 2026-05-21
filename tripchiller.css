@@ -1779,3 +1779,179 @@ body {
   .tc-user-photos__track,
   .tc-user-photos__img { transition: none !important; animation: none !important; }
 }
+
+
+/* =========================
+   TRIPCHILLER / UI ACTIONS
+   ========================= */
+:root {
+  --tc-ui-black: #050505;
+  --tc-ui-red: #9d191c;
+  --tc-ui-red-hover: #a51414;
+  --tc-ui-text: #ffffff;
+  --tc-ui-text-pressed: rgba(255,255,255,.50);
+  --tc-ui-shadow: 0 5px 0 rgba(0,0,0,.42);
+  --tc-ui-shadow-hover: 0 6px 0 rgba(0,0,0,.46), 0 0 16px rgba(157,25,28,.24);
+  --tc-ui-shadow-pressed: 0 2px 0 rgba(0,0,0,.50);
+  --tc-ui-transition: background-color .22s ease, color .12s linear, transform .08s ease, box-shadow .22s ease, opacity .12s linear;
+}
+
+.tc-action,
+.tc-ui-btn,
+.tc-legal-btn,
+.t778__showmore,
+button.t778__showmore,
+.t-store__load-more-btn,
+.js-store-load-more-btn,
+#allrecords .t778__btn-wrapper a.t778__btn.t778__btn_second,
+#allrecords .t778__btn-wrapper button.t778__btn.t778__btn_second,
+.soc1 .tn-atom,
+.soc2 .tn-atom,
+.soc3 .tn-atom,
+.soc4 .tn-atom {
+  cursor: pointer !important;
+  background: var(--tc-ui-black) !important;
+  background-color: var(--tc-ui-black) !important;
+  color: var(--tc-ui-text) !important;
+  box-shadow: var(--tc-ui-shadow) !important;
+  transform: translateY(0) scale(1) !important;
+  transition: var(--tc-ui-transition) !important;
+  -webkit-tap-highlight-color: transparent !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.tc-action:hover,
+.tc-ui-btn:hover,
+.tc-legal-btn:hover,
+.t778__showmore:hover,
+button.t778__showmore:hover,
+.t-store__load-more-btn:hover,
+.js-store-load-more-btn:hover,
+#allrecords .t778__btn-wrapper a.t778__btn.t778__btn_second:hover,
+#allrecords .t778__btn-wrapper button.t778__btn.t778__btn_second:hover,
+.soc1:hover .tn-atom,
+.soc2:hover .tn-atom,
+.soc3:hover .tn-atom,
+.soc4:hover .tn-atom {
+  background: var(--tc-ui-red) !important;
+  background-color: var(--tc-ui-red) !important;
+  box-shadow: var(--tc-ui-shadow-hover) !important;
+  color: var(--tc-ui-text) !important;
+}
+
+.tc-action:active,
+.tc-action.tc-ui-pressed,
+.tc-ui-btn:active,
+.tc-ui-btn.tc-ui-pressed,
+.tc-legal-btn:active,
+.tc-legal-btn.tc-ui-pressed,
+.tc-legal-btn.tc-pressed,
+.t778__showmore:active,
+.t778__showmore.tc-ui-pressed,
+.t778__showmore.tc-loadmore-pressed,
+button.t778__showmore:active,
+button.t778__showmore.tc-ui-pressed,
+button.t778__showmore.tc-loadmore-pressed,
+.t-store__load-more-btn:active,
+.t-store__load-more-btn.tc-ui-pressed,
+.t-store__load-more-btn.tc-loadmore-pressed,
+.js-store-load-more-btn:active,
+.js-store-load-more-btn.tc-ui-pressed,
+.js-store-load-more-btn.tc-loadmore-pressed,
+#allrecords .t778__btn-wrapper a.t778__btn.t778__btn_second:active,
+#allrecords .t778__btn-wrapper a.t778__btn.t778__btn_second.tc-ui-pressed,
+#allrecords .t778__btn-wrapper button.t778__btn.t778__btn_second:active,
+#allrecords .t778__btn-wrapper button.t778__btn.t778__btn_second.tc-ui-pressed,
+.soc1 .tn-atom:active,
+.soc1 .tn-atom.tc-ui-pressed,
+.soc2 .tn-atom:active,
+.soc2 .tn-atom.tc-ui-pressed,
+.soc3 .tn-atom:active,
+.soc3 .tn-atom.tc-ui-pressed,
+.soc4 .tn-atom:active,
+.soc4 .tn-atom.tc-ui-pressed {
+  background: var(--tc-ui-red) !important;
+  background-color: var(--tc-ui-red) !important;
+  transform: translateY(2px) scale(.975) !important;
+  box-shadow: var(--tc-ui-shadow-pressed) !important;
+  color: var(--tc-ui-text-pressed) !important;
+}
+
+.tc-action.tc-ui-pressed span,
+.tc-action.tc-ui-pressed div,
+.tc-action.tc-ui-pressed .tn-atom,
+.tc-action.tc-ui-pressed .t-btn,
+.tc-ui-btn.tc-ui-pressed span,
+.tc-ui-btn.tc-ui-pressed div,
+.tc-ui-btn.tc-ui-pressed .tn-atom,
+.tc-ui-btn.tc-ui-pressed .t-btn,
+.tc-legal-btn.tc-ui-pressed span,
+.tc-legal-btn.tc-ui-pressed div,
+.tc-legal-btn.tc-ui-pressed .tn-atom,
+.tc-legal-btn.tc-ui-pressed .t-btn,
+.tc-legal-btn.tc-pressed span,
+.tc-legal-btn.tc-pressed div,
+.tc-legal-btn.tc-pressed .tn-atom,
+.tc-legal-btn.tc-pressed .t-btn,
+.t778__showmore.tc-ui-pressed span,
+.t778__showmore.tc-ui-pressed div,
+.t778__showmore.tc-ui-pressed .tn-atom,
+.t778__showmore.tc-ui-pressed .t-btn,
+.t778__showmore.tc-loadmore-pressed span,
+.t778__showmore.tc-loadmore-pressed div,
+.t778__showmore.tc-loadmore-pressed .tn-atom,
+.t778__showmore.tc-loadmore-pressed .t-btn,
+.t-store__load-more-btn.tc-ui-pressed span,
+.t-store__load-more-btn.tc-ui-pressed div,
+.t-store__load-more-btn.tc-ui-pressed .tn-atom,
+.t-store__load-more-btn.tc-ui-pressed .t-btn,
+.t-store__load-more-btn.tc-loadmore-pressed span,
+.t-store__load-more-btn.tc-loadmore-pressed div,
+.t-store__load-more-btn.tc-loadmore-pressed .tn-atom,
+.t-store__load-more-btn.tc-loadmore-pressed .t-btn,
+.js-store-load-more-btn.tc-ui-pressed span,
+.js-store-load-more-btn.tc-ui-pressed div,
+.js-store-load-more-btn.tc-ui-pressed .tn-atom,
+.js-store-load-more-btn.tc-ui-pressed .t-btn,
+.js-store-load-more-btn.tc-loadmore-pressed span,
+.js-store-load-more-btn.tc-loadmore-pressed div,
+.js-store-load-more-btn.tc-loadmore-pressed .tn-atom,
+.js-store-load-more-btn.tc-loadmore-pressed .t-btn,
+#allrecords .t778__btn-wrapper .t778__btn.tc-ui-pressed span,
+#allrecords .t778__btn-wrapper .t778__btn.tc-ui-pressed div,
+#allrecords .t778__btn-wrapper .t778__btn.tc-ui-pressed .tn-atom,
+#allrecords .t778__btn-wrapper .t778__btn.tc-ui-pressed .t-btn,
+.soc1 .tn-atom.tc-ui-pressed span,
+.soc1 .tn-atom.tc-ui-pressed div,
+.soc1 .tn-atom.tc-ui-pressed .tn-atom,
+.soc1 .tn-atom.tc-ui-pressed .t-btn,
+.soc2 .tn-atom.tc-ui-pressed span,
+.soc2 .tn-atom.tc-ui-pressed div,
+.soc2 .tn-atom.tc-ui-pressed .tn-atom,
+.soc2 .tn-atom.tc-ui-pressed .t-btn,
+.soc3 .tn-atom.tc-ui-pressed span,
+.soc3 .tn-atom.tc-ui-pressed div,
+.soc3 .tn-atom.tc-ui-pressed .tn-atom,
+.soc3 .tn-atom.tc-ui-pressed .t-btn,
+.soc4 .tn-atom.tc-ui-pressed span,
+.soc4 .tn-atom.tc-ui-pressed div,
+.soc4 .tn-atom.tc-ui-pressed .tn-atom,
+.soc4 .tn-atom.tc-ui-pressed .t-btn {
+  color: var(--tc-ui-text-pressed) !important;
+}
+
+.soc1 .tn-atom,
+.soc2 .tn-atom,
+.soc3 .tn-atom,
+.soc4 .tn-atom {
+  border-radius: 9999px !important;
+  isolation: isolate;
+}
+
+.soc1 .tn-atom img, .soc1 .tn-atom svg,
+.soc2 .tn-atom img, .soc2 .tn-atom svg,
+.soc3 .tn-atom img, .soc3 .tn-atom svg,
+.soc4 .tn-atom img, .soc4 .tn-atom svg {
+  pointer-events: none;
+}
