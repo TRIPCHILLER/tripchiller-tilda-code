@@ -3252,94 +3252,69 @@ function setupDesktopAura() {
 })();
 
 (function () {
-  if (window.__TC_USER_PHOTOS_ROTATOR_V1__) return;
-  window.__TC_USER_PHOTOS_ROTATOR_V1__ = true;
+  "use strict";
+
+  var GUARD_KEY = '__TC_USER_PHOTOS_T123_V2__';
+  var prevInstance = window[GUARD_KEY];
+  if (prevInstance && typeof prevInstance.destroy === 'function') prevInstance.destroy();
+
+  var USER_PHOTOS = [
+    "https://static.tildacdn.com/tild3866-3134-4235-b739-386236373939/20250209_152049_IMG_.jpg",
+    "https://static.tildacdn.com/tild3165-6233-4966-b365-306534343730/jT-rqCPef8n7kAtP79Dv.jpg",
+    "https://static.tildacdn.com/tild3239-3630-4538-b363-333364323737/IMG_4749__2.jpg",
+    "https://static.tildacdn.com/tild3234-3538-4661-b436-346663663433/photo_2025-12-07_17-.jpg",
+    "https://static.tildacdn.com/tild6632-6531-4062-b932-326661346366/IMG_8909.JPG",
+    "https://static.tildacdn.com/tild3138-3131-4030-b235-343662656564/IMG_4749__3.jpg",
+    "https://static.tildacdn.com/tild3934-6435-4062-b035-623934333265/photo_2024-08-29_14-.jpg",
+    "https://static.tildacdn.com/tild3462-3738-4665-a163-663163373862/photo_2026-01-07_05-.jpg",
+    "https://static.tildacdn.com/tild6438-3732-4131-a662-316337343765/IMG_47102_.jpg",
+    "https://static.tildacdn.com/tild3331-3461-4235-b136-336637336333/6yu6j06OMVuTiTq3_83Q.jpg",
+    "https://static.tildacdn.com/tild6335-3432-4565-b636-306436343532/photo_2026-05-21_14-.jpg",
+    "https://static.tildacdn.com/tild3739-3839-4131-b737-616363623435/IMG_4749__4.jpg"
+  ];
 
   function ready(fn) {
     if (document.readyState !== 'loading') fn();
     else document.addEventListener('DOMContentLoaded', fn);
   }
 
-  function renderSection(root) {
+  function mod(n, m) { return ((n % m) + m) % m; }
+
+  function build(root) {
+    var tickerBase = 'TRIPCHILLER USER ARCHIVE / НАШИ ТРИПОНАВТЫ / CUSTOM SIGNALS / REAL PEOPLE REAL ITEMS / ';
+    var tickerLine = tickerBase.repeat(8);
+
     root.innerHTML = '' +
       '<section class="tc-user-photos" aria-label="НАШИ ТРИПОНАВТЫ">' +
         '<h2 class="tc-user-photos__title">НАШИ ТРИПОНАВТЫ</h2>' +
         '<div class="tc-user-photos__ticker tc-user-photos__ticker--top" aria-hidden="true">' +
-          '<div class="tc-user-photos__ticker-track">' +
-            '<span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>' +
-            '<span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>' +
-            '<span>ДАННЫЙ РАЗДЕЛ КАЖДЫЙ РАЗ ОТОБРАЖАЕТ РАНДОМНЫЕ ЖИВЫЕ ФОТОГРАФИИ ИЗ СПИСКА</span>' +
-          '</div>' +
+          '<div class="tc-user-photos__ticker-track">' + tickerLine + '</div>' +
         '</div>' +
         '<div class="tc-user-photos__carousel">' +
-          '<button class="tc-user-photos__nav tc-user-photos__nav--prev" type="button" aria-label="Предыдущее фото">' +
-            '<span>&lt;</span>' +
-          '</button>' +
+          '<button class="tc-user-photos__nav tc-user-photos__nav--prev" type="button" aria-label="Предыдущее фото"><span>‹</span></button>' +
           '<div class="tc-user-photos__viewport">' +
             '<div class="tc-user-photos__track">' +
-              '<figure class="tc-user-photos__slide tc-user-photos__slide--prev" aria-hidden="true"><img class="tc-user-photos__img" alt=""></figure>' +
-              '<figure class="tc-user-photos__slide tc-user-photos__slide--active"><img class="tc-user-photos__img" alt=""></figure>' +
-              '<figure class="tc-user-photos__slide tc-user-photos__slide--next" aria-hidden="true"><img class="tc-user-photos__img" alt=""></figure>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--prev"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--active"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--next"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
             '</div>' +
           '</div>' +
-          '<button class="tc-user-photos__nav tc-user-photos__nav--next" type="button" aria-label="Следующее фото">' +
-            '<span>&gt;</span>' +
-          '</button>' +
+          '<button class="tc-user-photos__nav tc-user-photos__nav--next" type="button" aria-label="Следующее фото"><span>›</span></button>' +
         '</div>' +
         '<div class="tc-user-photos__ticker tc-user-photos__ticker--bottom" aria-hidden="true">' +
-          '<div class="tc-user-photos__ticker-track">' +
-            '<span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>' +
-            '<span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>' +
-            '<span>ВСЕ ФОТОГРАФИИ БЫЛИ РАЗМЕЩЕНЫ С РАЗРЕШЕНИЯ ВЛАДЕЛЬЦЕВ И БЫЛИ ПРИСЛАНЫ ИМИ ЛИЧНО</span>' +
-          '</div>' +
+          '<div class="tc-user-photos__ticker-track">' + tickerLine + '</div>' +
         '</div>' +
       '</section>';
 
     return root.querySelector('.tc-user-photos');
   }
 
-  function loadPhotos() {
-    var url = 'https://tripchiller.github.io/tripchiller-tilda-code/user-photos.json?v=' + Date.now();
+  ready(function () {
+    var root = document.getElementById('tc-user-photos-root');
+    if (!root) return;
 
-    return fetch(url, { cache: 'no-store' })
-      .then(function (res) {
-        if (!res.ok) throw new Error('Failed to load user-photos.json');
-        return res.json();
-      })
-      .then(function (items) {
-        if (!Array.isArray(items)) return [];
-
-        return items.filter(function (item) {
-          if (!item || typeof item !== 'object') return false;
-          if (typeof item.src !== 'string') return false;
-
-          var src = item.src.trim();
-          return src.indexOf('http') === 0 && src.indexOf('PASTE_IMAGE') === -1;
-        }).map(function (item) {
-          return {
-            src: item.src.trim(),
-            alt: typeof item.alt === 'string' ? item.alt : 'TRIPCHILLER user photo'
-          };
-        });
-      })
-      .catch(function () {
-        return [];
-      });
-  }
-
-  function preloadPhoto(src) {
-    if (!src) return;
-    var pre = new Image();
-    pre.src = src;
-  }
-
-  function applyPhoto(img, photo, keepAlt) {
-    if (!img || !photo) return;
-    img.src = photo.src;
-    img.alt = keepAlt ? (photo.alt || 'TRIPCHILLER user photo') : '';
-  }
-
-  function initRotator(section, photos) {
+    root.innerHTML = '';
+    var section = build(root);
     if (!section) return;
 
     var prevImg = section.querySelector('.tc-user-photos__slide--prev .tc-user-photos__img');
@@ -3348,111 +3323,113 @@ function setupDesktopAura() {
     var prevBtn = section.querySelector('.tc-user-photos__nav--prev');
     var nextBtn = section.querySelector('.tc-user-photos__nav--next');
 
-    if (!prevImg || !activeImg || !nextImg || !prevBtn || !nextBtn) return;
+    var photos = USER_PHOTOS.slice();
+    var len = photos.length;
+    var current = len > 0 ? Math.floor(Math.random() * len) : 0;
+    var isSliding = false;
+    var cleanupTransition = null;
 
-    if (!photos.length) {
-      section.classList.add('is-empty');
-      return;
+    function getIndices(index) {
+      if (len === 0) return { prev: -1, active: -1, next: -1 };
+      if (len === 1) return { prev: 0, active: 0, next: 0 };
+      return { prev: mod(index - 1, len), active: mod(index, len), next: mod(index + 1, len) };
     }
 
-    var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var index = Math.floor(Math.random() * photos.length);
-    var isAnimating = false;
-    var timerId = null;
-    var animationDuration = reducedMotion ? 0 : 520;
-
-    function getIndex(offset) {
-      return (index + offset + photos.length) % photos.length;
+    function setImg(img, idx) {
+      if (!img || idx < 0 || !photos[idx]) return;
+      img.src = photos[idx];
+      img.alt = 'Фото трипонавта ' + (idx + 1);
     }
 
-    function renderSlides() {
-      var prevIndex = getIndex(-1);
-      var nextIndex = getIndex(1);
-
-      applyPhoto(prevImg, photos[prevIndex], false);
-      applyPhoto(activeImg, photos[index], true);
-      applyPhoto(nextImg, photos[nextIndex], false);
-
-      preloadPhoto(photos[getIndex(-2)].src);
-      preloadPhoto(photos[getIndex(2)].src);
+    function preloadNeighbors(index) {
+      if (len < 2) return;
+      var ids = getIndices(index);
+      [ids.prev, ids.next].forEach(function (idx) {
+        if (idx < 0 || !photos[idx]) return;
+        var img = new Image();
+        img.decoding = 'async';
+        img.src = photos[idx];
+      });
     }
 
-    function clearSlideState() {
-      section.classList.remove('is-sliding-next');
+    function render() {
+      var ids = getIndices(current);
+      if (ids.active < 0) return;
+      setImg(prevImg, ids.prev);
+      setImg(activeImg, ids.active);
+      setImg(nextImg, ids.next);
+      preloadNeighbors(current);
+    }
+
+    function cleanupSlideState() {
       section.classList.remove('is-sliding-prev');
+      section.classList.remove('is-sliding-next');
     }
 
-    function stopAuto() {
-      if (timerId) {
-        clearInterval(timerId);
-        timerId = null;
+    function finalize(dir) {
+      if (!isSliding) return;
+      isSliding = false;
+      cleanupSlideState();
+      current = dir === 'next' ? mod(current + 1, len || 1) : mod(current - 1, len || 1);
+      render();
+      if (cleanupTransition) {
+        cleanupTransition();
+        cleanupTransition = null;
       }
     }
 
-    function startAuto() {
-      stopAuto();
-      if (reducedMotion || photos.length < 2) return;
-      timerId = setInterval(function () {
-        go(1, false);
-      }, 5000);
+    function slide(dir) {
+      if (isSliding || len < 2) return;
+      isSliding = true;
+      cleanupSlideState();
+      void section.offsetWidth;
+      section.classList.add(dir === 'next' ? 'is-sliding-next' : 'is-sliding-prev');
+
+      var done = false;
+      var timeoutId = setTimeout(function () {
+        if (done) return;
+        done = true;
+        finalize(dir);
+      }, 560);
+
+      var onEnd = function (e) {
+        if (e && e.target !== section) return;
+        if (done) return;
+        done = true;
+        clearTimeout(timeoutId);
+        finalize(dir);
+      };
+
+      section.addEventListener('transitionend', onEnd);
+      cleanupTransition = function () {
+        clearTimeout(timeoutId);
+        section.removeEventListener('transitionend', onEnd);
+      };
     }
 
-    function go(direction, isManual) {
-      if (photos.length < 2 || isAnimating) return;
+    function onPrev() { slide('prev'); }
+    function onNext() { slide('next'); }
 
-      var step = direction > 0 ? 1 : -1;
-      var newIndex = (index + step + photos.length) % photos.length;
+    prevBtn.addEventListener('click', onPrev);
+    nextBtn.addEventListener('click', onNext);
 
-      if (isManual) startAuto();
-
-      if (animationDuration === 0) {
-        index = newIndex;
-        renderSlides();
-        window.dispatchEvent(new CustomEvent('tc:user-photos-updated'));
-        return;
-      }
-
-      isAnimating = true;
-      section.classList.add(step > 0 ? 'is-sliding-next' : 'is-sliding-prev');
-
-      setTimeout(function () {
-        index = newIndex;
-        renderSlides();
-        clearSlideState();
-        isAnimating = false;
-        window.dispatchEvent(new CustomEvent('tc:user-photos-updated'));
-      }, animationDuration);
-    }
-
-    prevBtn.addEventListener('click', function () {
-      go(-1, true);
-    });
-
-    nextBtn.addEventListener('click', function () {
-      go(1, true);
-    });
-
-    if (photos.length === 1) {
+    if (len === 0) {
+      section.classList.add('is-empty');
+    } else if (len === 1) {
       section.classList.add('has-single');
-      applyPhoto(activeImg, photos[0], true);
-      prevBtn.disabled = true;
-      nextBtn.disabled = true;
-      return;
+      render();
+    } else {
+      render();
     }
 
-    renderSlides();
-    startAuto();
-  }
-
-  ready(function () {
-    var root = document.getElementById('tc-user-photos-root');
-    if (!root) return;
-
-    var section = renderSection(root);
-
-    loadPhotos().then(function (photos) {
-      initRotator(section, photos);
-    });
+    window[GUARD_KEY] = {
+      destroy: function () {
+        if (cleanupTransition) cleanupTransition();
+        prevBtn.removeEventListener('click', onPrev);
+        nextBtn.removeEventListener('click', onNext);
+        root.innerHTML = '';
+      }
+    };
   });
 })();
 
