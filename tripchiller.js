@@ -1983,6 +1983,13 @@ eyeUnlockTimer = setTimeout(function(){
   if (window.__TC_LOAD_MORE_BUTTON_STYLE_V1__) return;
   window.__TC_LOAD_MORE_BUTTON_STYLE_V1__ = true;
   var LOAD_MORE_LABEL = 'ЗАГРУЗИТЬ ЕЩЁ';
+  var observerRaf = 0;
+
+  function setTextIfNeeded(node, value) {
+    if (!node) return;
+    if ((node.textContent || '').trim() === value) return;
+    node.textContent = value;
+  }
 
   function normalizeLoadMoreText() {
     var buttons = document.querySelectorAll(
@@ -1994,9 +2001,9 @@ eyeUnlockTimer = setTimeout(function(){
 
       var textNodeTarget = btn.querySelector('.t-btntext, span, div');
       if (textNodeTarget) {
-        textNodeTarget.textContent = LOAD_MORE_LABEL;
+        setTextIfNeeded(textNodeTarget, LOAD_MORE_LABEL);
       } else {
-        btn.textContent = LOAD_MORE_LABEL;
+        setTextIfNeeded(btn, LOAD_MORE_LABEL);
       }
     });
   }
@@ -2061,16 +2068,22 @@ eyeUnlockTimer = setTimeout(function(){
 
   window.addEventListener('load', scheduleBind);
 
+  function scheduleObserverBind() {
+    if (observerRaf) return;
+    observerRaf = requestAnimationFrame(function () {
+      observerRaf = 0;
+      scheduleBind();
+    });
+  }
+
   if (window.MutationObserver) {
     var observer = new MutationObserver(function () {
-      scheduleBind();
+      scheduleObserverBind();
     });
 
     observer.observe(document.documentElement, {
       childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'style']
+      subtree: true
     });
   }
 })();
