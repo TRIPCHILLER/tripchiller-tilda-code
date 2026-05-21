@@ -3288,14 +3288,23 @@ function setupDesktopAura() {
   }
 
   function build(root) {
-    var tickerBase = 'TRIPCHILLER USER ARCHIVE / НАШИ ТРИПОНАВТЫ / CUSTOM SIGNALS / REAL PEOPLE REAL ITEMS / ';
-    var tickerLine = tickerBase.repeat(8);
+    var topTickerText = '| ПРИ КАЖДОМ ЗАПУСКЕ ЭТОЙ СТРАНИЦЫ, ЗДЕСЬ ОТОБРАЖАЮТСЯ РАНДОМНЫЕ ФОТО НАШИХ АДЕПТОВ | ОСТАВЬ СВОЙ СЛЕД - ПРИШЛИ ФОТКУ В ЛЮБОМ ИЗДЕЛИИ В ДИРЕКТ: T.ME/TRIPCHILLER.OFFICIAL';
+    var bottomTickerText = '| МЫ УВАЖАЕМ ПРИВАТНОСТЬ КАЖДОГО УЧАСТНИКА | В АРХИВ ПОПАДАЮТ ТОЛЬКО ФОТО, ПРИСЛАННЫЕ ВЛАДЕЛЬЦАМИ С ИХ РАЗРЕШЕНИЯ';
+
+    function buildTickerLine(text) {
+      return '<span>' + text + '</span>' +
+             '<span>' + text + '</span>' +
+             '<span>' + text + '</span>';
+    }
+
+    var topTickerLine = buildTickerLine(topTickerText);
+    var bottomTickerLine = buildTickerLine(bottomTickerText);
 
     root.innerHTML = '' +
       '<section class="tc-user-photos" aria-label="НАШИ ТРИПОНАВТЫ">' +
         '<h2 class="tc-user-photos__title">НАШИ ТРИПОНАВТЫ</h2>' +
         '<div class="tc-user-photos__ticker tc-user-photos__ticker--top" aria-hidden="true">' +
-          '<div class="tc-user-photos__ticker-track">' + tickerLine + '</div>' +
+          '<div class="tc-user-photos__ticker-track">' + topTickerLine + '</div>' +
         '</div>' +
         '<div class="tc-user-photos__carousel">' +
           '<button class="tc-user-photos__nav tc-user-photos__nav--prev" type="button" aria-label="Предыдущее фото"><span>‹</span></button>' +
@@ -3309,7 +3318,7 @@ function setupDesktopAura() {
           '<button class="tc-user-photos__nav tc-user-photos__nav--next" type="button" aria-label="Следующее фото"><span>›</span></button>' +
         '</div>' +
         '<div class="tc-user-photos__ticker tc-user-photos__ticker--bottom" aria-hidden="true">' +
-          '<div class="tc-user-photos__ticker-track">' + tickerLine + '</div>' +
+          '<div class="tc-user-photos__ticker-track">' + bottomTickerLine + '</div>' +
         '</div>' +
       '</section>';
 
