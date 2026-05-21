@@ -2432,6 +2432,7 @@ function setupDesktopAura() {
   let lastCleanFadeTime = 0;
   let redMode = false;
   let redModeStartTime = 0;
+  let suppressCleanResetUntil = 0;
   // Large sticky zone: eyes should not return on tiny cursor movement.
   const FOCUS_RESET_DISTANCE = 140;
   const CLEAN_RETURN_FADE_TIME = 900;
@@ -2593,6 +2594,7 @@ function setupDesktopAura() {
     const baseSoft = BASE_SOFT + pulse * 18;
     const soft = baseSoft * radiusMultiplier;
     const core = Math.min(baseCore * radiusMultiplier, soft * 0.34);
+    const mid = core + (soft - core) * 0.58;
 
     const rippleSpeed = 0.28;
     const phase1 = (t * rippleSpeed) % 1;
@@ -2602,6 +2604,7 @@ function setupDesktopAura() {
     bg.style.setProperty("--my", currentY + "px");
 
     bg.style.setProperty("--spot-core", core.toFixed(2) + "px");
+    bg.style.setProperty("--spot-mid", mid.toFixed(2) + "px");
     bg.style.setProperty("--spot-soft", soft.toFixed(2) + "px");
 
     setRipple("r1", phase1, totalPower);
@@ -2625,7 +2628,8 @@ function setupDesktopAura() {
     loadColorLayer();
 
     const isRedActive = redMode || document.body.classList.contains("tc-flower-dragging");
-    if (!isRedActive) {
+    const allowCleanReset = performance.now() > suppressCleanResetUntil;
+    if (!isRedActive && allowCleanReset) {
       maybeResetFocusTimer(event.clientX, event.clientY);
     }
 
@@ -2666,6 +2670,16 @@ function setupDesktopAura() {
     return !!(node && node.closest && node.closest(".flower, .eye-desktop"));
   }
 
+
+  function isPlainBackgroundPress(event) {
+    if (!event || !event.target || !event.target.closest) return false;
+    if (isFlowerTarget(event.target)) return false;
+
+    return !event.target.closest(
+      "a, button, input, textarea, select, label, .t-submit, .t-btn, .t778__showmore, .t-store__load-more-btn, .js-store-load-more-btn, .tc-disk-switcher, .t-store__prod-popup, .t-popup"
+    );
+  }
+
   function enableRedMode() {
     redMode = true;
     redModeStartTime = performance.now();
@@ -2683,6 +2697,10 @@ function setupDesktopAura() {
 
   document.addEventListener("pointermove", activate, { passive: true });
   document.addEventListener("pointerdown", function (event) {
+    if (isPlainBackgroundPress(event)) {
+      suppressCleanResetUntil = performance.now() + 650;
+    }
+
     if (isFlowerTarget(event.target)) {
       activate(event);
       enableRedMode();
@@ -2713,6 +2731,139 @@ function setupDesktopAura() {
   if (isDesktop && supportsMask) {
     setupDesktopAura();
   }
+})();
+
+
+(function () {
+  if (window.__TC_BACKGROUND_DRAG_SCROLL_V1__) return;
+  window.__TC_BACKGROUND_DRAG_SCROLL_V1__ = true;
+
+  const desktopMedia = window.matchMedia("(min-width: 981px) and (pointer: fine)");
+  const THRESHOLD = 7;
+  const SCROLL_MULTIPLIER = 1.45;
+
+  let pending = false;
+  let dragging = false;
+  let startY = 0;
+  let lastY = 0;
+  let suppressClickUntil = 0;
+
+  function isInteractiveTarget(target) {
+    if (!target || !target.closest) return true;
+
+    return !!target.closest(
+      [
+        "a",
+        "button",
+        "input",
+        "textarea",
+        "select",
+        "label",
+        "[role='button']",
+        "[role='link']",
+        ".t-btn",
+        ".t-submit",
+        ".tn-elem",
+        ".tn-atom",
+        ".flower",
+        ".eye-desktop",
+        ".eye-mobile",
+        ".radio-power",
+        ".radio-next",
+        ".radio-on",
+        ".radio-off",
+        ".note1",
+        ".note2",
+        ".note3",
+        ".note4",
+        ".soc1",
+        ".soc2",
+        ".soc3",
+        ".soc4",
+        ".tc-disk-switcher",
+        ".tc-path-row",
+        ".uc-shop-grid",
+        ".uc-custom-grid",
+        ".t-store",
+        ".t778",
+        ".t778__col",
+        ".t778__wrapper",
+        ".t778__btn-wrapper",
+        ".t-store__card",
+        ".t-store__grid-cont",
+        ".t-store__prod-popup",
+        ".js-store-prod-popup",
+        ".t-popup",
+        ".t-popup_show",
+        ".t-zoomer",
+        ".t-zoomer__wrapper",
+        ".t-slds",
+        ".t-slds__wrapper",
+        ".swiper",
+        ".swiper-wrapper",
+        ".swiper-slide",
+        ".tc-user-photos",
+        ".tc-user-photos__carousel",
+        ".tc-user-photos__nav"
+      ].join(",")
+    );
+  }
+
+  function canStartBackgroundDrag(event) {
+    if (!desktopMedia.matches) return false;
+    if (!event || event.button !== 0) return false;
+    if (isInteractiveTarget(event.target)) return false;
+    return true;
+  }
+
+  function endDragScroll() {
+    if (dragging) {
+      suppressClickUntil = Date.now() + 320;
+    }
+
+    pending = false;
+    dragging = false;
+    document.body.classList.remove("tc-bg-drag-scrolling");
+  }
+
+  document.addEventListener("pointerdown", function (event) {
+    if (!canStartBackgroundDrag(event)) return;
+
+    pending = true;
+    dragging = false;
+    startY = event.clientY;
+    lastY = event.clientY;
+  }, { passive: true, capture: true });
+
+  document.addEventListener("pointermove", function (event) {
+    if (!pending || !desktopMedia.matches) return;
+
+    const moved = Math.abs(event.clientY - startY);
+    if (!dragging && moved < THRESHOLD) return;
+
+    if (!dragging) {
+      dragging = true;
+      document.body.classList.add("tc-bg-drag-scrolling");
+    }
+
+    const dy = event.clientY - lastY;
+    lastY = event.clientY;
+
+    event.preventDefault();
+    window.scrollBy(0, -dy * SCROLL_MULTIPLIER);
+  }, { passive: false, capture: true });
+
+  document.addEventListener("pointerup", endDragScroll, true);
+  document.addEventListener("pointercancel", endDragScroll, true);
+  window.addEventListener("blur", endDragScroll);
+
+  document.addEventListener("click", function (event) {
+    if (Date.now() > suppressClickUntil) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }, true);
 })();
 
 (function () {
