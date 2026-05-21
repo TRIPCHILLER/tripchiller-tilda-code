@@ -2673,6 +2673,7 @@ function setupDesktopAura() {
 
   function isPlainBackgroundPress(event) {
     if (!event || !event.target || !event.target.closest) return false;
+    if (event.button !== 0) return false;
     if (isFlowerTarget(event.target)) return false;
 
     return !event.target.closest(
