@@ -2406,7 +2406,7 @@ function setupDesktopAura() {
   */
   const REVEAL_TIME = 650;
   const EYES_TO_CLEAN_DELAY = 1000;
-  const EYES_TO_CLEAN_FADE = 1000;
+  const EYES_TO_CLEAN_FADE = 500;
   const NORMAL_CHARGE_TIME = 3000;
   const RED_CHARGE_TIME = 3000;
   const NORMAL_START_SCALE = 0.5;
