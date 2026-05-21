@@ -18,7 +18,7 @@ This repository contains external CSS and JavaScript loaded by a Tilda website.
 - Prefer small patches over full rewrites.
 - Keep all selectors compatible with Tilda-generated markup.
 - Do not edit SEO meta tags, JSON-LD, canonical links, or Open Graph tags unless explicitly requested.
-
+- Answers & PR's only on Russian language
 ## Testing
 
 Before finishing a JavaScript change, run:
