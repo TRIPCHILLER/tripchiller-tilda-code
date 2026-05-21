@@ -3258,6 +3258,8 @@ function setupDesktopAura() {
   var prevInstance = window[GUARD_KEY];
   if (prevInstance && typeof prevInstance.destroy === 'function') prevInstance.destroy();
 
+  var USER_PHOTOS_REV = '20260521';
+
   var USER_PHOTOS = [
     "https://static.tildacdn.com/tild3866-3134-4235-b739-386236373939/20250209_152049_IMG_.jpg",
     "https://static.tildacdn.com/tild3165-6233-4966-b365-306534343730/jT-rqCPef8n7kAtP79Dv.jpg",
@@ -3279,6 +3281,11 @@ function setupDesktopAura() {
   }
 
   function mod(n, m) { return ((n % m) + m) % m; }
+
+  function withPhotoRev(url) {
+    if (!url) return url;
+    return url + (url.indexOf('?') === -1 ? '?' : '&') + 'rev=' + USER_PHOTOS_REV;
+  }
 
   function build(root) {
     var tickerBase = 'TRIPCHILLER USER ARCHIVE / НАШИ ТРИПОНАВТЫ / CUSTOM SIGNALS / REAL PEOPLE REAL ITEMS / ';
@@ -3337,7 +3344,7 @@ function setupDesktopAura() {
 
     function setImg(img, idx) {
       if (!img || idx < 0 || !photos[idx]) return;
-      img.src = photos[idx];
+      img.src = withPhotoRev(photos[idx]);
       img.alt = 'Фото трипонавта ' + (idx + 1);
     }
 
@@ -3348,7 +3355,7 @@ function setupDesktopAura() {
         if (idx < 0 || !photos[idx]) return;
         var img = new Image();
         img.decoding = 'async';
-        img.src = photos[idx];
+        img.src = withPhotoRev(photos[idx]);
       });
     }
 
