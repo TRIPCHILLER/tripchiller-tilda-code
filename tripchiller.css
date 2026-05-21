@@ -1793,6 +1793,9 @@ body {
   --tc-ui-shadow: 0 4px 9px rgba(0,0,0,.30);
   --tc-ui-shadow-hover: 0 5px 12px rgba(0,0,0,.34), 0 0 14px rgba(157,25,28,.18);
   --tc-ui-shadow-pressed: 0 2px 5px rgba(0,0,0,.34);
+  --tc-ui-rect-shadow: 0 4px 0 rgba(0,0,0,.34), 0 8px 13px rgba(0,0,0,.38);
+  --tc-ui-rect-shadow-hover: 0 5px 0 rgba(0,0,0,.36), 0 10px 16px rgba(0,0,0,.42), 0 0 14px rgba(157,25,28,.20);
+  --tc-ui-rect-shadow-pressed: 0 2px 0 rgba(0,0,0,.36), 0 4px 8px rgba(0,0,0,.34);
   --tc-ui-transition: background-color .22s ease, color .12s linear, transform .08s ease, box-shadow .22s ease, opacity .12s linear;
 }
 
@@ -2054,4 +2057,54 @@ button.t778__showmore.tc-loadmore-pressed,
 .tc-legal-btn.tc-ui-pressed,
 .tc-legal-btn.tc-pressed {
   box-shadow: var(--tc-ui-shadow-pressed) !important;
+}
+
+/* Rectangular action buttons: stronger local shadow overrides. */
+.t778__showmore,
+button.t778__showmore,
+.t-store__load-more-btn,
+.js-store-load-more-btn {
+  box-shadow: var(--tc-ui-rect-shadow) !important;
+}
+
+.t778__showmore:hover,
+button.t778__showmore:hover,
+.t-store__load-more-btn:hover,
+.js-store-load-more-btn:hover {
+  box-shadow: var(--tc-ui-rect-shadow-hover) !important;
+}
+
+.t778__showmore:active,
+.t778__showmore.tc-loadmore-pressed,
+button.t778__showmore:active,
+button.t778__showmore.tc-loadmore-pressed,
+.t-store__load-more-btn:active,
+.t-store__load-more-btn.tc-loadmore-pressed,
+.js-store-load-more-btn:active,
+.js-store-load-more-btn.tc-loadmore-pressed {
+  box-shadow: var(--tc-ui-rect-shadow-pressed) !important;
+}
+
+.tc-legal-btn,
+.tc-legal-btn .tn-atom,
+.tc-legal-btn .t-btn {
+  box-shadow: var(--tc-ui-rect-shadow) !important;
+}
+
+.tc-legal-btn:hover,
+.tc-legal-btn:hover .tn-atom,
+.tc-legal-btn:hover .t-btn {
+  box-shadow: var(--tc-ui-rect-shadow-hover) !important;
+}
+
+.tc-legal-btn:active,
+.tc-legal-btn.tc-ui-pressed,
+.tc-legal-btn.tc-pressed,
+.tc-legal-btn:active .tn-atom,
+.tc-legal-btn.tc-ui-pressed .tn-atom,
+.tc-legal-btn.tc-pressed .tn-atom,
+.tc-legal-btn:active .t-btn,
+.tc-legal-btn.tc-ui-pressed .t-btn,
+.tc-legal-btn.tc-pressed .t-btn {
+  box-shadow: var(--tc-ui-rect-shadow-pressed) !important;
 }
