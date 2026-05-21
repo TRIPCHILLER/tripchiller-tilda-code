@@ -2753,72 +2753,83 @@ function setupDesktopAura() {
   const desktopMedia = window.matchMedia("(min-width: 981px) and (pointer: fine)");
   const THRESHOLD = 7;
   const SCROLL_MULTIPLIER = 1.45;
+  const INERTIA_POWER = 0.42;
+  const INERTIA_FRICTION = 0.88;
+  const INERTIA_MIN_VELOCITY = 0.08;
+  const INERTIA_MAX_STEP = 28;
 
   let pending = false;
   let dragging = false;
   let startY = 0;
   let lastY = 0;
   let suppressClickUntil = 0;
+  let velocityY = 0;
+  let inertiaRaf = 0;
+  let lastMoveTime = 0;
 
   function isInteractiveTarget(target) {
     if (!target || !target.closest) return true;
 
-    return !!target.closest(
-      [
-        "a",
-        "button",
-        "input",
-        "textarea",
-        "select",
-        "label",
-        "[role='button']",
-        "[role='link']",
-        ".t-btn",
-        ".t-submit",
-        ".tn-elem",
-        ".tn-atom",
-        ".flower",
-        ".eye-desktop",
-        ".eye-mobile",
-        ".radio-power",
-        ".radio-next",
-        ".radio-on",
-        ".radio-off",
-        ".note1",
-        ".note2",
-        ".note3",
-        ".note4",
-        ".soc1",
-        ".soc2",
-        ".soc3",
-        ".soc4",
-        ".tc-disk-switcher",
-        ".tc-path-row",
-        ".uc-shop-grid",
-        ".uc-custom-grid",
-        ".t-store",
-        ".t778",
-        ".t778__col",
-        ".t778__wrapper",
-        ".t778__btn-wrapper",
-        ".t-store__card",
-        ".t-store__grid-cont",
-        ".t-store__prod-popup",
-        ".js-store-prod-popup",
-        ".t-popup",
-        ".t-popup_show",
-        ".t-zoomer",
-        ".t-zoomer__wrapper",
-        ".t-slds",
-        ".t-slds__wrapper",
-        ".swiper",
-        ".swiper-wrapper",
-        ".swiper-slide",
-        ".tc-user-photos",
-        ".tc-user-photos__carousel",
-        ".tc-user-photos__nav"
-      ].join(",")
-    );
+    if (target.closest("a,button,input,textarea,select,label,[role='button'],[role='link'],.t-btn,.t-submit")) {
+      return true;
+    }
+
+    if (target.closest(".flower,.eye-desktop,.eye-mobile,.radio-power,.radio-next,.radio-on,.radio-off,.note1,.note2,.note3,.note4,.soc1,.soc2,.soc3,.soc4,.tc-disk-switcher,.tc-path-row")) {
+      return true;
+    }
+
+    if (target.closest(".t778__col,.t778__wrapper,.t778__imgwrapper,.t778__content,.t778__textwrapper,.t778__btn-wrapper,.t-store__card,.t-store__card__imgwrapper,.t-store__card__textwrapper,.t-store__prod-snippet,.js-product,.t-store__grid-cont")) {
+      return true;
+    }
+
+    if (target.closest(".t-store__prod-popup,.js-store-prod-popup,.t-popup,.t-popup_show,.t-zoomer,.t-zoomer__wrapper,.t-slds,.t-slds__wrapper,.swiper,.swiper-wrapper,.swiper-slide")) {
+      return true;
+    }
+
+    if (target.closest(".tc-user-photos__nav,.tc-user-photos__slide,.tc-user-photos__img,.tc-user-photos__ticker,.tc-user-photos__ticker-track,.tc-user-photos__carousel")) {
+      return true;
+    }
+
+    const atom = target.closest('.tn-atom');
+    if (atom) {
+      const style = window.getComputedStyle(atom);
+      const hasMedia = !!atom.querySelector('img,svg,video,canvas');
+      const hasInteractiveInside = !!atom.querySelector("a,button,input,textarea,select,[role='button'],[role='link']");
+      const isPointer = style.cursor === 'pointer';
+
+      if (hasMedia || hasInteractiveInside || isPointer) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function stopInertia() {
+    if (!inertiaRaf) return;
+    cancelAnimationFrame(inertiaRaf);
+    inertiaRaf = 0;
+  }
+
+  function startInertia() {
+    stopInertia();
+
+    let v = velocityY * INERTIA_POWER;
+
+    function tick() {
+      if (Math.abs(v) < INERTIA_MIN_VELOCITY) {
+        inertiaRaf = 0;
+        return;
+      }
+
+      const step = Math.max(-INERTIA_MAX_STEP, Math.min(INERTIA_MAX_STEP, v));
+      window.scrollBy(0, step);
+
+      v *= INERTIA_FRICTION;
+      inertiaRaf = requestAnimationFrame(tick);
+    }
+
+    inertiaRaf = requestAnimationFrame(tick);
   }
 
   function canStartBackgroundDrag(event) {
@@ -2829,6 +2840,8 @@ function setupDesktopAura() {
   }
 
   function endDragScroll() {
+    const shouldInertia = dragging;
+
     if (dragging) {
       suppressClickUntil = Date.now() + 320;
     }
@@ -2836,15 +2849,23 @@ function setupDesktopAura() {
     pending = false;
     dragging = false;
     document.body.classList.remove("tc-bg-drag-scrolling");
+
+    if (shouldInertia) {
+      startInertia();
+    }
   }
 
   document.addEventListener("pointerdown", function (event) {
     if (!canStartBackgroundDrag(event)) return;
 
+    stopInertia();
+
     pending = true;
     dragging = false;
     startY = event.clientY;
     lastY = event.clientY;
+    velocityY = 0;
+    lastMoveTime = performance.now();
   }, { passive: true, capture: true });
 
   document.addEventListener("pointermove", function (event) {
@@ -2861,13 +2882,27 @@ function setupDesktopAura() {
     const dy = event.clientY - lastY;
     lastY = event.clientY;
 
+    const now = performance.now();
+    const dt = Math.max(16, now - lastMoveTime);
+    lastMoveTime = now;
+
+    const scrollStep = -dy * SCROLL_MULTIPLIER;
+
     event.preventDefault();
-    window.scrollBy(0, -dy * SCROLL_MULTIPLIER);
+    window.scrollBy(0, scrollStep);
+
+    velocityY = (scrollStep / dt) * 16;
   }, { passive: false, capture: true });
 
   document.addEventListener("pointerup", endDragScroll, true);
-  document.addEventListener("pointercancel", endDragScroll, true);
-  window.addEventListener("blur", endDragScroll);
+  document.addEventListener("pointercancel", function () {
+    stopInertia();
+    endDragScroll();
+  }, true);
+  window.addEventListener("blur", function () {
+    stopInertia();
+    endDragScroll();
+  });
 
   document.addEventListener("click", function (event) {
     if (Date.now() > suppressClickUntil) return;
