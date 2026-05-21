@@ -1790,9 +1790,9 @@ body {
   --tc-ui-red-hover: #a51414;
   --tc-ui-text: #ffffff;
   --tc-ui-text-pressed: rgba(255,255,255,.50);
-  --tc-ui-shadow: 0 5px 0 rgba(0,0,0,.42);
-  --tc-ui-shadow-hover: 0 6px 0 rgba(0,0,0,.46), 0 0 16px rgba(157,25,28,.24);
-  --tc-ui-shadow-pressed: 0 2px 0 rgba(0,0,0,.50);
+  --tc-ui-shadow: 0 4px 9px rgba(0,0,0,.30);
+  --tc-ui-shadow-hover: 0 5px 12px rgba(0,0,0,.34), 0 0 14px rgba(157,25,28,.18);
+  --tc-ui-shadow-pressed: 0 2px 5px rgba(0,0,0,.34);
   --tc-ui-transition: background-color .22s ease, color .12s linear, transform .08s ease, box-shadow .22s ease, opacity .12s linear;
 }
 
@@ -1954,4 +1954,104 @@ button.t778__showmore.tc-loadmore-pressed,
 .soc3 .tn-atom img, .soc3 .tn-atom svg,
 .soc4 .tn-atom img, .soc4 .tn-atom svg {
   pointer-events: none;
+  transition: opacity .12s linear, filter .12s linear;
+}
+
+#allrecords .t778__btn-wrapper a.t778__btn.t778__btn_second,
+#allrecords .t778__btn-wrapper button.t778__btn.t778__btn_second {
+  background: #fff !important;
+  background-color: #fff !important;
+  color: #000 !important;
+  border: 2px solid #000 !important;
+  text-shadow: none !important;
+  box-shadow: 0 3px 8px rgba(0,0,0,.18) !important;
+}
+
+#allrecords .t778__btn-wrapper a.t778__btn.t778__btn_second:hover,
+#allrecords .t778__btn-wrapper button.t778__btn.t778__btn_second:hover {
+  background: var(--tc-ui-red) !important;
+  background-color: var(--tc-ui-red) !important;
+  border-color: var(--tc-ui-red) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,.22), 0 0 10px rgba(157,25,28,.16) !important;
+}
+
+#allrecords .t778__btn-wrapper a.t778__btn.t778__btn_second:active,
+#allrecords .t778__btn-wrapper a.t778__btn.t778__btn_second.tc-ui-pressed,
+#allrecords .t778__btn-wrapper button.t778__btn.t778__btn_second:active,
+#allrecords .t778__btn-wrapper button.t778__btn.t778__btn_second.tc-ui-pressed {
+  background: var(--tc-ui-red) !important;
+  background-color: var(--tc-ui-red) !important;
+  border-color: var(--tc-ui-red) !important;
+  color: var(--tc-ui-text-pressed) !important;
+  transform: translateY(2px) scale(.975) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,.22) !important;
+}
+
+#allrecords .t778__btn-wrapper a.t778__btn:not(.t778__btn_second).t-btnflex.t-btnflex_type_button,
+#allrecords .t778__btn-wrapper button.t778__btn:not(.t778__btn_second).t-btnflex.t-btnflex_type_button {
+  box-shadow: 0 3px 8px rgba(0,0,0,.18) !important;
+}
+
+#allrecords .t778__btn-wrapper a.t778__btn:not(.t778__btn_second).t-btnflex.t-btnflex_type_button:hover,
+#allrecords .t778__btn-wrapper button.t778__btn:not(.t778__btn_second).t-btnflex.t-btnflex_type_button:hover {
+  box-shadow: 0 4px 10px rgba(0,0,0,.22), 0 0 10px rgba(157,25,28,.16) !important;
+}
+
+#allrecords .t778__btn-wrapper a.t778__btn:not(.t778__btn_second).t-btnflex.t-btnflex_type_button:active,
+#allrecords .t778__btn-wrapper a.t778__btn:not(.t778__btn_second).tc-info-card-pressed,
+#allrecords .t778__btn-wrapper button.t778__btn:not(.t778__btn_second).t-btnflex.t-btnflex_type_button:active,
+#allrecords .t778__btn-wrapper button.t778__btn:not(.t778__btn_second).tc-info-card-pressed {
+  box-shadow: 0 1px 4px rgba(0,0,0,.22) !important;
+}
+
+.t778__showmore,
+button.t778__showmore,
+.t-store__load-more-btn,
+.js-store-load-more-btn {
+  box-shadow: var(--tc-ui-shadow) !important;
+}
+
+.t778__showmore:hover,
+button.t778__showmore:hover,
+.t-store__load-more-btn:hover,
+.js-store-load-more-btn:hover {
+  box-shadow: var(--tc-ui-shadow-hover) !important;
+}
+
+.t778__showmore:active,
+.t778__showmore.tc-loadmore-pressed,
+button.t778__showmore:active,
+button.t778__showmore.tc-loadmore-pressed,
+.t-store__load-more-btn:active,
+.t-store__load-more-btn.tc-loadmore-pressed,
+.js-store-load-more-btn:active,
+.js-store-load-more-btn.tc-loadmore-pressed {
+  box-shadow: var(--tc-ui-shadow-pressed) !important;
+}
+
+.soc1 .tn-atom.tc-ui-pressed img,
+.soc1 .tn-atom.tc-ui-pressed svg,
+.soc2 .tn-atom.tc-ui-pressed img,
+.soc2 .tn-atom.tc-ui-pressed svg,
+.soc3 .tn-atom.tc-ui-pressed img,
+.soc3 .tn-atom.tc-ui-pressed svg,
+.soc4 .tn-atom.tc-ui-pressed img,
+.soc4 .tn-atom.tc-ui-pressed svg {
+  opacity: .55;
+  filter: grayscale(1) brightness(.82);
+}
+
+.tc-legal-btn {
+  box-shadow: var(--tc-ui-shadow) !important;
+}
+
+.tc-legal-btn:hover {
+  box-shadow: var(--tc-ui-shadow-hover) !important;
+}
+
+.tc-legal-btn:active,
+.tc-legal-btn.tc-ui-pressed,
+.tc-legal-btn.tc-pressed {
+  box-shadow: var(--tc-ui-shadow-pressed) !important;
 }
