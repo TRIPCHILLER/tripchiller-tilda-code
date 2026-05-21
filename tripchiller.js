@@ -2778,7 +2778,7 @@ function setupDesktopAura() {
       return true;
     }
 
-    if (target.closest(".t778__col,.t778__wrapper,.t778__imgwrapper,.t778__content,.t778__textwrapper,.t778__btn-wrapper,.t-store__card,.t-store__card__imgwrapper,.t-store__card__textwrapper,.t-store__prod-snippet,.js-product,.t-store__grid-cont")) {
+    if (target.closest(".t778__col,.t778__wrapper,.t778__imgwrapper,.t778__content,.t778__textwrapper,.t778__btn-wrapper,.t-store__card,.t-store__card__imgwrapper,.t-store__card__textwrapper,.t-store__prod-snippet,.js-product")) {
       return true;
     }
 
@@ -2786,7 +2786,7 @@ function setupDesktopAura() {
       return true;
     }
 
-    if (target.closest(".tc-user-photos__nav,.tc-user-photos__slide,.tc-user-photos__img,.tc-user-photos__ticker,.tc-user-photos__ticker-track,.tc-user-photos__carousel")) {
+    if (target.closest(".tc-user-photos__nav,.tc-user-photos__slide,.tc-user-photos__img,.tc-user-photos__ticker,.tc-user-photos__ticker-track")) {
       return true;
     }
 
@@ -2839,8 +2839,8 @@ function setupDesktopAura() {
     return true;
   }
 
-  function endDragScroll() {
-    const shouldInertia = dragging;
+  function endDragScroll(allowInertia) {
+    const shouldInertia = allowInertia && dragging;
 
     if (dragging) {
       suppressClickUntil = Date.now() + 320;
@@ -2894,14 +2894,16 @@ function setupDesktopAura() {
     velocityY = (scrollStep / dt) * 16;
   }, { passive: false, capture: true });
 
-  document.addEventListener("pointerup", endDragScroll, true);
+  document.addEventListener("pointerup", function () {
+    endDragScroll(true);
+  }, true);
   document.addEventListener("pointercancel", function () {
     stopInertia();
-    endDragScroll();
+    endDragScroll(false);
   }, true);
   window.addEventListener("blur", function () {
     stopInertia();
-    endDragScroll();
+    endDragScroll(false);
   });
 
   document.addEventListener("click", function (event) {
