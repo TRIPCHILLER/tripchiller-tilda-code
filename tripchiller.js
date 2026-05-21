@@ -2735,6 +2735,8 @@ function setupDesktopAura() {
   }
 
   function disableRedMode() {
+    if (!redMode) return;
+
     redMode = false;
     redModeStartTime = 0;
     focusStartTime = 0;
