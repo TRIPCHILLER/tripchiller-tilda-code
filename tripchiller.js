@@ -3287,6 +3287,31 @@ function setupDesktopAura() {
     return url + (url.indexOf('?') === -1 ? '?' : '&') + 'rev=' + USER_PHOTOS_REV;
   }
 
+  function randomInt(max) {
+    if (max <= 0) return 0;
+
+    if (window.crypto && window.crypto.getRandomValues) {
+      var arr = new Uint32Array(1);
+      window.crypto.getRandomValues(arr);
+      return arr[0] % max;
+    }
+
+    return Math.floor(Math.random() * max);
+  }
+
+  function shufflePhotos(list) {
+    var arr = list.slice();
+
+    for (var i = arr.length - 1; i > 0; i -= 1) {
+      var j = randomInt(i + 1);
+      var tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+    }
+
+    return arr;
+  }
+
   function build(root) {
     var topTickerText = '| ПРИ КАЖДОМ ЗАПУСКЕ ЭТОЙ СТРАНИЦЫ, ЗДЕСЬ ОТОБРАЖАЮТСЯ РАНДОМНЫЕ ФОТО НАШИХ АДЕПТОВ | ОСТАВЬ СВОЙ СЛЕД - ПРИШЛИ ФОТКУ В ЛЮБОМ ИЗДЕЛИИ В ДИРЕКТ: T.ME/TRIPCHILLER.OFFICIAL';
     var bottomTickerText = '| МЫ УВАЖАЕМ ПРИВАТНОСТЬ КАЖДОГО УЧАСТНИКА | В АРХИВ ПОПАДАЮТ ТОЛЬКО ФОТО, ПРИСЛАННЫЕ ВЛАДЕЛЬЦАМИ С ИХ РАЗРЕШЕНИЯ';
@@ -3338,12 +3363,48 @@ function setupDesktopAura() {
     var nextImg = section.querySelector('.tc-user-photos__slide--next .tc-user-photos__img');
     var prevBtn = section.querySelector('.tc-user-photos__nav--prev');
     var nextBtn = section.querySelector('.tc-user-photos__nav--next');
+    var topTickerTrack = section.querySelector('.tc-user-photos__ticker--top .tc-user-photos__ticker-track');
+    var bottomTickerTrack = section.querySelector('.tc-user-photos__ticker--bottom .tc-user-photos__ticker-track');
 
-    var photos = USER_PHOTOS.slice();
+    var photos = shufflePhotos(USER_PHOTOS);
     var len = photos.length;
-    var current = len > 0 ? Math.floor(Math.random() * len) : 0;
+    var current = len > 0 ? randomInt(len) : 0;
     var isSliding = false;
     var cleanupTransition = null;
+    var tickerResizeRaf = 0;
+
+    function parseAnimationDurationMs(track) {
+      if (!track || !window.getComputedStyle) return 24000;
+
+      var duration = window.getComputedStyle(track).animationDuration || '24s';
+      var first = duration.split(',')[0].trim();
+
+      if (first.slice(-2) === 'ms') return parseFloat(first) || 24000;
+      if (first.slice(-1) === 's') return (parseFloat(first) || 24) * 1000;
+
+      return 24000;
+    }
+
+    function syncTickerSpeeds() {
+      if (!topTickerTrack || !bottomTickerTrack) return;
+
+      var topWidth = topTickerTrack.scrollWidth || 0;
+      var bottomWidth = bottomTickerTrack.scrollWidth || 0;
+      if (!topWidth || !bottomWidth) return;
+
+      var bottomDurationMs = parseAnimationDurationMs(bottomTickerTrack);
+      var topDurationMs = bottomDurationMs * (topWidth / bottomWidth);
+
+      topTickerTrack.style.animationDuration = Math.max(1000, topDurationMs) + 'ms';
+    }
+
+    function scheduleTickerSpeedSync() {
+      if (tickerResizeRaf) return;
+      tickerResizeRaf = requestAnimationFrame(function () {
+        tickerResizeRaf = 0;
+        syncTickerSpeeds();
+      });
+    }
 
     function getIndices(index) {
       if (len === 0) return { prev: -1, active: -1, next: -1 };
@@ -3438,9 +3499,19 @@ function setupDesktopAura() {
       render();
     }
 
+    requestAnimationFrame(syncTickerSpeeds);
+    window.addEventListener('load', syncTickerSpeeds);
+    window.addEventListener('resize', scheduleTickerSpeedSync);
+
     window[GUARD_KEY] = {
       destroy: function () {
         if (cleanupTransition) cleanupTransition();
+        if (tickerResizeRaf) {
+          cancelAnimationFrame(tickerResizeRaf);
+          tickerResizeRaf = 0;
+        }
+        window.removeEventListener('load', syncTickerSpeeds);
+        window.removeEventListener('resize', scheduleTickerSpeedSync);
         prevBtn.removeEventListener('click', onPrev);
         nextBtn.removeEventListener('click', onNext);
         root.innerHTML = '';
