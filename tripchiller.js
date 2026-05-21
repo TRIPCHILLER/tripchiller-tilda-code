@@ -1982,6 +1982,24 @@ eyeUnlockTimer = setTimeout(function(){
 (function () {
   if (window.__TC_LOAD_MORE_BUTTON_STYLE_V1__) return;
   window.__TC_LOAD_MORE_BUTTON_STYLE_V1__ = true;
+  var LOAD_MORE_LABEL = 'ЗАГРУЗИТЬ ЕЩЁ';
+
+  function normalizeLoadMoreText() {
+    var buttons = document.querySelectorAll(
+      '.t778__showmore, button.t778__showmore, .t-store__load-more-btn, .js-store-load-more-btn'
+    );
+
+    buttons.forEach(function (btn) {
+      if (!btn) return;
+
+      var textNodeTarget = btn.querySelector('.t-btntext, span, div');
+      if (textNodeTarget) {
+        textNodeTarget.textContent = LOAD_MORE_LABEL;
+      } else {
+        btn.textContent = LOAD_MORE_LABEL;
+      }
+    });
+  }
 
   function bindLoadMoreButtons() {
     var buttons = document.querySelectorAll(
@@ -2027,9 +2045,12 @@ eyeUnlockTimer = setTimeout(function(){
 
   function scheduleBind() {
     bindLoadMoreButtons();
+    normalizeLoadMoreText();
     setTimeout(bindLoadMoreButtons, 200);
     setTimeout(bindLoadMoreButtons, 800);
     setTimeout(bindLoadMoreButtons, 1600);
+    setTimeout(normalizeLoadMoreText, 300);
+    setTimeout(normalizeLoadMoreText, 1000);
   }
 
   if (document.readyState === 'loading') {
