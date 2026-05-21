@@ -2411,6 +2411,7 @@ function setupDesktopAura() {
   const RED_CHARGE_TIME = 3000;
   const NORMAL_START_SCALE = 0.5;
   const NORMAL_RADIUS_MULTIPLIER = 1.0;
+  const NORMAL_RADIUS_SHRINK_EASE = 0.045;
   const RED_START_SCALE = 0.5;
   const RED_RADIUS_MULTIPLIER = 1.5;
 
@@ -2430,6 +2431,7 @@ function setupDesktopAura() {
   let cleanFadeTarget = 0;
   let cleanFadePower = 0;
   let lastCleanFadeTime = 0;
+  let normalRadiusVisual = NORMAL_START_SCALE;
   let redMode = false;
   let redModeStartTime = 0;
   let suppressCleanResetUntil = 0;
@@ -2574,7 +2576,15 @@ function setupDesktopAura() {
 
     const focusElapsed = focusStartTime ? Math.max(0, time - focusStartTime) : 0;
     const normalCharge = smoothstep(focusElapsed / NORMAL_CHARGE_TIME);
-    const normalRadiusMultiplier = NORMAL_START_SCALE + normalCharge * (NORMAL_RADIUS_MULTIPLIER - NORMAL_START_SCALE);
+    const normalRadiusTarget = NORMAL_START_SCALE + normalCharge * (NORMAL_RADIUS_MULTIPLIER - NORMAL_START_SCALE);
+
+    if (normalRadiusTarget >= normalRadiusVisual) {
+      normalRadiusVisual = normalRadiusTarget;
+    } else {
+      normalRadiusVisual += (normalRadiusTarget - normalRadiusVisual) * NORMAL_RADIUS_SHRINK_EASE;
+    }
+
+    const normalRadiusMultiplier = normalRadiusVisual;
 
     const redElapsed = isRedActive && redModeStartTime ? Math.max(0, time - redModeStartTime) : 0;
     const redCharge = isRedActive ? smoothstep(redElapsed / RED_CHARGE_TIME) : 0;
@@ -2652,6 +2662,7 @@ function setupDesktopAura() {
     cleanFadeTarget = 0;
     cleanFadePower = 0;
     lastCleanFadeTime = 0;
+    normalRadiusVisual = NORMAL_START_SCALE;
     redMode = false;
     redModeStartTime = 0;
 
