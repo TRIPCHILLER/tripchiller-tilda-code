@@ -3999,3 +3999,144 @@ function setupDesktopAura() {
     activeTarget = null;
   });
 })();
+
+(function () {
+  if (window.__TC_PRODUCT_MAGNIFIER_V1__) return;
+  window.__TC_PRODUCT_MAGNIFIER_V1__ = true;
+
+  var CAN_USE_MAGNIFIER =
+    window.matchMedia &&
+    window.matchMedia('(min-width: 981px) and (pointer: fine)').matches;
+
+  if (!CAN_USE_MAGNIFIER) return;
+
+  var LENS_SIZE = 230;
+  var LENS_ZOOM = 2.4;
+  var lens = null;
+
+  function debugLog() {
+    if (!window.__TC_DEBUG_PRODUCT_MAGNIFIER || !window.console || !console.log) return;
+    console.log.apply(console, arguments);
+  }
+
+  function ensureLens() {
+    if (lens && lens.parentNode) return lens;
+    lens = document.createElement('div');
+    lens.className = 'tc-product-magnifier';
+    lens.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(lens);
+    return lens;
+  }
+
+  function hideLens() {
+    if (!lens) return;
+    lens.classList.remove('is-visible');
+  }
+
+  function getBgUrlFromNode(node) {
+    if (!node) return '';
+    var bg = window.getComputedStyle(node).backgroundImage;
+    if (!bg || bg === 'none') return '';
+    var match = bg.match(/^url\((['"]?)(.*)\1\)$/);
+    return match && match[2] ? match[2] : '';
+  }
+
+  function getImageSource(node) {
+    if (!node) return '';
+    if (node.tagName && node.tagName.toLowerCase() === 'img') {
+      return node.currentSrc || node.src || '';
+    }
+    var imageNode = node.querySelector && node.querySelector('img');
+    if (imageNode) return imageNode.currentSrc || imageNode.src || '';
+    return getBgUrlFromNode(node);
+  }
+
+  function getViewerImageFromTarget(target) {
+    if (!target || !target.closest) return null;
+    var viewer = target.closest('.t-zoomer, .t-slds__bgimg-wrapper, .t-slds__bgimg, .t-slds__imgwrapper');
+    if (!viewer) return null;
+    var popup = target.closest('.t-popup_show, .t-store__prod-popup, .t-zoomer');
+    if (!popup) return null;
+
+    var image = target.closest('img, .t-slds__bgimg, .t-bgimg');
+    if (image) return image;
+
+    image = viewer.querySelector('img, .t-slds__bgimg, .t-bgimg');
+    return image || null;
+  }
+
+  function isActionControl(node) {
+    if (!node || !node.closest) return false;
+    return !!node.closest('.t-zoomer__close, .t-zoomer__control, .t-slds__arrow_wrapper, .t-slds__arrow, .t-slds__bullet, .t-slds__counter');
+  }
+
+  function updateLensPosition(event, imageNode) {
+    var src = getImageSource(imageNode);
+    if (!src) {
+      hideLens();
+      return;
+    }
+    var rect = imageNode.getBoundingClientRect();
+    if (!rect.width || !rect.height) {
+      hideLens();
+      return;
+    }
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) {
+      hideLens();
+      return;
+    }
+
+    var x = (event.clientX - rect.left) / rect.width;
+    var y = (event.clientY - rect.top) / rect.height;
+
+    var lensEl = ensureLens();
+    lensEl.style.left = (event.clientX - LENS_SIZE / 2) + 'px';
+    lensEl.style.top = (event.clientY - LENS_SIZE / 2) + 'px';
+    lensEl.style.backgroundImage = 'url("' + src + '")';
+    lensEl.style.backgroundSize = (rect.width * LENS_ZOOM) + 'px ' + (rect.height * LENS_ZOOM) + 'px';
+    lensEl.style.backgroundPosition =
+      (-(x * rect.width * LENS_ZOOM - LENS_SIZE / 2)) + 'px ' +
+      (-(y * rect.height * LENS_ZOOM - LENS_SIZE / 2)) + 'px';
+    lensEl.classList.add('is-visible');
+
+    debugLog('[PRODUCT_MAGNIFIER] active image', imageNode, src);
+  }
+
+  document.addEventListener('pointermove', function (event) {
+    var imageNode = getViewerImageFromTarget(event.target);
+    if (!imageNode || isActionControl(event.target)) {
+      hideLens();
+      return;
+    }
+    updateLensPosition(event, imageNode);
+  }, true);
+
+  document.addEventListener('pointerleave', hideLens, true);
+  document.addEventListener('mouseleave', hideLens, true);
+
+  function blockNativeZoom(event) {
+    if (isActionControl(event.target)) return;
+    var imageNode = getViewerImageFromTarget(event.target);
+    if (!imageNode) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof event.stopImmediatePropagation === 'function') {
+      event.stopImmediatePropagation();
+    }
+    debugLog('[PRODUCT_MAGNIFIER] blocked native zoom click', imageNode);
+  }
+
+  document.addEventListener('pointerdown', blockNativeZoom, true);
+  document.addEventListener('click', blockNativeZoom, true);
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') hideLens();
+  }, true);
+
+  var observer = new MutationObserver(function () {
+    var visibleViewer = document.querySelector('.t-zoomer.t-popup_show, .t-popup_show .t-zoomer, .t-popup_show .t-slds');
+    if (!visibleViewer) hideLens();
+  });
+
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
