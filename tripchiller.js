@@ -3672,8 +3672,8 @@ function setupDesktopAura() {
       section.classList.remove('is-dragging');
       section.style.removeProperty('--tc-user-drag-x');
       if (!wasActive) return;
+      suppressPhotoClickUntil = Date.now() + 350;
       if (Math.abs(dx) >= DRAG_COMMIT_THRESHOLD) {
-        suppressPhotoClickUntil = Date.now() + 350;
         if (dx < 0) {
           if (slide('next')) restartAuto();
         } else if (slide('prev')) restartAuto();
