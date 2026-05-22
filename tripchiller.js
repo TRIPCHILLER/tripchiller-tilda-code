@@ -1905,7 +1905,121 @@ eyeUnlockTimer = setTimeout(function(){
   if (window.__TRIP_RADIO__ && window.__TRIP_RADIO__.destroy) {
     try { window.__TRIP_RADIO__.destroy(); } catch(e){}
   }
+  if (window.__TC_RADIO_NOTES_V2__) {
+    try { window.__TC_RADIO_NOTES_V2__.destroy(); } catch (e) {}
+  }
+
   var RADIO = window.__TRIP_RADIO__ = {};
+  window.__TC_RADIO_NOTES_V2__ = RADIO;
+
+  var NOTE_DELAYS = [0, 280, 560, 840];
+  var NOTE_INTERVAL_MS = 1200;
+  var NOTE_DRAIN_MS = 5100;
+  var NOTE_CLASSES = ['note1', 'note2', 'note3', 'note4'];
+
+  var noteState = 'off';
+  var noteInterval = 0;
+  var noteDrainTimer = 0;
+  var noteTimeouts = [];
+  var noteIndex = 0;
+
+  function isDebugNotes() {
+    return window.__TC_DEBUG_RADIO_NOTES__ === true;
+  }
+
+  function notesLog() {
+    if (!isDebugNotes()) return;
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift('[TC_RADIO_NOTES]');
+    try { console.log.apply(console, args); } catch (e) {}
+  }
+
+  function clearNoteTimers() {
+    if (noteInterval) {
+      clearInterval(noteInterval);
+      noteInterval = 0;
+    }
+    if (noteDrainTimer) {
+      clearTimeout(noteDrainTimer);
+      noteDrainTimer = 0;
+    }
+    if (noteTimeouts.length) {
+      noteTimeouts.forEach(function (id) { clearTimeout(id); });
+      noteTimeouts = [];
+    }
+    notesLog('clear timers');
+  }
+
+  function setNotesState(next) {
+    noteState = next;
+    document.body.classList.remove('radio-notes-starting', 'radio-notes-playing', 'radio-notes-draining');
+    if (next === 'starting') document.body.classList.add('radio-notes-starting');
+    if (next === 'playing') document.body.classList.add('radio-notes-playing');
+    if (next === 'draining') document.body.classList.add('radio-notes-draining');
+    notesLog('state:', next);
+  }
+
+  function getNoteNode(noteClass) {
+    return document.querySelector('.' + noteClass + ' .tn-atom');
+  }
+
+  function spawnNote(noteClass) {
+    var note = getNoteNode(noteClass);
+    if (!note) return;
+    note.classList.remove('tc-note-active');
+    void note.offsetWidth;
+    note.classList.add('tc-note-active');
+    notesLog('spawn note:', noteClass);
+  }
+
+  function startNoteCycle() {
+    if (noteInterval) clearInterval(noteInterval);
+    noteInterval = setInterval(function () {
+      if (noteState !== 'playing') return;
+      spawnNote(NOTE_CLASSES[noteIndex % NOTE_CLASSES.length]);
+      noteIndex += 1;
+    }, NOTE_INTERVAL_MS);
+  }
+
+  function startNotes() {
+    clearNoteTimers();
+    noteIndex = 0;
+    setNotesState('starting');
+
+    NOTE_DELAYS.forEach(function (delay, idx) {
+      var tid = setTimeout(function () {
+        if (noteState !== 'starting') return;
+        spawnNote(NOTE_CLASSES[idx]);
+        noteIndex = idx + 1;
+        if (idx === NOTE_CLASSES.length - 1 && noteState === 'starting') {
+          setNotesState('playing');
+          startNoteCycle();
+        }
+      }, delay);
+      noteTimeouts.push(tid);
+    });
+  }
+
+  function stopNotes() {
+    if (noteState === 'off') return;
+    clearNoteTimers();
+    setNotesState('draining');
+    noteDrainTimer = setTimeout(function () {
+      document.querySelectorAll('.note1 .tn-atom, .note2 .tn-atom, .note3 .tn-atom, .note4 .tn-atom').forEach(function (note) {
+        note.classList.remove('tc-note-active');
+      });
+      setNotesState('off');
+    }, NOTE_DRAIN_MS);
+  }
+
+  NOTE_CLASSES.forEach(function (cls) {
+    var note = getNoteNode(cls);
+    if (!note) return;
+    note.addEventListener('animationend', function () {
+      note.classList.remove('tc-note-active');
+      notesLog('note animationend:', cls);
+    });
+  });
 
 
   var PLAYLIST = [
@@ -1953,12 +2067,14 @@ eyeUnlockTimer = setTimeout(function(){
     var p = audio.play();
     if (p && p.catch) p.catch(function(){});
     document.body.classList.add('radio-playing');
+    startNotes();
     bump();
   }
 
   function pause(){
     audio.pause();
     document.body.classList.remove('radio-playing');
+    stopNotes();
     bump();
   }
 
@@ -2006,6 +2122,8 @@ eyeUnlockTimer = setTimeout(function(){
     RADIO.destroy = function(){
       try{ audio.pause(); }catch(e){}
       document.body.classList.remove('radio-playing','radio-bump');
+      clearNoteTimers();
+      setNotesState('off');
       try{ power && unbind(power); }catch(e){}
       try{ nextBtn && unbind(nextBtn); }catch(e){}
     };
