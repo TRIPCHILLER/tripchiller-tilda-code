@@ -719,6 +719,91 @@ function onScroll(){
 })();
 
 (function(){
+  "use strict";
+
+  if (window.__TC_USER_PHOTOS_TITLE_WIDTH_BOUND__) return;
+  window.__TC_USER_PHOTOS_TITLE_WIDTH_BOUND__ = true;
+
+  function normText(s){
+    return (s || "").replace(/\s+/g, " ").trim().toUpperCase();
+  }
+
+  function findByText(selector, expected){
+    var nodes = document.querySelectorAll(selector);
+    for (var i = 0; i < nodes.length; i++) {
+      if (normText(nodes[i].textContent).indexOf(expected) !== -1) return nodes[i];
+    }
+    return null;
+  }
+
+  function closestWidthTarget(node){
+    if (!node || !node.closest) return node;
+    return node.closest('.tn-elem, .t-col, .t-container, .t-rec, .t396__elem') || node;
+  }
+
+  function bindTitleWidth(){
+    var titleEl = findByText('h1,h2,h3,[data-field="text"],.tn-atom,.t-title,.t-descr,.t-text', ':: C0MMUN1TY ::');
+    if (!titleEl) return;
+
+    var rect = titleEl.getBoundingClientRect();
+    if (!rect || !rect.width) return;
+
+    var width = Math.round(rect.width);
+    document.documentElement.style.setProperty('--tc-user-photos-title-width', width + 'px');
+
+    var bottomTextNode = findByText('h1,h2,h3,[data-field="text"],.tn-atom,.t-title,.t-descr,.t-text', 'ПО ЛЮБЫМ ВОПРОСАМ И ДЛЯ ЗАКАЗА');
+    if (bottomTextNode) {
+      closestWidthTarget(bottomTextNode).classList.add('tc-user-photos-title-width-target');
+    }
+
+    var socialNodes = document.querySelectorAll('.soc1, .soc2, .soc3, .soc4');
+    if (socialNodes.length) {
+      var sharedParent = socialNodes[0].parentElement;
+      var allSameParent = !!sharedParent;
+      for (var i = 1; i < socialNodes.length; i++) {
+        if (socialNodes[i].parentElement !== sharedParent) {
+          allSameParent = false;
+          break;
+        }
+      }
+
+      var iconsTarget = allSameParent ? sharedParent : closestWidthTarget(socialNodes[0]);
+      if (iconsTarget) iconsTarget.classList.add('tc-user-photos-icons-width-target');
+    }
+  }
+
+  var resizeTimer = null;
+  function scheduleBind(delay){
+    setTimeout(bindTitleWidth, delay || 0);
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    scheduleBind(0);
+    scheduleBind(120);
+    scheduleBind(360);
+    scheduleBind(800);
+  });
+
+  window.addEventListener('load', function(){
+    scheduleBind(0);
+    scheduleBind(180);
+    scheduleBind(520);
+  });
+
+  window.addEventListener('resize', function(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(bindTitleWidth, 120);
+  });
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function(){
+      scheduleBind(0);
+      scheduleBind(180);
+    });
+  }
+})();
+
+(function(){
   if (window.__TC_FLOWER_DESKTOP_DRAG_V1__) return;
   window.__TC_FLOWER_DESKTOP_DRAG_V1__ = true;
 
