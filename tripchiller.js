@@ -742,7 +742,7 @@ function onScroll(){
   }
 
   function bindTitleWidth(){
-    var titleEl = findByText('h1,h2,h3,[data-field="text"],.tn-atom,.t-title,.t-descr,.t-text', 'НАШИ ТРИПОНАВТЫ');
+    var titleEl = findByText('h1,h2,h3,[data-field="text"],.tn-atom,.t-title,.t-descr,.t-text', ':: C0MMUN1TY ::');
     if (!titleEl) return;
 
     var rect = titleEl.getBoundingClientRect();
