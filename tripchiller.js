@@ -3337,9 +3337,11 @@ function setupDesktopAura() {
           '<button class="tc-user-photos__nav tc-user-photos__nav--prev" type="button" aria-label="Предыдущее фото"><span>‹</span></button>' +
           '<div class="tc-user-photos__viewport">' +
             '<div class="tc-user-photos__track">' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--far-prev"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
               '<div class="tc-user-photos__slide tc-user-photos__slide--prev"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
               '<div class="tc-user-photos__slide tc-user-photos__slide--active"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
               '<div class="tc-user-photos__slide tc-user-photos__slide--next"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--far-next"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
             '</div>' +
           '</div>' +
           '<button class="tc-user-photos__nav tc-user-photos__nav--next" type="button" aria-label="Следующее фото"><span>›</span></button>' +
@@ -3360,9 +3362,12 @@ function setupDesktopAura() {
     var section = build(root);
     if (!section) return;
 
+    var track = section.querySelector('.tc-user-photos__track');
+    var farPrevImg = section.querySelector('.tc-user-photos__slide--far-prev .tc-user-photos__img');
     var prevImg = section.querySelector('.tc-user-photos__slide--prev .tc-user-photos__img');
     var activeImg = section.querySelector('.tc-user-photos__slide--active .tc-user-photos__img');
     var nextImg = section.querySelector('.tc-user-photos__slide--next .tc-user-photos__img');
+    var farNextImg = section.querySelector('.tc-user-photos__slide--far-next .tc-user-photos__img');
     var prevBtn = section.querySelector('.tc-user-photos__nav--prev');
     var nextBtn = section.querySelector('.tc-user-photos__nav--next');
     var topTickerTrack = section.querySelector('.tc-user-photos__ticker--top .tc-user-photos__ticker-track');
@@ -3374,6 +3379,9 @@ function setupDesktopAura() {
     var isSliding = false;
     var cleanupTransition = null;
     var tickerResizeRaf = 0;
+    var autoTimer = 0;
+    var AUTO_INTERVAL = 5000;
+    var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function parseAnimationDurationMs(track) {
       if (!track || !window.getComputedStyle) return 24000;
@@ -3409,9 +3417,19 @@ function setupDesktopAura() {
     }
 
     function getIndices(index) {
-      if (len === 0) return { prev: -1, active: -1, next: -1 };
-      if (len === 1) return { prev: 0, active: 0, next: 0 };
-      return { prev: mod(index - 1, len), active: mod(index, len), next: mod(index + 1, len) };
+      if (len === 0) {
+        return { farPrev: -1, prev: -1, active: -1, next: -1, farNext: -1 };
+      }
+      if (len === 1) {
+        return { farPrev: 0, prev: 0, active: 0, next: 0, farNext: 0 };
+      }
+      return {
+        farPrev: mod(index - 2, len),
+        prev: mod(index - 1, len),
+        active: mod(index, len),
+        next: mod(index + 1, len),
+        farNext: mod(index + 2, len)
+      };
     }
 
     function setImg(img, idx) {
@@ -3422,8 +3440,8 @@ function setupDesktopAura() {
 
     function preloadNeighbors(index) {
       if (len < 2) return;
-      var ids = getIndices(index);
-      [ids.prev, ids.next].forEach(function (idx) {
+      [-3, -2, -1, 1, 2, 3].forEach(function (offset) {
+        var idx = mod(index + offset, len);
         if (idx < 0 || !photos[idx]) return;
         var img = new Image();
         img.decoding = 'async';
@@ -3434,9 +3452,11 @@ function setupDesktopAura() {
     function render() {
       var ids = getIndices(current);
       if (ids.active < 0) return;
+      setImg(farPrevImg, ids.farPrev);
       setImg(prevImg, ids.prev);
       setImg(activeImg, ids.active);
       setImg(nextImg, ids.next);
+      setImg(farNextImg, ids.farNext);
       preloadNeighbors(current);
     }
 
@@ -3447,21 +3467,36 @@ function setupDesktopAura() {
 
     function finalize(dir) {
       if (!isSliding) return;
+
       isSliding = false;
+
+      var nextCurrent = dir === 'next'
+        ? mod(current + 1, len || 1)
+        : mod(current - 1, len || 1);
+
+      section.classList.add('is-resetting');
+
       cleanupSlideState();
-      current = dir === 'next' ? mod(current + 1, len || 1) : mod(current - 1, len || 1);
+      current = nextCurrent;
       render();
+
       if (cleanupTransition) {
         cleanupTransition();
         cleanupTransition = null;
       }
+
+      if (track) void track.offsetWidth;
+
+      requestAnimationFrame(function () {
+        section.classList.remove('is-resetting');
+      });
     }
 
     function slide(dir) {
-      if (isSliding || len < 2) return;
+      if (isSliding || len < 2 || !track) return false;
       isSliding = true;
       cleanupSlideState();
-      void section.offsetWidth;
+      void track.offsetWidth;
       section.classList.add(dir === 'next' ? 'is-sliding-next' : 'is-sliding-prev');
 
       var done = false;
@@ -3469,25 +3504,58 @@ function setupDesktopAura() {
         if (done) return;
         done = true;
         finalize(dir);
-      }, 560);
+      }, 820);
 
       var onEnd = function (e) {
-        if (e && e.target !== section) return;
+        if (e && e.target !== track) return;
+        if (e && e.propertyName && e.propertyName !== 'transform') return;
         if (done) return;
+
         done = true;
         clearTimeout(timeoutId);
         finalize(dir);
       };
 
-      section.addEventListener('transitionend', onEnd);
+      track.addEventListener('transitionend', onEnd);
       cleanupTransition = function () {
         clearTimeout(timeoutId);
-        section.removeEventListener('transitionend', onEnd);
+        track.removeEventListener('transitionend', onEnd);
       };
+
+      return true;
     }
 
-    function onPrev() { slide('prev'); }
-    function onNext() { slide('next'); }
+    function stopAuto() {
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = 0;
+      }
+    }
+
+    function startAuto() {
+      stopAuto();
+      if (reducedMotion || len < 2) return;
+      autoTimer = setInterval(function () {
+        slide('next');
+      }, AUTO_INTERVAL);
+    }
+
+    function restartAuto() {
+      stopAuto();
+      startAuto();
+    }
+
+    function onVisibilityChange() {
+      if (document.hidden) stopAuto();
+      else startAuto();
+    }
+
+    function onPrev() {
+      if (slide('prev')) restartAuto();
+    }
+    function onNext() {
+      if (slide('next')) restartAuto();
+    }
 
     prevBtn.addEventListener('click', onPrev);
     nextBtn.addEventListener('click', onNext);
@@ -3504,6 +3572,8 @@ function setupDesktopAura() {
     requestAnimationFrame(syncTickerSpeeds);
     window.addEventListener('load', syncTickerSpeeds);
     window.addEventListener('resize', scheduleTickerSpeedSync);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    startAuto();
 
     window[GUARD_KEY] = {
       destroy: function () {
@@ -3514,8 +3584,10 @@ function setupDesktopAura() {
         }
         window.removeEventListener('load', syncTickerSpeeds);
         window.removeEventListener('resize', scheduleTickerSpeedSync);
+        document.removeEventListener('visibilitychange', onVisibilityChange);
         prevBtn.removeEventListener('click', onPrev);
         nextBtn.removeEventListener('click', onNext);
+        stopAuto();
         root.innerHTML = '';
       }
     };
