@@ -3800,10 +3800,16 @@ function setupDesktopAura() {
       if (e && e.target && e.target.closest('.tc-user-photos__nav')) return;
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       if (typeof e.isPrimary === 'boolean' && !e.isPrimary) return;
-      dragState = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, active: false, canceled: false };
-      try {
-        if (viewport && viewport.setPointerCapture) viewport.setPointerCapture(e.pointerId);
-      } catch (_) {}
+      dragState = {
+        pointerId: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        dx: 0,
+        dy: 0,
+        active: false,
+        canceled: false,
+        captured: false
+      };
     }
     function onDragMove(e) {
       if (!dragState || dragState.canceled || dragState.pointerId !== e.pointerId || isSliding) return;
@@ -3817,6 +3823,12 @@ function setupDesktopAura() {
           dragState.active = true;
           suppressPhotoClickUntil = Date.now() + 350;
           section.classList.add('is-dragging');
+          try {
+            if (viewport && viewport.setPointerCapture) {
+              viewport.setPointerCapture(e.pointerId);
+              dragState.captured = true;
+            }
+          } catch (_) {}
         } else return;
       }
       e.preventDefault();
@@ -3830,7 +3842,9 @@ function setupDesktopAura() {
       var wasActive = dragState.active;
       var dx = dragState.dx;
       try {
-        if (viewport && viewport.releasePointerCapture) viewport.releasePointerCapture(e.pointerId);
+        if (dragState.captured && viewport && viewport.releasePointerCapture) {
+          viewport.releasePointerCapture(e.pointerId);
+        }
       } catch (_) {}
       dragState = null;
       section.classList.remove('is-dragging');
