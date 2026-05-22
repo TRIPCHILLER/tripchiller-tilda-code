@@ -3316,13 +3316,14 @@ function setupDesktopAura() {
   }
 
   function build(root) {
-    var topTickerText = '| ЗДЕСЬ ОТОБРАЖАЮТСЯ РАНДОМНЫЕ ФОТО НАШИХ АДЕПТОВ | ОСТАВЬ СВОЙ СЛЕД - ПРИШЛИ ФОТКУ В ЛЮБОМ ИЗДЕЛИИ В ДИРЕКТ: T.ME/TRIPCHILLER.OFFICIAL';
-    var bottomTickerText = '| МЫ УВАЖАЕМ ПРИВАТНОСТЬ КАЖДОГО УЧАСТНИКА | В АРХИВ ПОПАДАЮТ ТОЛЬКО ФОТО, ПРИСЛАННЫЕ ВЛАДЕЛЬЦАМИ С ИХ РАЗРЕШЕНИЯ';
+    var topTickerText = 'ЗДЕСЬ ОТОБРАЖАЮТСЯ РАНДОМНЫЕ ФОТО НАШИХ АДЕПТОВ | ОСТАВЬ СВОЙ СЛЕД - ПРИШЛИ ФОТКУ В ЛЮБОМ ИЗДЕЛИИ В ДИРЕКТ: T.ME/TRIPCHILLER.OFFICIAL';
+    var bottomTickerText = 'МЫ УВАЖАЕМ ПРИВАТНОСТЬ КАЖДОГО УЧАСТНИКА | В АРХИВ ПОПАДАЮТ ТОЛЬКО ФОТО, ПРИСЛАННЫЕ ВЛАДЕЛЬЦАМИ С ИХ РАЗРЕШЕНИЯ';
 
     function buildTickerLine(text) {
-      return '<span>' + text + '</span>' +
-             '<span>' + text + '</span>' +
-             '<span>' + text + '</span>';
+      var item = '<span class="tc-user-photos__ticker-item">' + text + '</span>';
+      var sep = '<span class="tc-user-photos__ticker-sep" aria-hidden="true">|</span>';
+
+      return item + sep + item + sep + item + sep + item;
     }
 
     var topTickerLine = buildTickerLine(topTickerText);
