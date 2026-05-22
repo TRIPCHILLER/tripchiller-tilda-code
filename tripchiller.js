@@ -3939,12 +3939,23 @@ function setupDesktopAura() {
 
 
 (function () {
+  if (window.__TC_CONTACTS_PAGE_CLASS_V1__) return;
+  window.__TC_CONTACTS_PAGE_CLASS_V1__ = true;
+
+  var normalizedPath = (location.pathname || '/').replace(/\/+$/, '') || '/';
+  if (normalizedPath === '/contacts') {
+    document.documentElement.classList.add('tc-page-contacts');
+  }
+})();
+
+(function () {
   if (window.__TC_UI_ACTION_PRESS_V1__) return;
   window.__TC_UI_ACTION_PRESS_V1__ = true;
 
   var TARGET_SELECTOR =
     '.tc-action, .tc-ui-btn, .tc-legal-btn, .t778__showmore, .t-store__load-more-btn, .js-store-load-more-btn, ' +
-    '#allrecords .t778__btn-wrapper .t778__btn, .soc1 .tn-atom, .soc2 .tn-atom, .soc3 .tn-atom, .soc4 .tn-atom';
+    '#allrecords .t778__btn-wrapper .t778__btn, .soc1 .tn-atom, .soc2 .tn-atom, .soc3 .tn-atom, .soc4 .tn-atom, ' +
+    '.tc-contact-link, .tc-contact-link .tn-atom';
 
   var activeTarget = null;
 
@@ -4000,6 +4011,52 @@ function setupDesktopAura() {
     document.querySelectorAll('.tc-ui-pressed').forEach(release);
     activeTarget = null;
   });
+})();
+
+(function () {
+  if (window.__TC_CONTACTS_TYPEWRITER_V1__) return;
+  window.__TC_CONTACTS_TYPEWRITER_V1__ = true;
+
+  var normalizedPath = (location.pathname || '/').replace(/\/+$/, '') || '/';
+  if (normalizedPath !== '/contacts') return;
+
+  var line1 = 'цифровые уголки,';
+  var line2 = 'где я обитаю:';
+  var speed = 40;
+
+  function startTyping() {
+    var root = document.querySelector('.tw-type-1a');
+    if (!root) return;
+    if (root.dataset.tcContactsTypingDone === '1') return;
+
+    var target = root.querySelector('.tn-atom') || root;
+    if (!target) return;
+
+    root.dataset.tcContactsTypingDone = '1';
+    target.innerHTML = '';
+
+    var full = line1 + '\n' + line2;
+    var i = 0;
+
+    function tick() {
+      if (i > full.length - 1) return;
+      var ch = full.charAt(i++);
+      if (ch === '\n') {
+        target.appendChild(document.createElement('br'));
+      } else {
+        target.appendChild(document.createTextNode(ch));
+      }
+      setTimeout(tick, speed);
+    }
+
+    tick();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startTyping);
+  } else {
+    startTyping();
+  }
 })();
 
 (function () {

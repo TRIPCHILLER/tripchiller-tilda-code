@@ -2263,3 +2263,108 @@ button.t778__showmore.tc-loadmore-pressed,
     display: none !important;
   }
 }
+
+/* =========================
+   TRIPCHILLER / CONTACTS UI
+   ========================= */
+html.tc-page-contacts .soc1 .tn-atom,
+html.tc-page-contacts .soc2 .tn-atom,
+html.tc-page-contacts .soc3 .tn-atom,
+html.tc-page-contacts .soc4 .tn-atom {
+  transition: var(--tc-ui-transition) !important;
+  box-shadow: var(--tc-ui-shadow) !important;
+  background: var(--tc-ui-black) !important;
+  background-color: var(--tc-ui-black) !important;
+  border-radius: 9999px !important;
+}
+
+html.tc-page-contacts .soc1:hover .tn-atom,
+html.tc-page-contacts .soc2:hover .tn-atom,
+html.tc-page-contacts .soc3:hover .tn-atom,
+html.tc-page-contacts .soc4:hover .tn-atom {
+  background: var(--tc-ui-red) !important;
+  background-color: var(--tc-ui-red) !important;
+  box-shadow: var(--tc-ui-shadow-hover) !important;
+}
+
+html.tc-page-contacts .soc1 .tn-atom.tc-ui-pressed,
+html.tc-page-contacts .soc2 .tn-atom.tc-ui-pressed,
+html.tc-page-contacts .soc3 .tn-atom.tc-ui-pressed,
+html.tc-page-contacts .soc4 .tn-atom.tc-ui-pressed {
+  transform: translateY(2px) scale(.975) !important;
+  box-shadow: var(--tc-ui-shadow-pressed) !important;
+}
+
+html.tc-page-contacts .soc1 .tn-atom.tc-ui-pressed img,
+html.tc-page-contacts .soc2 .tn-atom.tc-ui-pressed img,
+html.tc-page-contacts .soc3 .tn-atom.tc-ui-pressed img,
+html.tc-page-contacts .soc4 .tn-atom.tc-ui-pressed img,
+html.tc-page-contacts .soc1 .tn-atom.tc-ui-pressed svg,
+html.tc-page-contacts .soc2 .tn-atom.tc-ui-pressed svg,
+html.tc-page-contacts .soc3 .tn-atom.tc-ui-pressed svg,
+html.tc-page-contacts .soc4 .tn-atom.tc-ui-pressed svg {
+  opacity: .55 !important;
+  filter: grayscale(1) brightness(.82) !important;
+}
+
+html.tc-page-contacts .tc-contact-link,
+html.tc-page-contacts .tc-contact-link .tn-atom {
+  cursor: pointer !important;
+  background: #fff !important;
+  background-color: #fff !important;
+  color: #000 !important;
+  box-shadow: var(--tc-ui-rect-shadow) !important;
+  transition: var(--tc-ui-transition) !important;
+  transform: translateY(0) scale(1) !important;
+  overflow: hidden !important;
+}
+
+html.tc-page-contacts .tc-contact-link:hover,
+html.tc-page-contacts .tc-contact-link:hover .tn-atom {
+  background: var(--tc-ui-red) !important;
+  background-color: var(--tc-ui-red) !important;
+  color: #fff !important;
+  box-shadow: var(--tc-ui-rect-shadow-hover) !important;
+}
+
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed,
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tn-atom,
+html.tc-page-contacts .tc-contact-link:active,
+html.tc-page-contacts .tc-contact-link:active .tn-atom {
+  background: var(--tc-ui-red) !important;
+  background-color: var(--tc-ui-red) !important;
+  transform: translateY(2px) scale(.975) !important;
+  box-shadow: var(--tc-ui-rect-shadow-pressed) !important;
+  color: var(--tc-ui-text-pressed) !important;
+}
+
+html.tc-page-contacts .tc-contact-link img,
+html.tc-page-contacts .tc-contact-link svg {
+  transition: filter .22s ease, opacity .12s linear !important;
+}
+
+html.tc-page-contacts .tc-contact-link:hover img,
+html.tc-page-contacts .tc-contact-link:hover svg {
+  filter: invert(1) brightness(10) !important;
+}
+
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed img,
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed svg {
+  opacity: .55 !important;
+  filter: invert(1) brightness(10) grayscale(1) !important;
+}
+
+html.tc-page-contacts .tc-contact-link:hover [field="text"],
+html.tc-page-contacts .tc-contact-link:hover .tn-atom {
+  color: #fff !important;
+}
+
+html.tc-page-contacts .tw-type-1a,
+html.tc-page-contacts .tw-type-1a .tn-atom {
+  white-space: normal !important;
+  text-align: center !important;
+}
+
+html.tc-page-contacts .tw-type-1a br {
+  display: block;
+}
