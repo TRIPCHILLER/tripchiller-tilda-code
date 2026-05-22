@@ -4051,23 +4051,38 @@ function setupDesktopAura() {
     return getBgUrlFromNode(node);
   }
 
-  function getViewerImageFromTarget(target) {
-    if (!target || !target.closest) return null;
-    var viewer = target.closest('.t-zoomer, .t-slds__bgimg-wrapper, .t-slds__bgimg, .t-slds__imgwrapper');
-    if (!viewer) return null;
-    var popup = target.closest('.t-popup_show, .t-store__prod-popup, .t-zoomer');
-    if (!popup) return null;
-
-    var image = target.closest('img, .t-slds__bgimg, .t-bgimg');
-    if (image) return image;
-
-    image = viewer.querySelector('img, .t-slds__bgimg, .t-bgimg');
-    return image || null;
-  }
-
   function isActionControl(node) {
     if (!node || !node.closest) return false;
-    return !!node.closest('.t-zoomer__close, .t-zoomer__control, .t-slds__arrow_wrapper, .t-slds__arrow, .t-slds__bullet, .t-slds__counter');
+    return !!node.closest(
+      '.t-popup__close, .t-store__prod-popup__close, .t-zoomer__close, .t-zoomer__control, .t-zoomer__scale, .t-zoomer__minus, .t-zoomer__plus, .t-zoomer__prev, .t-zoomer__next, .t-slds__arrow_wrapper, .t-slds__arrow, .t-slds__bullet, .t-slds__counter, .t-slds__thumbs, .t-slds__thumbsbullet, .t-slds__thumbsbullet-wrapper'
+    );
+  }
+
+  function isThumbnailTarget(node) {
+    if (!node || !node.closest) return false;
+    return !!node.closest(
+      '.t-slds__thumbs, .t-slds__thumbsbullet, .t-slds__thumbsbullet-wrapper, .t-slds__thumbsbullet-border, .t-store__prod-popup__sliderthumb, .t-store__prod-popup__gallery-thumb'
+    );
+  }
+
+  function isProductPopupMainImageTarget(target) {
+    if (!target || !target.closest) return false;
+    var popup = target.closest('.t-store__prod-popup, .t-popup_show');
+    if (!popup) return false;
+    if (isActionControl(target) || isThumbnailTarget(target)) return false;
+
+    var imageArea = target.closest('.t-slds__imgwrapper, .t-slds__bgimg-wrapper, .t-slds__bgimg, .t-bgimg, img');
+    if (!imageArea) return false;
+    if (isThumbnailTarget(imageArea)) return false;
+    return true;
+  }
+
+  function getViewerImageFromTarget(target) {
+    if (!isProductPopupMainImageTarget(target)) return null;
+    var image = target.closest('img, .t-slds__bgimg, .t-bgimg, .t-slds__bgimg-wrapper, .t-slds__imgwrapper');
+    if (!image) return null;
+    if (isThumbnailTarget(image)) return null;
+    return image;
   }
 
   function updateLensPosition(event, imageNode) {
@@ -4104,7 +4119,7 @@ function setupDesktopAura() {
 
   document.addEventListener('pointermove', function (event) {
     var imageNode = getViewerImageFromTarget(event.target);
-    if (!imageNode || isActionControl(event.target)) {
+    if (!imageNode || isActionControl(event.target) || isThumbnailTarget(event.target)) {
       hideLens();
       return;
     }
@@ -4115,7 +4130,8 @@ function setupDesktopAura() {
   document.addEventListener('mouseleave', hideLens, true);
 
   function blockNativeZoom(event) {
-    if (isActionControl(event.target)) return;
+    if (!CAN_USE_MAGNIFIER) return;
+    if (isActionControl(event.target) || isThumbnailTarget(event.target)) return;
     var imageNode = getViewerImageFromTarget(event.target);
     if (!imageNode) return;
     event.preventDefault();
@@ -4134,8 +4150,8 @@ function setupDesktopAura() {
   }, true);
 
   var observer = new MutationObserver(function () {
-    var visibleViewer = document.querySelector('.t-zoomer.t-popup_show, .t-popup_show .t-zoomer, .t-popup_show .t-slds');
-    if (!visibleViewer) hideLens();
+    var visiblePopup = document.querySelector('.t-store__prod-popup.t-popup_show, .t-popup_show .t-store__prod-popup, .t-popup_show .js-store-prod-popup');
+    if (!visiblePopup) hideLens();
   });
 
   observer.observe(document.documentElement, { childList: true, subtree: true });
