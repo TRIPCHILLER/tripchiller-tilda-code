@@ -1647,6 +1647,7 @@ body {
   overflow: hidden;
   overflow-x: hidden;
   position: relative;
+  touch-action: pan-y;
 }
 
 .tc-user-photos__track {
@@ -1703,6 +1704,12 @@ body {
   text-decoration: none;
   cursor: default;
   -webkit-tap-highlight-color: transparent;
+}
+.tc-user-photos__photo-link,
+.tc-user-photos__img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .tc-user-photos__slide--active .tc-user-photos__photo-link.is-linked { cursor: pointer; }
 .tc-user-photos__slide--prev .tc-user-photos__photo-link,

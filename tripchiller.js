@@ -3353,11 +3353,11 @@ function setupDesktopAura() {
           '<button class="tc-user-photos__nav tc-user-photos__nav--prev" type="button" aria-label="Предыдущее фото"><span>‹</span></button>' +
           '<div class="tc-user-photos__viewport">' +
             '<div class="tc-user-photos__track">' +
-              '<div class="tc-user-photos__slide tc-user-photos__slide--far-prev"><a class="tc-user-photos__photo-link" href="" aria-label="Открыть товар"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
-              '<div class="tc-user-photos__slide tc-user-photos__slide--prev"><a class="tc-user-photos__photo-link" href="" aria-label="Открыть товар"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
-              '<div class="tc-user-photos__slide tc-user-photos__slide--active"><a class="tc-user-photos__photo-link" href="" aria-label="Открыть товар"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
-              '<div class="tc-user-photos__slide tc-user-photos__slide--next"><a class="tc-user-photos__photo-link" href="" aria-label="Открыть товар"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
-              '<div class="tc-user-photos__slide tc-user-photos__slide--far-next"><a class="tc-user-photos__photo-link" href="" aria-label="Открыть товар"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--far-prev"><a class="tc-user-photos__photo-link" href="" draggable="false" aria-label="Открыть товар"><img class="tc-user-photos__img" draggable="false" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--prev"><a class="tc-user-photos__photo-link" href="" draggable="false" aria-label="Открыть товар"><img class="tc-user-photos__img" draggable="false" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--active"><a class="tc-user-photos__photo-link" href="" draggable="false" aria-label="Открыть товар"><img class="tc-user-photos__img" draggable="false" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--next"><a class="tc-user-photos__photo-link" href="" draggable="false" aria-label="Открыть товар"><img class="tc-user-photos__img" draggable="false" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--far-next"><a class="tc-user-photos__photo-link" href="" draggable="false" aria-label="Открыть товар"><img class="tc-user-photos__img" draggable="false" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
             '</div>' +
           '</div>' +
           '<button class="tc-user-photos__nav tc-user-photos__nav--next" type="button" aria-label="Следующее фото"><span>›</span></button>' +
@@ -3476,8 +3476,10 @@ function setupDesktopAura() {
       link.setAttribute('aria-label', href ? 'Открыть товар по фото' : alt);
       link.dataset.photoRole = role || '';
       link.dataset.photoIndex = String(idx);
+      link.dataset.productHref = href || '';
       if (role === 'active' && href) {
         link.href = href;
+        link.dataset.productHref = href;
         link.target = '_self';
         link.removeAttribute('aria-disabled');
         link.classList.remove('is-not-linked');
@@ -3485,6 +3487,7 @@ function setupDesktopAura() {
         link.tabIndex = 0;
       } else {
         link.removeAttribute('href');
+        link.dataset.productHref = '';
         link.removeAttribute('target');
         link.setAttribute('aria-disabled', 'true');
         link.classList.remove('is-linked');
@@ -3634,9 +3637,50 @@ function setupDesktopAura() {
       e.preventDefault();
       if (slide('next')) restartAuto();
     }
+    function getTProductIdFromHref(href) {
+      if (!href) return '';
+      var match = String(href).match(/tproduct\/([^?#]+)/);
+      return match ? match[1] : '';
+    }
+    function openTildaProductFromPhoto(href) {
+      if (!href) return false;
+      var productId = getTProductIdFromHref(href);
+      var selectorParts = [];
+      if (productId) {
+        selectorParts.push('a[href*="' + productId + '"]');
+        selectorParts.push('[data-product-lid="' + productId + '"]');
+        selectorParts.push('[data-product-gen-uid="' + productId + '"]');
+        selectorParts.push('[data-product-id="' + productId + '"]');
+      }
+      selectorParts.push('a[href="' + href + '"]');
+      for (var i = 0; i < selectorParts.length; i += 1) {
+        var target = document.querySelector(selectorParts[i]);
+        if (!target) continue;
+        if (target === activeLink || target.closest('#tc-user-photos-root')) continue;
+        target.dispatchEvent(new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        }));
+        return true;
+      }
+      window.location.href = href;
+      return true;
+    }
     function onActiveLinkClick(e) {
-      if (shouldSuppressPhotoClick()) { e.preventDefault(); e.stopPropagation(); return; }
-      if (!activeLink || !activeLink.href || activeLink.classList.contains('is-not-linked')) e.preventDefault();
+      if (shouldSuppressPhotoClick()) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      var href = activeLink ? activeLink.dataset.productHref : '';
+      if (!href || activeLink.classList.contains('is-not-linked')) {
+        e.preventDefault();
+        return;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      openTildaProductFromPhoto(href);
     }
     function onDragStart(e) {
       if (isSliding || len < 2) return;
@@ -3644,6 +3688,9 @@ function setupDesktopAura() {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       if (typeof e.isPrimary === 'boolean' && !e.isPrimary) return;
       dragState = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, active: false, canceled: false };
+      try {
+        if (viewport && viewport.setPointerCapture) viewport.setPointerCapture(e.pointerId);
+      } catch (_) {}
     }
     function onDragMove(e) {
       if (!dragState || dragState.canceled || dragState.pointerId !== e.pointerId || isSliding) return;
@@ -3655,6 +3702,7 @@ function setupDesktopAura() {
         if (absY > absX * 1.2) { dragState.canceled = true; dragState = null; return; }
         if (absX > DRAG_START_THRESHOLD && absX > absY) {
           dragState.active = true;
+          suppressPhotoClickUntil = Date.now() + 350;
           section.classList.add('is-dragging');
         } else return;
       }
@@ -3668,6 +3716,9 @@ function setupDesktopAura() {
       if (!dragState || (e && dragState.pointerId !== e.pointerId)) return;
       var wasActive = dragState.active;
       var dx = dragState.dx;
+      try {
+        if (viewport && viewport.releasePointerCapture) viewport.releasePointerCapture(e.pointerId);
+      } catch (_) {}
       dragState = null;
       section.classList.remove('is-dragging');
       section.style.removeProperty('--tc-user-drag-x');
@@ -3684,8 +3735,13 @@ function setupDesktopAura() {
     nextBtn.addEventListener('click', onNext);
     if (prevLink) prevLink.addEventListener('click', onPrevSlideClick);
     if (nextLink) nextLink.addEventListener('click', onNextSlideClick);
+    function preventNativePhotoDrag(e) {
+      e.preventDefault();
+    }
+
     if (activeLink) activeLink.addEventListener('click', onActiveLinkClick);
     if (viewport) viewport.addEventListener('pointerdown', onDragStart);
+    if (viewport) viewport.addEventListener('dragstart', preventNativePhotoDrag);
     window.addEventListener('pointermove', onDragMove, { passive: false });
     window.addEventListener('pointerup', onDragEnd);
     window.addEventListener('pointercancel', onDragEnd);
@@ -3721,6 +3777,7 @@ function setupDesktopAura() {
         if (nextLink) nextLink.removeEventListener('click', onNextSlideClick);
         if (activeLink) activeLink.removeEventListener('click', onActiveLinkClick);
         if (viewport) viewport.removeEventListener('pointerdown', onDragStart);
+        if (viewport) viewport.removeEventListener('dragstart', preventNativePhotoDrag);
         window.removeEventListener('pointermove', onDragMove, { passive: false });
         window.removeEventListener('pointerup', onDragEnd);
         window.removeEventListener('pointercancel', onDragEnd);
