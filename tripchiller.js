@@ -3346,8 +3346,8 @@ function setupDesktopAura() {
     var bottomTickerLine = buildTickerLine(bottomTickerText);
 
     root.innerHTML = '' +
-      '<section class="tc-user-photos" aria-label="НАШИ ТРИПОНАВТЫ">' +
-        '<h2 class="tc-user-photos__title">НАШИ ТРИПОНАВТЫ</h2>' +
+      '<section class="tc-user-photos" aria-label=":: C0MMUN1TY ::">' +
+        '<h2 class="tc-user-photos__title">:: C0MMUN1TY ::</h2>' +
         '<div class="tc-user-photos__ticker tc-user-photos__ticker--top" aria-hidden="true">' +
           '<div class="tc-user-photos__ticker-track">' + topTickerLine + '</div>' +
         '</div>' +
