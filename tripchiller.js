@@ -3642,15 +3642,33 @@ function setupDesktopAura() {
       var match = String(href).match(/tproduct\/([^?#]+)/);
       return match ? match[1] : '';
     }
+    function getShortTProductId(productId) {
+      if (!productId) return '';
+      var parts = String(productId).split('-');
+      return parts.length > 1 ? parts[parts.length - 1] : '';
+    }
     function openTildaProductFromPhoto(href) {
       if (!href) return false;
       var productId = getTProductIdFromHref(href);
+      var shortProductId = getShortTProductId(productId);
+      var hashIndex = String(href).indexOf('#!');
+      var hrefHash = hashIndex >= 0 ? String(href).slice(hashIndex) : '';
       var selectorParts = [];
       if (productId) {
         selectorParts.push('a[href*="' + productId + '"]');
         selectorParts.push('[data-product-lid="' + productId + '"]');
         selectorParts.push('[data-product-gen-uid="' + productId + '"]');
         selectorParts.push('[data-product-id="' + productId + '"]');
+      }
+      if (shortProductId) {
+        selectorParts.push('a[href*="' + shortProductId + '"]');
+        selectorParts.push('[data-product-lid="' + shortProductId + '"]');
+        selectorParts.push('[data-product-gen-uid="' + shortProductId + '"]');
+        selectorParts.push('[data-product-id="' + shortProductId + '"]');
+      }
+      if (hrefHash) {
+        selectorParts.push('a[href="' + hrefHash + '"]');
+        selectorParts.push('a[href*="' + hrefHash + '"]');
       }
       selectorParts.push('a[href="' + href + '"]');
       for (var i = 0; i < selectorParts.length; i += 1) {
