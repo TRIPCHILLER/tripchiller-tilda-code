@@ -3999,3 +3999,160 @@ function setupDesktopAura() {
     activeTarget = null;
   });
 })();
+
+(function () {
+  if (window.__TC_PRODUCT_MAGNIFIER_V1__) return;
+  window.__TC_PRODUCT_MAGNIFIER_V1__ = true;
+
+  var CAN_USE_MAGNIFIER =
+    window.matchMedia &&
+    window.matchMedia('(min-width: 981px) and (pointer: fine)').matches;
+
+  if (!CAN_USE_MAGNIFIER) return;
+
+  var LENS_SIZE = 230;
+  var LENS_ZOOM = 2.4;
+  var lens = null;
+
+  function debugLog() {
+    if (!window.__TC_DEBUG_PRODUCT_MAGNIFIER || !window.console || !console.log) return;
+    console.log.apply(console, arguments);
+  }
+
+  function ensureLens() {
+    if (lens && lens.parentNode) return lens;
+    lens = document.createElement('div');
+    lens.className = 'tc-product-magnifier';
+    lens.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(lens);
+    return lens;
+  }
+
+  function hideLens() {
+    if (!lens) return;
+    lens.classList.remove('is-visible');
+  }
+
+  function getBgUrlFromNode(node) {
+    if (!node) return '';
+    var bg = window.getComputedStyle(node).backgroundImage;
+    if (!bg || bg === 'none') return '';
+    var match = bg.match(/^url\((['"]?)(.*)\1\)$/);
+    return match && match[2] ? match[2] : '';
+  }
+
+  function getImageSource(node) {
+    if (!node) return '';
+    if (node.tagName && node.tagName.toLowerCase() === 'img') {
+      return node.currentSrc || node.src || '';
+    }
+    var imageNode = node.querySelector && node.querySelector('img');
+    if (imageNode) return imageNode.currentSrc || imageNode.src || '';
+    return getBgUrlFromNode(node);
+  }
+
+  function isActionControl(node) {
+    if (!node || !node.closest) return false;
+    return !!node.closest(
+      '.t-popup__close, .t-store__prod-popup__close, .t-zoomer__close, .t-zoomer__control, .t-zoomer__scale, .t-zoomer__minus, .t-zoomer__plus, .t-zoomer__prev, .t-zoomer__next, .t-slds__arrow_wrapper, .t-slds__arrow, .t-slds__bullet, .t-slds__counter, .t-slds__thumbs, .t-slds__thumbsbullet, .t-slds__thumbsbullet-wrapper'
+    );
+  }
+
+  function isThumbnailTarget(node) {
+    if (!node || !node.closest) return false;
+    return !!node.closest(
+      '.t-slds__thumbs, .t-slds__thumbsbullet, .t-slds__thumbsbullet-wrapper, .t-slds__thumbsbullet-border, .t-store__prod-popup__sliderthumb, .t-store__prod-popup__gallery-thumb'
+    );
+  }
+
+  function isProductPopupMainImageTarget(target) {
+    if (!target || !target.closest) return false;
+    var popup = target.closest('.t-store__prod-popup, .t-popup_show');
+    if (!popup) return false;
+    if (isActionControl(target) || isThumbnailTarget(target)) return false;
+
+    var imageArea = target.closest('.t-slds__imgwrapper, .t-slds__bgimg-wrapper, .t-slds__bgimg, .t-bgimg, img');
+    if (!imageArea) return false;
+    if (isThumbnailTarget(imageArea)) return false;
+    return true;
+  }
+
+  function getViewerImageFromTarget(target) {
+    if (!isProductPopupMainImageTarget(target)) return null;
+    var image = target.closest('img, .t-slds__bgimg, .t-bgimg, .t-slds__bgimg-wrapper, .t-slds__imgwrapper');
+    if (!image) return null;
+    if (isThumbnailTarget(image)) return null;
+    return image;
+  }
+
+  function updateLensPosition(event, imageNode) {
+    var src = getImageSource(imageNode);
+    if (!src) {
+      hideLens();
+      return;
+    }
+    var rect = imageNode.getBoundingClientRect();
+    if (!rect.width || !rect.height) {
+      hideLens();
+      return;
+    }
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) {
+      hideLens();
+      return;
+    }
+
+    var x = (event.clientX - rect.left) / rect.width;
+    var y = (event.clientY - rect.top) / rect.height;
+
+    var lensEl = ensureLens();
+    lensEl.style.left = (event.clientX - LENS_SIZE / 2) + 'px';
+    lensEl.style.top = (event.clientY - LENS_SIZE / 2) + 'px';
+    lensEl.style.backgroundImage = 'url("' + src + '")';
+    lensEl.style.backgroundSize = (rect.width * LENS_ZOOM) + 'px ' + (rect.height * LENS_ZOOM) + 'px';
+    lensEl.style.backgroundPosition =
+      (-(x * rect.width * LENS_ZOOM - LENS_SIZE / 2)) + 'px ' +
+      (-(y * rect.height * LENS_ZOOM - LENS_SIZE / 2)) + 'px';
+    lensEl.classList.add('is-visible');
+
+    debugLog('[PRODUCT_MAGNIFIER] active image', imageNode, src);
+  }
+
+  document.addEventListener('pointermove', function (event) {
+    var imageNode = getViewerImageFromTarget(event.target);
+    if (!imageNode || isActionControl(event.target) || isThumbnailTarget(event.target)) {
+      hideLens();
+      return;
+    }
+    updateLensPosition(event, imageNode);
+  }, true);
+
+  document.addEventListener('pointerleave', hideLens, true);
+  document.addEventListener('mouseleave', hideLens, true);
+
+  function blockNativeZoom(event) {
+    if (!CAN_USE_MAGNIFIER) return;
+    if (isActionControl(event.target) || isThumbnailTarget(event.target)) return;
+    var imageNode = getViewerImageFromTarget(event.target);
+    if (!imageNode) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof event.stopImmediatePropagation === 'function') {
+      event.stopImmediatePropagation();
+    }
+    debugLog('[PRODUCT_MAGNIFIER] blocked native zoom click', imageNode);
+  }
+
+  document.addEventListener('pointerdown', blockNativeZoom, true);
+  document.addEventListener('click', blockNativeZoom, true);
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') hideLens();
+  }, true);
+
+  var observer = new MutationObserver(function () {
+    var visiblePopup = document.querySelector('.t-store__prod-popup.t-popup_show, .t-popup_show .t-store__prod-popup, .t-popup_show .js-store-prod-popup');
+    if (!visiblePopup) hideLens();
+  });
+
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
