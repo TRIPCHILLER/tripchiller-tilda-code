@@ -1811,9 +1811,10 @@ body {
   max-width: 100%;
   margin-left: auto !important;
   margin-right: auto !important;
-  display: flex !important;
-  justify-content: space-evenly !important;
-  align-items: center;
+}
+
+.tc-community-icon-align {
+  transform: translateX(var(--tc-community-icon-dx, 0px)) !important;
 }
 
 .tc-user-photos.has-single .tc-user-photos__nav,
@@ -1868,9 +1869,6 @@ body {
   .tc-user-photos__nav--prev { left: 14px; }
   .tc-user-photos__nav--next { right: 14px; }
 
-  .tc-user-photos-icons-width-target {
-    justify-content: space-between !important;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
