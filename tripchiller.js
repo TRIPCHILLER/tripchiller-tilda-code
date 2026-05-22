@@ -3276,8 +3276,8 @@ function setupDesktopAura() {
     { src: "https://static.tildacdn.com/tild6661-3232-4464-a231-623165643665/IMG_4749__34.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593191131", alt: "GLAMOUR EMO CAP" },
     { src: "https://static.tildacdn.com/tild6232-6665-4532-b732-363561623133/IMG_4749__5.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344170359", alt: "DFMB WASHED CAP" },
     { src: "https://static.tildacdn.com/tild3461-3739-4230-b437-356534376461/IMG_47102__2.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-3569261809201", alt: "DFMB T-SHIRT" },
-    { src: "https://static.tildacdn.com/tild3461-3739-4230-b437-356534376461/IMG_47102__2.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-3569261809201", alt: "DFMB T-SHIRT" },
-    { src: "https://static.tildacdn.com/tild3263-6663-4261-b862-303232613766/IMG_4242__2.jpg", href: "", alt: "FROZEN VITEK FLAME T-SHIRT" }
+    { src: "https://static.tildacdn.com/tild3263-6663-4261-b862-303232613766/IMG_4242__2.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-3569261809201", alt: "FROZEN VITEK FLAME T-SHIRT" },
+    { src: "https://static.tildacdn.com/tild3237-3265-4434-b361-353639366137/_.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1778902327100", alt: "HAND-PRINTED POLO SHIRT" }
   ];
 
   function ready(fn) {
