@@ -2307,56 +2307,105 @@ html.tc-page-contacts .soc4 .tn-atom.tc-ui-pressed svg {
   filter: grayscale(1) brightness(.82) !important;
 }
 
-html.tc-page-contacts .tc-contact-link,
-html.tc-page-contacts .tc-contact-link .tn-atom {
+html.tc-page-contacts .tc-contact-link {
   cursor: pointer !important;
-  background: #fff !important;
-  background-color: #fff !important;
-  color: #000 !important;
-  box-shadow: var(--tc-ui-rect-shadow) !important;
-  transition: var(--tc-ui-transition) !important;
-  transform: translateY(0) scale(1) !important;
-  overflow: hidden !important;
 }
 
-html.tc-page-contacts .tc-contact-link:hover,
-html.tc-page-contacts .tc-contact-link:hover .tn-atom {
+html.tc-page-contacts .tc-contact-link .tn-elem[data-elem-type="shape"] .tn-atom,
+html.tc-page-contacts .tc-contact-link-bg .tn-atom,
+html.tc-page-contacts .tn-elem.tc-contact-link-bg .tn-atom,
+html.tc-page-contacts .tc-contact-link-bg.tn-elem .tn-atom {
+  background: #fff !important;
+  background-color: #fff !important;
+  border-radius: 9999px !important;
+  box-shadow: var(--tc-ui-rect-shadow) !important;
+  transition: background-color .22s ease, box-shadow .22s ease !important;
+}
+
+html.tc-page-contacts .tc-contact-link:hover .tn-elem[data-elem-type="shape"] .tn-atom,
+html.tc-page-contacts .tc-contact-link:hover .tc-contact-link-bg .tn-atom,
+html.tc-page-contacts .tc-contact-link:hover .tn-elem.tc-contact-link-bg .tn-atom,
+html.tc-page-contacts .tc-contact-link:hover .tc-contact-link-bg.tn-elem .tn-atom {
   background: var(--tc-ui-red) !important;
   background-color: var(--tc-ui-red) !important;
-  color: #fff !important;
   box-shadow: var(--tc-ui-rect-shadow-hover) !important;
 }
 
-html.tc-page-contacts .tc-contact-link.tc-ui-pressed,
-html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tn-atom,
-html.tc-page-contacts .tc-contact-link:active,
-html.tc-page-contacts .tc-contact-link:active .tn-atom {
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tn-elem[data-elem-type="shape"] .tn-atom,
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tc-contact-link-bg .tn-atom,
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tn-elem.tc-contact-link-bg .tn-atom,
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tc-contact-link-bg.tn-elem .tn-atom,
+html.tc-page-contacts .tc-contact-link:active .tn-elem[data-elem-type="shape"] .tn-atom,
+html.tc-page-contacts .tc-contact-link:active .tc-contact-link-bg .tn-atom,
+html.tc-page-contacts .tc-contact-link:active .tn-elem.tc-contact-link-bg .tn-atom,
+html.tc-page-contacts .tc-contact-link:active .tc-contact-link-bg.tn-elem .tn-atom {
   background: var(--tc-ui-red) !important;
   background-color: var(--tc-ui-red) !important;
-  transform: translateY(2px) scale(.975) !important;
   box-shadow: var(--tc-ui-rect-shadow-pressed) !important;
+}
+
+html.tc-page-contacts .tc-contact-link .tn-elem[data-elem-type="text"] .tn-atom,
+html.tc-page-contacts .tc-contact-link-text .tn-atom,
+html.tc-page-contacts .tn-elem.tc-contact-link-text .tn-atom,
+html.tc-page-contacts .tc-contact-link-text.tn-elem .tn-atom {
+  color: #000 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transition: color .22s ease, opacity .12s linear !important;
+}
+
+html.tc-page-contacts .tc-contact-link:hover .tn-elem[data-elem-type="text"] .tn-atom,
+html.tc-page-contacts .tc-contact-link:hover .tc-contact-link-text .tn-atom,
+html.tc-page-contacts .tc-contact-link:hover .tn-elem.tc-contact-link-text .tn-atom,
+html.tc-page-contacts .tc-contact-link:hover .tc-contact-link-text.tn-elem .tn-atom {
+  color: #fff !important;
+}
+
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tn-elem[data-elem-type="text"] .tn-atom,
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tc-contact-link-text .tn-atom,
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tn-elem.tc-contact-link-text .tn-atom,
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tc-contact-link-text.tn-elem .tn-atom,
+html.tc-page-contacts .tc-contact-link:active .tn-elem[data-elem-type="text"] .tn-atom,
+html.tc-page-contacts .tc-contact-link:active .tc-contact-link-text .tn-atom,
+html.tc-page-contacts .tc-contact-link:active .tn-elem.tc-contact-link-text .tn-atom,
+html.tc-page-contacts .tc-contact-link:active .tc-contact-link-text.tn-elem .tn-atom {
   color: var(--tc-ui-text-pressed) !important;
 }
 
-html.tc-page-contacts .tc-contact-link img,
-html.tc-page-contacts .tc-contact-link svg {
+html.tc-page-contacts .tc-contact-link .tn-elem[data-elem-type="image"] .tn-atom,
+html.tc-page-contacts .tc-contact-link .tn-elem[data-elem-type="image"] .tn-atom img,
+html.tc-page-contacts .tc-contact-link .tn-elem[data-elem-type="image"] .tn-atom svg,
+html.tc-page-contacts .tc-contact-link-icon .tn-atom,
+html.tc-page-contacts .tc-contact-link-icon .tn-atom img,
+html.tc-page-contacts .tc-contact-link-icon .tn-atom svg,
+html.tc-page-contacts .tn-elem.tc-contact-link-icon .tn-atom,
+html.tc-page-contacts .tn-elem.tc-contact-link-icon .tn-atom img,
+html.tc-page-contacts .tn-elem.tc-contact-link-icon .tn-atom svg,
+html.tc-page-contacts .tc-contact-link-icon.tn-elem .tn-atom,
+html.tc-page-contacts .tc-contact-link-icon.tn-elem .tn-atom img,
+html.tc-page-contacts .tc-contact-link-icon.tn-elem .tn-atom svg {
+  background: transparent !important;
+  box-shadow: none !important;
   transition: filter .22s ease, opacity .12s linear !important;
 }
 
-html.tc-page-contacts .tc-contact-link:hover img,
-html.tc-page-contacts .tc-contact-link:hover svg {
+html.tc-page-contacts .tc-contact-link:hover .tn-elem[data-elem-type="image"] img,
+html.tc-page-contacts .tc-contact-link:hover .tn-elem[data-elem-type="image"] svg,
+html.tc-page-contacts .tc-contact-link:hover .tc-contact-link-icon img,
+html.tc-page-contacts .tc-contact-link:hover .tc-contact-link-icon svg {
   filter: invert(1) brightness(10) !important;
 }
 
-html.tc-page-contacts .tc-contact-link.tc-ui-pressed img,
-html.tc-page-contacts .tc-contact-link.tc-ui-pressed svg {
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tn-elem[data-elem-type="image"] img,
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tn-elem[data-elem-type="image"] svg,
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tc-contact-link-icon img,
+html.tc-page-contacts .tc-contact-link.tc-ui-pressed .tc-contact-link-icon svg,
+html.tc-page-contacts .tc-contact-link:active .tn-elem[data-elem-type="image"] img,
+html.tc-page-contacts .tc-contact-link:active .tn-elem[data-elem-type="image"] svg,
+html.tc-page-contacts .tc-contact-link:active .tc-contact-link-icon img,
+html.tc-page-contacts .tc-contact-link:active .tc-contact-link-icon svg {
   opacity: .55 !important;
   filter: invert(1) brightness(10) grayscale(1) !important;
-}
-
-html.tc-page-contacts .tc-contact-link:hover [field="text"],
-html.tc-page-contacts .tc-contact-link:hover .tn-atom {
-  color: #fff !important;
 }
 
 html.tc-page-contacts .tw-type-1a,
