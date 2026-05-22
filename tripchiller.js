@@ -767,6 +767,8 @@ function onScroll(){
     var base = parseFloat(atom.dataset.tcBaseFontSize) || 16;
     atom.style.fontSize = base + 'px';
     atom.style.width = '';
+    atom.style.transform = '';
+    atom.style.transformOrigin = '';
     atom.style.whiteSpace = 'nowrap';
     atom.style.textAlign = 'center';
     atom.style.marginLeft = 'auto';
@@ -779,21 +781,19 @@ function onScroll(){
     var scale = titleWidth / beforeWidth;
     var isMobile = window.innerWidth <= 768;
     var minSize = isMobile ? 10 : 12;
-    var maxSize = isMobile ? 24 : 32;
+    var maxSize = isMobile ? 34 : 56;
     var nextSize = Math.max(minSize, Math.min(maxSize, base * scale));
 
     atom.style.fontSize = nextSize + 'px';
 
     var afterWidth = atom.getBoundingClientRect().width || 0;
+    var appliedScaleX = 1;
     if (afterWidth && titleWidth) {
-      var ratio = titleWidth / afterWidth;
-      if (Math.abs(1 - ratio) > 0.04) {
-        var ls = (ratio - 1) * 0.08;
-        ls = Math.max(-0.3, Math.min(0.3, ls));
-        atom.style.letterSpacing = ls.toFixed(3) + 'em';
-        afterWidth = atom.getBoundingClientRect().width || afterWidth;
-      } else {
-        atom.style.letterSpacing = '';
+      var finalRatio = titleWidth / afterWidth;
+      if (Math.abs(1 - finalRatio) > 0.05) {
+        appliedScaleX = Math.max(0.85, Math.min(1.35, finalRatio));
+        atom.style.transformOrigin = 'center center';
+        atom.style.transform = 'scaleX(' + appliedScaleX.toFixed(3) + ')';
       }
     }
 
@@ -801,7 +801,13 @@ function onScroll(){
       atom.parentElement.classList.add('tc-user-photos-title-width-target');
     }
 
-    logDebug('titleWidth=', titleWidth, 'bottomBefore=', Math.round(beforeWidth), 'bottomAfter=', Math.round(afterWidth), 'fontSize=', nextSize);
+    logDebug(
+      'titleWidth=', Math.round(titleWidth),
+      'bottomBefore=', Math.round(beforeWidth),
+      'bottomAfterFontSize=', Math.round(afterWidth),
+      'fontSize=', nextSize.toFixed(2),
+      'scaleX=', appliedScaleX.toFixed(3)
+    );
 
     return atom;
   }
