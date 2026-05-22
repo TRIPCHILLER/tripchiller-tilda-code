@@ -3261,21 +3261,21 @@ function setupDesktopAura() {
   var USER_PHOTOS_REV = '20260521';
 
   var USER_PHOTOS = [
-    "https://static.tildacdn.com/tild3866-3134-4235-b739-386236373939/20250209_152049_IMG_.jpg",
-    "https://static.tildacdn.com/tild3165-6233-4966-b365-306534343730/jT-rqCPef8n7kAtP79Dv.jpg",
-    "https://static.tildacdn.com/tild3239-3630-4538-b363-333364323737/IMG_4749__2.jpg",
-    "https://static.tildacdn.com/tild3234-3538-4661-b436-346663663433/photo_2025-12-07_17-.jpg",
-    "https://static.tildacdn.com/tild6632-6531-4062-b932-326661346366/IMG_8909.JPG",
-    "https://static.tildacdn.com/tild3138-3131-4030-b235-343662656564/IMG_4749__3.jpg",
-    "https://static.tildacdn.com/tild3934-6435-4062-b035-623934333265/photo_2024-08-29_14-.jpg",
-    "https://static.tildacdn.com/tild3462-3738-4665-a163-663163373862/photo_2026-01-07_05-.jpg",
-    "https://static.tildacdn.com/tild6438-3732-4131-a662-316337343765/IMG_47102_.jpg",
-    "https://static.tildacdn.com/tild3331-3461-4235-b136-336637336333/6yu6j06OMVuTiTq3_83Q.jpg",
-    "https://static.tildacdn.com/tild6335-3432-4565-b636-306436343532/photo_2026-05-21_14-.jpg",
-    "https://static.tildacdn.com/tild6263-3933-4631-b765-343764386231/IMG_4749__33.jpg",
-    "https://static.tildacdn.com/tild6661-3232-4464-a231-623165643665/IMG_4749__34.jpg",
-    "https://static.tildacdn.com/tild6232-6665-4532-b732-363561623133/IMG_4749__5.jpg",
-    "https://static.tildacdn.com/tild3739-3839-4131-b737-616363623435/IMG_4749__4.jpg"
+    { src: "https://static.tildacdn.com/tild3866-3134-4235-b739-386236373939/20250209_152049_IMG_.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754849678317", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild3165-6233-4966-b365-306534343730/jT-rqCPef8n7kAtP79Dv.jpg", href: "", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild3239-3630-4538-b363-333364323737/IMG_4749__2.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754578987399", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild3234-3538-4661-b436-346663663433/photo_2025-12-07_17-.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344171469", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild6632-6531-4062-b932-326661346366/IMG_8909.JPG", href: "https://tripchiller.com/#!/tproduct/1202483551-1756816115084", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild3138-3131-4030-b235-343662656564/IMG_4749__3.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1756815870388", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild3934-6435-4062-b035-623934333265/photo_2024-08-29_14-.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1778901069550", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild3462-3738-4665-a163-663163373862/photo_2026-01-07_05-.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344170359", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild6438-3732-4131-a662-316337343765/IMG_47102_.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344171469", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild3331-3461-4235-b136-336637336333/6yu6j06OMVuTiTq3_83Q.jpg", href: "", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild6335-3432-4565-b636-306436343532/photo_2026-05-21_14-.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593190734", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild6263-3933-4631-b765-343764386231/IMG_4749__33.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593191131", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild6661-3232-4464-a231-623165643665/IMG_4749__34.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593191131", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild6232-6665-4532-b732-363561623133/IMG_4749__5.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344170359", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild3739-3839-4131-b737-616363623435/IMG_4749__4.jpg", href: "", alt: "Фото адепта TRIPCHILLER" }
   ];
 
   function ready(fn) {
@@ -3288,6 +3288,18 @@ function setupDesktopAura() {
   function withPhotoRev(url) {
     if (!url) return url;
     return url + (url.indexOf('?') === -1 ? '?' : '&') + 'rev=' + USER_PHOTOS_REV;
+  }
+  function getPhotoSrc(item) {
+    if (!item) return "";
+    return typeof item === "string" ? item : item.src || "";
+  }
+  function getPhotoHref(item) {
+    if (!item || typeof item === "string") return "";
+    return item.href || "";
+  }
+  function getPhotoAlt(item, idx) {
+    if (!item || typeof item === "string") return "Фото трипонавта " + (idx + 1);
+    return item.alt || ("Фото трипонавта " + (idx + 1));
   }
 
   function randomInt(max) {
@@ -3341,11 +3353,11 @@ function setupDesktopAura() {
           '<button class="tc-user-photos__nav tc-user-photos__nav--prev" type="button" aria-label="Предыдущее фото"><span>‹</span></button>' +
           '<div class="tc-user-photos__viewport">' +
             '<div class="tc-user-photos__track">' +
-              '<div class="tc-user-photos__slide tc-user-photos__slide--far-prev"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
-              '<div class="tc-user-photos__slide tc-user-photos__slide--prev"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
-              '<div class="tc-user-photos__slide tc-user-photos__slide--active"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
-              '<div class="tc-user-photos__slide tc-user-photos__slide--next"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
-              '<div class="tc-user-photos__slide tc-user-photos__slide--far-next"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--far-prev"><a class="tc-user-photos__photo-link" href="" aria-label="Открыть товар"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--prev"><a class="tc-user-photos__photo-link" href="" aria-label="Открыть товар"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--active"><a class="tc-user-photos__photo-link" href="" aria-label="Открыть товар"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--next"><a class="tc-user-photos__photo-link" href="" aria-label="Открыть товар"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
+              '<div class="tc-user-photos__slide tc-user-photos__slide--far-next"><a class="tc-user-photos__photo-link" href="" aria-label="Открыть товар"><img class="tc-user-photos__img" loading="lazy" decoding="async" alt="Фото трипонавта"></a></div>' +
             '</div>' +
           '</div>' +
           '<button class="tc-user-photos__nav tc-user-photos__nav--next" type="button" aria-label="Следующее фото"><span>›</span></button>' +
@@ -3367,11 +3379,22 @@ function setupDesktopAura() {
     if (!section) return;
 
     var track = section.querySelector('.tc-user-photos__track');
-    var farPrevImg = section.querySelector('.tc-user-photos__slide--far-prev .tc-user-photos__img');
-    var prevImg = section.querySelector('.tc-user-photos__slide--prev .tc-user-photos__img');
-    var activeImg = section.querySelector('.tc-user-photos__slide--active .tc-user-photos__img');
-    var nextImg = section.querySelector('.tc-user-photos__slide--next .tc-user-photos__img');
-    var farNextImg = section.querySelector('.tc-user-photos__slide--far-next .tc-user-photos__img');
+    var viewport = section.querySelector('.tc-user-photos__viewport');
+    var farPrevSlide = section.querySelector('.tc-user-photos__slide--far-prev');
+    var prevSlide = section.querySelector('.tc-user-photos__slide--prev');
+    var activeSlide = section.querySelector('.tc-user-photos__slide--active');
+    var nextSlide = section.querySelector('.tc-user-photos__slide--next');
+    var farNextSlide = section.querySelector('.tc-user-photos__slide--far-next');
+    var farPrevLink = farPrevSlide ? farPrevSlide.querySelector('.tc-user-photos__photo-link') : null;
+    var prevLink = prevSlide ? prevSlide.querySelector('.tc-user-photos__photo-link') : null;
+    var activeLink = activeSlide ? activeSlide.querySelector('.tc-user-photos__photo-link') : null;
+    var nextLink = nextSlide ? nextSlide.querySelector('.tc-user-photos__photo-link') : null;
+    var farNextLink = farNextSlide ? farNextSlide.querySelector('.tc-user-photos__photo-link') : null;
+    var farPrevImg = farPrevSlide ? farPrevSlide.querySelector('.tc-user-photos__img') : null;
+    var prevImg = prevSlide ? prevSlide.querySelector('.tc-user-photos__img') : null;
+    var activeImg = activeSlide ? activeSlide.querySelector('.tc-user-photos__img') : null;
+    var nextImg = nextSlide ? nextSlide.querySelector('.tc-user-photos__img') : null;
+    var farNextImg = farNextSlide ? farNextSlide.querySelector('.tc-user-photos__img') : null;
     var prevBtn = section.querySelector('.tc-user-photos__nav--prev');
     var nextBtn = section.querySelector('.tc-user-photos__nav--next');
     var topTickerTrack = section.querySelector('.tc-user-photos__ticker--top .tc-user-photos__ticker-track');
@@ -3385,6 +3408,11 @@ function setupDesktopAura() {
     var tickerResizeRaf = 0;
     var autoTimer = 0;
     var AUTO_INTERVAL = 5000;
+    var suppressPhotoClickUntil = 0;
+    var dragState = null;
+    var DRAG_START_THRESHOLD = 8;
+    var DRAG_COMMIT_THRESHOLD = 70;
+    var MAX_DRAG_RATIO = 0.9;
     var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function parseAnimationDurationMs(track) {
@@ -3436,10 +3464,33 @@ function setupDesktopAura() {
       };
     }
 
-    function setImg(img, idx) {
+    function setPhotoSlot(link, img, idx, role) {
       if (!img || idx < 0 || !photos[idx]) return;
-      img.src = withPhotoRev(photos[idx]);
-      img.alt = 'Фото трипонавта ' + (idx + 1);
+      var item = photos[idx];
+      var src = getPhotoSrc(item);
+      var href = getPhotoHref(item);
+      var alt = getPhotoAlt(item, idx);
+      img.src = withPhotoRev(src);
+      img.alt = alt;
+      if (!link) return;
+      link.setAttribute('aria-label', href ? 'Открыть товар по фото' : alt);
+      link.dataset.photoRole = role || '';
+      link.dataset.photoIndex = String(idx);
+      if (role === 'active' && href) {
+        link.href = href;
+        link.target = '_self';
+        link.removeAttribute('aria-disabled');
+        link.classList.remove('is-not-linked');
+        link.classList.add('is-linked');
+        link.tabIndex = 0;
+      } else {
+        link.removeAttribute('href');
+        link.removeAttribute('target');
+        link.setAttribute('aria-disabled', 'true');
+        link.classList.remove('is-linked');
+        link.classList.add('is-not-linked');
+        link.tabIndex = -1;
+      }
     }
 
     function preloadNeighbors(index) {
@@ -3449,18 +3500,18 @@ function setupDesktopAura() {
         if (idx < 0 || !photos[idx]) return;
         var img = new Image();
         img.decoding = 'async';
-        img.src = withPhotoRev(photos[idx]);
+        img.src = withPhotoRev(getPhotoSrc(photos[idx]));
       });
     }
 
     function render() {
       var ids = getIndices(current);
       if (ids.active < 0) return;
-      setImg(farPrevImg, ids.farPrev);
-      setImg(prevImg, ids.prev);
-      setImg(activeImg, ids.active);
-      setImg(nextImg, ids.next);
-      setImg(farNextImg, ids.farNext);
+      setPhotoSlot(farPrevLink, farPrevImg, ids.farPrev, 'far-prev');
+      setPhotoSlot(prevLink, prevImg, ids.prev, 'prev');
+      setPhotoSlot(activeLink, activeImg, ids.active, 'active');
+      setPhotoSlot(nextLink, nextImg, ids.next, 'next');
+      setPhotoSlot(farNextLink, farNextImg, ids.farNext, 'far-next');
       preloadNeighbors(current);
     }
 
@@ -3548,6 +3599,19 @@ function setupDesktopAura() {
       stopAuto();
       startAuto();
     }
+    function shouldSuppressPhotoClick() { return Date.now() < suppressPhotoClickUntil; }
+    function getSlideStepPx() {
+      if (!track) return 0;
+      var raw = window.getComputedStyle(section).getPropertyValue('--tc-user-slide-step');
+      var parsed = parseFloat(raw);
+      if (parsed) return parsed;
+      if (activeSlide && nextSlide) {
+        var activeRect = activeSlide.getBoundingClientRect();
+        var nextRect = nextSlide.getBoundingClientRect();
+        return Math.abs(nextRect.left - activeRect.left) || 320;
+      }
+      return 320;
+    }
 
     function onVisibilityChange() {
       if (document.hidden) stopAuto();
@@ -3560,9 +3624,71 @@ function setupDesktopAura() {
     function onNext() {
       if (slide('next')) restartAuto();
     }
+    function onPrevSlideClick(e) {
+      if (shouldSuppressPhotoClick()) { e.preventDefault(); e.stopPropagation(); return; }
+      e.preventDefault();
+      if (slide('prev')) restartAuto();
+    }
+    function onNextSlideClick(e) {
+      if (shouldSuppressPhotoClick()) { e.preventDefault(); e.stopPropagation(); return; }
+      e.preventDefault();
+      if (slide('next')) restartAuto();
+    }
+    function onActiveLinkClick(e) {
+      if (shouldSuppressPhotoClick()) { e.preventDefault(); e.stopPropagation(); return; }
+      if (!activeLink || !activeLink.href || activeLink.classList.contains('is-not-linked')) e.preventDefault();
+    }
+    function onDragStart(e) {
+      if (isSliding || len < 2) return;
+      if (e && e.target && e.target.closest('.tc-user-photos__nav')) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (typeof e.isPrimary === 'boolean' && !e.isPrimary) return;
+      dragState = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, active: false, canceled: false };
+    }
+    function onDragMove(e) {
+      if (!dragState || dragState.canceled || dragState.pointerId !== e.pointerId || isSliding) return;
+      dragState.dx = e.clientX - dragState.startX;
+      dragState.dy = e.clientY - dragState.startY;
+      var absX = Math.abs(dragState.dx);
+      var absY = Math.abs(dragState.dy);
+      if (!dragState.active) {
+        if (absY > absX * 1.2) { dragState.canceled = true; dragState = null; return; }
+        if (absX > DRAG_START_THRESHOLD && absX > absY) {
+          dragState.active = true;
+          section.classList.add('is-dragging');
+        } else return;
+      }
+      e.preventDefault();
+      var step = getSlideStepPx();
+      var maxAbs = Math.max(DRAG_COMMIT_THRESHOLD, step * MAX_DRAG_RATIO);
+      var clampedDx = Math.max(-maxAbs, Math.min(maxAbs, dragState.dx));
+      section.style.setProperty('--tc-user-drag-x', clampedDx + 'px');
+    }
+    function onDragEnd(e) {
+      if (!dragState || (e && dragState.pointerId !== e.pointerId)) return;
+      var wasActive = dragState.active;
+      var dx = dragState.dx;
+      dragState = null;
+      section.classList.remove('is-dragging');
+      section.style.removeProperty('--tc-user-drag-x');
+      if (!wasActive) return;
+      suppressPhotoClickUntil = Date.now() + 350;
+      if (Math.abs(dx) >= DRAG_COMMIT_THRESHOLD) {
+        if (dx < 0) {
+          if (slide('next')) restartAuto();
+        } else if (slide('prev')) restartAuto();
+      }
+    }
 
     prevBtn.addEventListener('click', onPrev);
     nextBtn.addEventListener('click', onNext);
+    if (prevLink) prevLink.addEventListener('click', onPrevSlideClick);
+    if (nextLink) nextLink.addEventListener('click', onNextSlideClick);
+    if (activeLink) activeLink.addEventListener('click', onActiveLinkClick);
+    if (viewport) viewport.addEventListener('pointerdown', onDragStart);
+    window.addEventListener('pointermove', onDragMove, { passive: false });
+    window.addEventListener('pointerup', onDragEnd);
+    window.addEventListener('pointercancel', onDragEnd);
 
     if (len === 0) {
       section.classList.add('is-empty');
@@ -3591,6 +3717,13 @@ function setupDesktopAura() {
         document.removeEventListener('visibilitychange', onVisibilityChange);
         prevBtn.removeEventListener('click', onPrev);
         nextBtn.removeEventListener('click', onNext);
+        if (prevLink) prevLink.removeEventListener('click', onPrevSlideClick);
+        if (nextLink) nextLink.removeEventListener('click', onNextSlideClick);
+        if (activeLink) activeLink.removeEventListener('click', onActiveLinkClick);
+        if (viewport) viewport.removeEventListener('pointerdown', onDragStart);
+        window.removeEventListener('pointermove', onDragMove, { passive: false });
+        window.removeEventListener('pointerup', onDragEnd);
+        window.removeEventListener('pointercancel', onDragEnd);
         stopAuto();
         root.innerHTML = '';
       }
