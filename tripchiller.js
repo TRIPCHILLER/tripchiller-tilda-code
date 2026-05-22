@@ -3270,12 +3270,13 @@ function setupDesktopAura() {
     { src: "https://static.tildacdn.com/tild3934-6435-4062-b035-623934333265/photo_2024-08-29_14-.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1778901069550", alt: "Фото адепта TRIPCHILLER" },
     { src: "https://static.tildacdn.com/tild3462-3738-4665-a163-663163373862/photo_2026-01-07_05-.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344170359", alt: "Фото адепта TRIPCHILLER" },
     { src: "https://static.tildacdn.com/tild6438-3732-4131-a662-316337343765/IMG_47102_.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344171469", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild3331-3461-4235-b136-336637336333/6yu6j06OMVuTiTq3_83Q.jpg", href: "", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild6335-3432-4565-b636-306436343532/photo_2026-05-21_14-.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593190734", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild6263-3933-4631-b765-343764386231/IMG_4749__33.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593191131", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild6661-3232-4464-a231-623165643665/IMG_4749__34.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593191131", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild6232-6665-4532-b732-363561623133/IMG_4749__5.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344170359", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild3739-3839-4131-b737-616363623435/IMG_4749__4.jpg", href: "", alt: "Фото адепта TRIPCHILLER" }
+    { src: "https://static.tildacdn.com/tild3331-3461-4235-b136-336637336333/6yu6j06OMVuTiTq3_83Q.jpg", href: "", alt: "BLACK STAR T-SHIRT" },
+    { src: "https://static.tildacdn.com/tild6335-3432-4565-b636-306436343532/photo_2026-05-21_14-.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593190734", alt: "FOG MOOD CUSTOM CAP" },
+    { src: "https://static.tildacdn.com/tild6263-3933-4631-b765-343764386231/IMG_4749__33.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593191131", alt: "GLAMOUR EMO CAP" },
+    { src: "https://static.tildacdn.com/tild6661-3232-4464-a231-623165643665/IMG_4749__34.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593191131", alt: "GLAMOUR EMO CAP" },
+    { src: "https://static.tildacdn.com/tild6232-6665-4532-b732-363561623133/IMG_4749__5.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344170359", alt: "DFMB WASHED CAP" },
+    { src: "https://static.tildacdn.com/tild3461-3739-4230-b437-356534376461/IMG_47102__2.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-3569261809201", alt: "DFMB T-SHIRT" },
+    { src: "https://static.tildacdn.com/tild3739-3839-4131-b737-616363623435/IMG_4749__4.jpg", href: "", alt: "OSENIN FLAME T-SHIRT" }
   ];
 
   function ready(fn) {
