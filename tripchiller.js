@@ -3647,43 +3647,138 @@ function setupDesktopAura() {
       var parts = String(productId).split('-');
       return parts.length > 1 ? parts[parts.length - 1] : '';
     }
-    function openTildaProductFromPhoto(href) {
-      if (!href) return false;
+    function getHrefHash(href) {
+      var raw = String(href || '');
+      var hashIndex = raw.indexOf('#!');
+      return hashIndex >= 0 ? raw.slice(hashIndex) : '';
+    }
+    function normalizeHrefForCompare(value) {
+      return String(value || '').replace(/^https?:\/\/[^/]+/i, '');
+    }
+    function isInsideUserPhotos(node) {
+      return !!(node && node.closest && node.closest('#tc-user-photos-root'));
+    }
+    function isClickableCandidate(node) {
+      if (!node || !node.matches) return false;
+      return node.matches('a, button, [role="button"], .t-store__card__btn, .t-store__card__btns-wrapper a, .t778__btn, .t-btn, .js-store-prod-name, .js-product-url');
+    }
+    function getClickableFromCandidate(node) {
+      if (!node || isInsideUserPhotos(node)) return null;
+      if (isClickableCandidate(node)) return node;
+      var descendant = node.querySelector && node.querySelector(
+        'a[href*="#!/tproduct/"], a[href*="/#!/tproduct/"], a[href*="tproduct"], button, [role="button"], .t-store__card__btn, .t-store__card__btns-wrapper a, .t778__btn, .t-btn, .js-store-prod-name, .js-product-url'
+      );
+      if (descendant && !isInsideUserPhotos(descendant)) return descendant;
+      var closest = node.closest && node.closest(
+        'a, button, [role="button"], .t-store__card__btn, .t778__btn, .t-btn, .js-store-prod-name, .js-product-url'
+      );
+      if (closest && !isInsideUserPhotos(closest)) return closest;
+      return null;
+    }
+    function findTildaProductClickable(href) {
       var productId = getTProductIdFromHref(href);
       var shortProductId = getShortTProductId(productId);
-      var hashIndex = String(href).indexOf('#!');
-      var hrefHash = hashIndex >= 0 ? String(href).slice(hashIndex) : '';
-      var selectorParts = [];
+      var hrefHash = getHrefHash(href);
+      var normalizedHref = normalizeHrefForCompare(href);
+      var selectors = [];
+      if (hrefHash) {
+        selectors.push('a[href="' + hrefHash + '"]');
+        selectors.push('a[href*="' + hrefHash + '"]');
+      }
+      if (normalizedHref) selectors.push('a[href*="' + normalizedHref + '"]');
       if (productId) {
-        selectorParts.push('a[href*="' + productId + '"]');
-        selectorParts.push('[data-product-lid="' + productId + '"]');
-        selectorParts.push('[data-product-gen-uid="' + productId + '"]');
-        selectorParts.push('[data-product-id="' + productId + '"]');
+        selectors.push('a[href*="' + productId + '"]');
+        selectors.push('[data-product-lid="' + productId + '"]');
+        selectors.push('[data-product-gen-uid="' + productId + '"]');
+        selectors.push('[data-product-id="' + productId + '"]');
+        selectors.push('[data-product-uid="' + productId + '"]');
       }
       if (shortProductId) {
-        selectorParts.push('a[href*="' + shortProductId + '"]');
-        selectorParts.push('[data-product-lid="' + shortProductId + '"]');
-        selectorParts.push('[data-product-gen-uid="' + shortProductId + '"]');
-        selectorParts.push('[data-product-id="' + shortProductId + '"]');
+        selectors.push('a[href*="' + shortProductId + '"]');
+        selectors.push('[data-product-lid="' + shortProductId + '"]');
+        selectors.push('[data-product-gen-uid="' + shortProductId + '"]');
+        selectors.push('[data-product-id="' + shortProductId + '"]');
+        selectors.push('[data-product-uid="' + shortProductId + '"]');
       }
-      if (hrefHash) {
-        selectorParts.push('a[href="' + hrefHash + '"]');
-        selectorParts.push('a[href*="' + hrefHash + '"]');
+      for (var i = 0; i < selectors.length; i += 1) {
+        var nodes = Array.prototype.slice.call(document.querySelectorAll(selectors[i]));
+        for (var j = 0; j < nodes.length; j += 1) {
+          var node = nodes[j];
+          if (!node || node === activeLink || isInsideUserPhotos(node)) continue;
+          var clickable = getClickableFromCandidate(node);
+          if (clickable && !isInsideUserPhotos(clickable)) return clickable;
+        }
       }
-      selectorParts.push('a[href="' + href + '"]');
-      for (var i = 0; i < selectorParts.length; i += 1) {
-        var target = document.querySelector(selectorParts[i]);
-        if (!target) continue;
-        if (target === activeLink || target.closest('#tc-user-photos-root')) continue;
+      return null;
+    }
+    function clickTildaTarget(target) {
+      if (!target) return false;
+      try {
+        target.dispatchEvent(new MouseEvent('mousedown', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        }));
+        target.dispatchEvent(new MouseEvent('mouseup', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        }));
         target.dispatchEvent(new MouseEvent('click', {
           bubbles: true,
           cancelable: true,
           view: window
         }));
         return true;
+      } catch (_) {
+        try {
+          target.click();
+          return true;
+        } catch (__) {
+          return false;
+        }
       }
-      window.location.href = href;
+    }
+    function openTildaProductByHashFallback(href) {
+      var hrefHash = getHrefHash(href);
+      if (!hrefHash) {
+        window.location.href = href;
+        return true;
+      }
+      var applyHash = function () {
+        window.location.hash = hrefHash;
+        try {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        } catch (_) {
+          window.dispatchEvent(new Event('hashchange'));
+        }
+        try {
+          window.dispatchEvent(new Event('popstate'));
+        } catch (_) {}
+      };
+      if (window.location.hash === hrefHash) {
+        window.location.hash = '';
+        setTimeout(applyHash, 30);
+      } else {
+        applyHash();
+      }
       return true;
+    }
+    function openTildaProductFromPhoto(href) {
+      if (!href) return false;
+      var target = findTildaProductClickable(href);
+      if (window.__TC_DEBUG_USER_PHOTOS) {
+        console.log('[USER_PHOTOS] open product', { href: href, target: target });
+      }
+      if (target) {
+        clickTildaTarget(target);
+        setTimeout(function () {
+          var hasPopup = document.querySelector('.t-store__prod-popup, .t-popup_show, .t-popup.t-popup_show, .js-product-popup, .t-store__product-popup');
+          if (!hasPopup) openTildaProductByHashFallback(href);
+        }, 120);
+        return true;
+      }
+      return openTildaProductByHashFallback(href);
     }
     function onActiveLinkClick(e) {
       if (shouldSuppressPhotoClick()) {
@@ -3705,10 +3800,16 @@ function setupDesktopAura() {
       if (e && e.target && e.target.closest('.tc-user-photos__nav')) return;
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       if (typeof e.isPrimary === 'boolean' && !e.isPrimary) return;
-      dragState = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, active: false, canceled: false };
-      try {
-        if (viewport && viewport.setPointerCapture) viewport.setPointerCapture(e.pointerId);
-      } catch (_) {}
+      dragState = {
+        pointerId: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        dx: 0,
+        dy: 0,
+        active: false,
+        canceled: false,
+        captured: false
+      };
     }
     function onDragMove(e) {
       if (!dragState || dragState.canceled || dragState.pointerId !== e.pointerId || isSliding) return;
@@ -3722,6 +3823,12 @@ function setupDesktopAura() {
           dragState.active = true;
           suppressPhotoClickUntil = Date.now() + 350;
           section.classList.add('is-dragging');
+          try {
+            if (viewport && viewport.setPointerCapture) {
+              viewport.setPointerCapture(e.pointerId);
+              dragState.captured = true;
+            }
+          } catch (_) {}
         } else return;
       }
       e.preventDefault();
@@ -3735,7 +3842,9 @@ function setupDesktopAura() {
       var wasActive = dragState.active;
       var dx = dragState.dx;
       try {
-        if (viewport && viewport.releasePointerCapture) viewport.releasePointerCapture(e.pointerId);
+        if (dragState.captured && viewport && viewport.releasePointerCapture) {
+          viewport.releasePointerCapture(e.pointerId);
+        }
       } catch (_) {}
       dragState = null;
       section.classList.remove('is-dragging');
