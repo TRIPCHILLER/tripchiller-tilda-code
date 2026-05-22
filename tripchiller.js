@@ -2293,7 +2293,7 @@ eyeUnlockTimer = setTimeout(function(){
 (function () {
   if (window.__TC_LOAD_MORE_BUTTON_STYLE_V1__) return;
   window.__TC_LOAD_MORE_BUTTON_STYLE_V1__ = true;
-  var LOAD_MORE_LABEL = 'ЗАГРУЗИТЬ ЕЩЁ';
+  var LOAD_MORE_LABEL = 'загрузить ещё';
   var observerRaf = 0;
 
   function setTextIfNeeded(node, value) {
