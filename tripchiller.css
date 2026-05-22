@@ -1607,6 +1607,9 @@ body {
 .tc-user-photos__ticker--top .tc-user-photos__ticker-track { animation-direction: reverse; }
 .tc-user-photos__ticker--bottom .tc-user-photos__ticker-track { animation-direction: normal; }
 .tc-user-photos__ticker span { font-size: clamp(10px, 1.05vw, 14px); line-height: 1; letter-spacing: .06em; text-transform: uppercase; opacity: .98; }
+.tc-user-photos__ticker-item,
+.tc-user-photos__ticker-sep { font-size: clamp(10px, 1.05vw, 14px); line-height: 1; letter-spacing: .06em; text-transform: uppercase; opacity: .98; }
+.tc-user-photos__ticker-sep { display: inline-flex; align-items: center; justify-content: center; opacity: .92; margin: 0 4px; }
 
 .tc-user-photos__carousel {
   position: relative;
