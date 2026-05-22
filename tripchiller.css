@@ -581,23 +581,34 @@ body.radio-playing .radio-on .tn-atom{
     opacity:0; visibility:hidden;
     will-change: transform, opacity;
     transform: translate3d(0,0,0) scale(0);
+    animation-name: note-fly;
+    animation-duration: 5s;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-play-state: paused;
+    animation-iteration-count: 1;
   }
 
-  body.radio-playing .note1 .tn-atom{
-    --dx: -28px; animation: note-fly 5s linear infinite; animation-delay: 0s;
-    opacity:1; visibility:visible;
+  .note1 .tn-atom{ --dx: -28px; }
+  .note2 .tn-atom{ --dx: 22px; }
+  .note3 .tn-atom{ --dx: -18px; }
+  .note4 .tn-atom{ --dx: 30px; }
+
+  body.radio-notes-starting .tn-atom.tc-note-active,
+  body.radio-notes-playing .tn-atom.tc-note-active,
+  body.radio-notes-draining .tn-atom.tc-note-active{
+    opacity:1;
+    visibility:visible;
+    animation-play-state: running;
   }
-  body.radio-playing .note2 .tn-atom{
-    --dx: 22px;  animation: note-fly 5s linear infinite; animation-delay: -1s;
-    opacity:1; visibility:visible;
+
+  body.radio-notes-playing .tn-atom.tc-note-active{
+    animation-iteration-count: infinite;
   }
-  body.radio-playing .note3 .tn-atom{
-    --dx: -18px; animation: note-fly 5s linear infinite; animation-delay: -2s;
-    opacity:1; visibility:visible;
-  }
-  body.radio-playing .note4 .tn-atom{
-    --dx: 30px;  animation: note-fly 5s linear infinite; animation-delay: -3s;
-    opacity:1; visibility:visible;
+
+  body.radio-notes-draining .tn-atom.tc-note-active,
+  body.radio-notes-starting .tn-atom.tc-note-active{
+    animation-iteration-count: 1;
   }
 
   @keyframes note-fly{
