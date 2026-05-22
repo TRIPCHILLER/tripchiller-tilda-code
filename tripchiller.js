@@ -721,8 +721,15 @@ function onScroll(){
 (function(){
   "use strict";
 
-  if (window.__TC_USER_PHOTOS_TITLE_WIDTH_BOUND__) return;
-  window.__TC_USER_PHOTOS_TITLE_WIDTH_BOUND__ = true;
+  if (window.__TC_USER_PHOTOS_TITLE_WIDTH_BOUND_V2__) return;
+  window.__TC_USER_PHOTOS_TITLE_WIDTH_BOUND_V2__ = true;
+
+  function logDebug(){
+    if (!window.__TC_DEBUG_COMMUNITY_ALIGN__) return;
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift('[TC community align]');
+    console.log.apply(console, args);
+  }
 
   function normText(s){
     return (s || "").replace(/\s+/g, " ").trim().toUpperCase();
@@ -736,46 +743,141 @@ function onScroll(){
     return null;
   }
 
-  function closestWidthTarget(node){
-    if (!node || !node.closest) return node;
-    return node.closest('.tn-elem, .t-col, .t-container, .t-rec, .t396__elem') || node;
+  function getTitleAndBottom(){
+    var selector = 'h1,h2,h3,[data-field="text"],.tn-atom,.t-title,.t-descr,.t-text';
+    var titleNode = findByText(selector, ':: C0MMUN1TY ::');
+    var bottomNode = findByText(selector, 'ПО ЛЮБЫМ ВОПРОСАМ И ДЛЯ ЗАКАЗА');
+    return { titleNode: titleNode, bottomNode: bottomNode };
   }
 
-  function bindTitleWidth(){
-    var titleEl = findByText('h1,h2,h3,[data-field="text"],.tn-atom,.t-title,.t-descr,.t-text', ':: C0MMUN1TY ::');
-    if (!titleEl) return;
+  function scaleBottomText(bottomNode, titleWidth){
+    if (!bottomNode || !titleWidth) return null;
 
-    var rect = titleEl.getBoundingClientRect();
-    if (!rect || !rect.width) return;
+    var atom = bottomNode.classList && bottomNode.classList.contains('tn-atom')
+      ? bottomNode
+      : (bottomNode.querySelector ? bottomNode.querySelector('.tn-atom') : null) || bottomNode;
 
-    var width = Math.round(rect.width);
+    if (!atom || !atom.getBoundingClientRect) return null;
+
+    if (!atom.dataset.tcBaseFontSize) {
+      var initialBase = parseFloat(window.getComputedStyle(atom).fontSize) || 16;
+      atom.dataset.tcBaseFontSize = String(initialBase);
+    }
+
+    var base = parseFloat(atom.dataset.tcBaseFontSize) || 16;
+    atom.style.fontSize = base + 'px';
+    atom.style.width = '';
+    atom.style.whiteSpace = 'nowrap';
+    atom.style.textAlign = 'center';
+    atom.style.marginLeft = 'auto';
+    atom.style.marginRight = 'auto';
+
+    var beforeRect = atom.getBoundingClientRect();
+    var beforeWidth = beforeRect && beforeRect.width ? beforeRect.width : 0;
+    if (!beforeWidth) return null;
+
+    var scale = titleWidth / beforeWidth;
+    var isMobile = window.innerWidth <= 768;
+    var minSize = isMobile ? 10 : 12;
+    var maxSize = isMobile ? 24 : 32;
+    var nextSize = Math.max(minSize, Math.min(maxSize, base * scale));
+
+    atom.style.fontSize = nextSize + 'px';
+
+    var afterWidth = atom.getBoundingClientRect().width || 0;
+    if (afterWidth && titleWidth) {
+      var ratio = titleWidth / afterWidth;
+      if (Math.abs(1 - ratio) > 0.04) {
+        var ls = (ratio - 1) * 0.08;
+        ls = Math.max(-0.3, Math.min(0.3, ls));
+        atom.style.letterSpacing = ls.toFixed(3) + 'em';
+        afterWidth = atom.getBoundingClientRect().width || afterWidth;
+      } else {
+        atom.style.letterSpacing = '';
+      }
+    }
+
+    if (atom.parentElement) {
+      atom.parentElement.classList.add('tc-user-photos-title-width-target');
+    }
+
+    logDebug('titleWidth=', titleWidth, 'bottomBefore=', Math.round(beforeWidth), 'bottomAfter=', Math.round(afterWidth), 'fontSize=', nextSize);
+
+    return atom;
+  }
+
+  function getSocRank(node){
+    var classes = (node.className || '').split(/\s+/);
+    for (var i = 0; i < classes.length; i++) {
+      var m = /^soc([1-4])$/.exec(classes[i]);
+      if (m) return parseInt(m[1], 10);
+    }
+    return 99;
+  }
+
+  function alignIcons(bottomAtom, titleRect){
+    if (!bottomAtom || !titleRect || !titleRect.width) return;
+
+    var bottomRect = bottomAtom.getBoundingClientRect();
+    var allIcons = Array.prototype.slice.call(document.querySelectorAll('.soc1, .soc2, .soc3, .soc4'));
+    var candidates = allIcons.filter(function(node){
+      var r = node.getBoundingClientRect();
+      return r.width > 0 && r.height > 0 && r.top > (bottomRect.bottom - 20);
+    });
+
+    if (!candidates.length) return;
+
+    candidates.sort(function(a, b){
+      var ra = getSocRank(a);
+      var rb = getSocRank(b);
+      if (ra !== rb) return ra - rb;
+      return a.getBoundingClientRect().left - b.getBoundingClientRect().left;
+    });
+
+    var icons = candidates.slice(0, 4);
+    var fractions = [0.125, 0.375, 0.625, 0.875];
+    var debugIcons = [];
+
+    for (var i = 0; i < icons.length; i++) {
+      var icon = icons[i];
+      var rect = icon.getBoundingClientRect();
+      var desiredCenter = titleRect.left + (titleRect.width * (fractions[i] || 0.5));
+      var currentCenter = rect.left + rect.width / 2;
+      var dx = desiredCenter - currentCenter;
+
+      if (!icon.dataset.tcBaseTransform) {
+        icon.dataset.tcBaseTransform = icon.style.transform || '';
+      }
+      var baseTf = icon.dataset.tcBaseTransform;
+      icon.style.transform = (baseTf ? (baseTf + ' ') : '') + 'translateX(' + dx.toFixed(2) + 'px)';
+      icon.style.setProperty('--tc-community-icon-dx', dx.toFixed(2) + 'px');
+      icon.classList.add('tc-community-icon-align');
+
+      debugIcons.push((icon.className || '').trim() + ':dx=' + dx.toFixed(2));
+    }
+
+    logDebug('icons=', debugIcons.join(', '));
+  }
+
+  function bindCommunityWidth(){
+    var refs = getTitleAndBottom();
+    if (!refs.titleNode || !refs.bottomNode) return;
+
+    var titleRect = refs.titleNode.getBoundingClientRect();
+    if (!titleRect || !titleRect.width) return;
+
+    var width = Math.round(titleRect.width);
     document.documentElement.style.setProperty('--tc-user-photos-title-width', width + 'px');
 
-    var bottomTextNode = findByText('h1,h2,h3,[data-field="text"],.tn-atom,.t-title,.t-descr,.t-text', 'ПО ЛЮБЫМ ВОПРОСАМ И ДЛЯ ЗАКАЗА');
-    if (bottomTextNode) {
-      closestWidthTarget(bottomTextNode).classList.add('tc-user-photos-title-width-target');
-    }
+    var bottomAtom = scaleBottomText(refs.bottomNode, titleRect.width);
+    alignIcons(bottomAtom, titleRect);
+  }
 
-    var socialNodes = document.querySelectorAll('.soc1, .soc2, .soc3, .soc4');
-    if (socialNodes.length) {
-      var sharedParent = socialNodes[0].parentElement;
-      var allSameParent = !!sharedParent;
-      for (var i = 1; i < socialNodes.length; i++) {
-        if (socialNodes[i].parentElement !== sharedParent) {
-          allSameParent = false;
-          break;
-        }
-      }
-
-      var iconsTarget = allSameParent ? sharedParent : closestWidthTarget(socialNodes[0]);
-      if (iconsTarget) iconsTarget.classList.add('tc-user-photos-icons-width-target');
-    }
+  function scheduleBind(delay){
+    setTimeout(bindCommunityWidth, delay || 0);
   }
 
   var resizeTimer = null;
-  function scheduleBind(delay){
-    setTimeout(bindTitleWidth, delay || 0);
-  }
 
   document.addEventListener('DOMContentLoaded', function(){
     scheduleBind(0);
@@ -792,7 +894,7 @@ function onScroll(){
 
   window.addEventListener('resize', function(){
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(bindTitleWidth, 120);
+    resizeTimer = setTimeout(bindCommunityWidth, 120);
   });
 
   if (document.fonts && document.fonts.ready) {
