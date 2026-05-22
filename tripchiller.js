@@ -4013,6 +4013,7 @@ function setupDesktopAura() {
   var LENS_SIZE = 230;
   var LENS_ZOOM = 2.4;
   var lens = null;
+  var lastDebugSrc = '';
 
   function debugLog() {
     if (!window.__TC_DEBUG_PRODUCT_MAGNIFIER || !window.console || !console.log) return;
@@ -4041,13 +4042,57 @@ function setupDesktopAura() {
     return match && match[2] ? match[2] : '';
   }
 
-  function getImageSource(node) {
+  function getNodeImageAttr(node) {
+    if (!node || !node.getAttribute) return '';
+
+    var attrs = [
+      'data-original',
+      'data-original-src',
+      'data-img-zoom-url',
+      'data-zoom-url',
+      'data-img',
+      'data-lazy-rule',
+      'data-src'
+    ];
+
+    for (var i = 0; i < attrs.length; i += 1) {
+      var value = node.getAttribute(attrs[i]);
+      if (value && /\.(jpg|jpeg|png|webp)(\?|#|$)/i.test(value)) return value;
+    }
+
+    return '';
+  }
+
+  function getOriginalImageSource(node) {
     if (!node) return '';
+
+    var direct = getNodeImageAttr(node);
+    if (direct) return direct;
+
+    var img = node.querySelector && node.querySelector('img');
+    if (img) {
+      var imgOriginal = getNodeImageAttr(img);
+      if (imgOriginal) return imgOriginal;
+      if (img.currentSrc || img.src) return img.currentSrc || img.src;
+    }
+
+    var parentLink = node.closest && node.closest('a[href]');
+    if (parentLink) {
+      var href = parentLink.getAttribute('href');
+      if (href && /\.(jpg|jpeg|png|webp)(\?|#|$)/i.test(href)) return href;
+    }
+
     if (node.tagName && node.tagName.toLowerCase() === 'img') {
       return node.currentSrc || node.src || '';
     }
-    var imageNode = node.querySelector && node.querySelector('img');
-    if (imageNode) return imageNode.currentSrc || imageNode.src || '';
+
+    return '';
+  }
+
+  function getImageSource(node) {
+    if (!node) return '';
+    var original = getOriginalImageSource(node);
+    if (original) return original;
     return getBgUrlFromNode(node);
   }
 
@@ -4114,7 +4159,10 @@ function setupDesktopAura() {
       (-(y * rect.height * LENS_ZOOM - LENS_SIZE / 2)) + 'px';
     lensEl.classList.add('is-visible');
 
-    debugLog('[PRODUCT_MAGNIFIER] active image', imageNode, src);
+    if (window.__TC_DEBUG_PRODUCT_MAGNIFIER && src !== lastDebugSrc) {
+      lastDebugSrc = src;
+      debugLog('[PRODUCT_MAGNIFIER] active image', imageNode, src);
+    }
   }
 
   document.addEventListener('pointermove', function (event) {
