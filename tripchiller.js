@@ -3272,6 +3272,8 @@ function setupDesktopAura() {
     "https://static.tildacdn.com/tild6438-3732-4131-a662-316337343765/IMG_47102_.jpg",
     "https://static.tildacdn.com/tild3331-3461-4235-b136-336637336333/6yu6j06OMVuTiTq3_83Q.jpg",
     "https://static.tildacdn.com/tild6335-3432-4565-b636-306436343532/photo_2026-05-21_14-.jpg",
+    "https://static.tildacdn.com/tild3965-3966-4535-b231-373438323666/IMG_4749__32.jpg",
+    "https://static.tildacdn.com/tild6232-6665-4532-b732-363561623133/IMG_4749__5.jpg",
     "https://static.tildacdn.com/tild3739-3839-4131-b737-616363623435/IMG_4749__4.jpg"
   ];
 
