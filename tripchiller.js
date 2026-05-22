@@ -3955,7 +3955,7 @@ function setupDesktopAura() {
   var TARGET_SELECTOR =
     '.tc-action, .tc-ui-btn, .tc-legal-btn, .t778__showmore, .t-store__load-more-btn, .js-store-load-more-btn, ' +
     '#allrecords .t778__btn-wrapper .t778__btn, .soc1 .tn-atom, .soc2 .tn-atom, .soc3 .tn-atom, .soc4 .tn-atom, ' +
-    '.tc-contact-link, .tc-contact-link .tn-atom';
+    '.tc-contact-link';
 
   var activeTarget = null;
 
