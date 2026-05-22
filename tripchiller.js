@@ -4014,6 +4014,8 @@ function setupDesktopAura() {
   var LENS_ZOOM = 2.4;
   var lens = null;
   var lastDebugSrc = '';
+  var imageMetaCache = {};
+  var lensUpdateSeq = 0;
 
   function debugLog() {
     if (!window.__TC_DEBUG_PRODUCT_MAGNIFIER || !window.console || !console.log) return;
@@ -4030,6 +4032,7 @@ function setupDesktopAura() {
   }
 
   function hideLens() {
+    document.documentElement.classList.remove('tc-product-magnifier-active');
     if (!lens) return;
     lens.classList.remove('is-visible');
   }
@@ -4096,6 +4099,48 @@ function setupDesktopAura() {
     return getBgUrlFromNode(node);
   }
 
+
+  function getImageMeta(src, callback) {
+    if (!src) {
+      callback(null);
+      return;
+    }
+
+    var cached = imageMetaCache[src];
+    if (cached && cached.loaded) {
+      callback(cached.failed ? null : cached);
+      return;
+    }
+
+    if (cached && cached.loading) {
+      cached.callbacks.push(callback);
+      return;
+    }
+
+    imageMetaCache[src] = { loading: true, loaded: false, callbacks: [callback] };
+
+    var img = new Image();
+    img.onload = function () {
+      var meta = {
+        loaded: true,
+        loading: false,
+        width: img.naturalWidth || img.width,
+        height: img.naturalHeight || img.height
+      };
+      var callbacks = imageMetaCache[src].callbacks || [];
+      imageMetaCache[src] = meta;
+      callbacks.forEach(function (cb) { cb(meta); });
+    };
+
+    img.onerror = function () {
+      var callbacks = imageMetaCache[src].callbacks || [];
+      imageMetaCache[src] = { loaded: true, loading: false, width: 0, height: 0, failed: true };
+      callbacks.forEach(function (cb) { cb(null); });
+    };
+
+    img.src = src;
+  }
+
   function isActionControl(node) {
     if (!node || !node.closest) return false;
     return !!node.closest(
@@ -4146,18 +4191,52 @@ function setupDesktopAura() {
       return;
     }
 
-    var x = (event.clientX - rect.left) / rect.width;
-    var y = (event.clientY - rect.top) / rect.height;
+    var px = event.clientX - rect.left;
+    var py = event.clientY - rect.top;
 
     var lensEl = ensureLens();
     lensEl.style.left = (event.clientX - LENS_SIZE / 2) + 'px';
     lensEl.style.top = (event.clientY - LENS_SIZE / 2) + 'px';
     lensEl.style.backgroundImage = 'url("' + src + '")';
+
+    var x = px / rect.width;
+    var y = py / rect.height;
     lensEl.style.backgroundSize = (rect.width * LENS_ZOOM) + 'px ' + (rect.height * LENS_ZOOM) + 'px';
     lensEl.style.backgroundPosition =
       (-(x * rect.width * LENS_ZOOM - LENS_SIZE / 2)) + 'px ' +
       (-(y * rect.height * LENS_ZOOM - LENS_SIZE / 2)) + 'px';
+
+    lensUpdateSeq += 1;
+    var updateSeq = lensUpdateSeq;
+
+    getImageMeta(src, function (meta) {
+      if (updateSeq !== lensUpdateSeq) return;
+      if (!lens || !lens.classList.contains('is-visible')) return;
+      if (lens.style.backgroundImage.indexOf(src) === -1) return;
+      if (!meta || !meta.width || !meta.height) return;
+
+      var naturalW = meta.width;
+      var naturalH = meta.height;
+      var coverScale = Math.max(rect.width / naturalW, rect.height / naturalH);
+      var displayW = naturalW * coverScale;
+      var displayH = naturalH * coverScale;
+      var offsetX = (rect.width - displayW) / 2;
+      var offsetY = (rect.height - displayH) / 2;
+
+      var imageX = (px - offsetX) / displayW;
+      var imageY = (py - offsetY) / displayH;
+
+      imageX = Math.max(0, Math.min(1, imageX));
+      imageY = Math.max(0, Math.min(1, imageY));
+
+      lensEl.style.backgroundSize = (displayW * LENS_ZOOM) + 'px ' + (displayH * LENS_ZOOM) + 'px';
+      lensEl.style.backgroundPosition =
+        (-(imageX * displayW * LENS_ZOOM - LENS_SIZE / 2)) + 'px ' +
+        (-(imageY * displayH * LENS_ZOOM - LENS_SIZE / 2)) + 'px';
+    });
+
     lensEl.classList.add('is-visible');
+    document.documentElement.classList.add('tc-product-magnifier-active');
 
     if (window.__TC_DEBUG_PRODUCT_MAGNIFIER && src !== lastDebugSrc) {
       lastDebugSrc = src;
@@ -4177,21 +4256,16 @@ function setupDesktopAura() {
   document.addEventListener('pointerleave', hideLens, true);
   document.addEventListener('mouseleave', hideLens, true);
 
-  function blockNativeZoom(event) {
+  document.addEventListener('pointerdown', function (event) {
     if (!CAN_USE_MAGNIFIER) return;
-    if (isActionControl(event.target) || isThumbnailTarget(event.target)) return;
+    if (isActionControl(event.target) || isThumbnailTarget(event.target)) {
+      hideLens();
+      return;
+    }
     var imageNode = getViewerImageFromTarget(event.target);
     if (!imageNode) return;
-    event.preventDefault();
-    event.stopPropagation();
-    if (typeof event.stopImmediatePropagation === 'function') {
-      event.stopImmediatePropagation();
-    }
-    debugLog('[PRODUCT_MAGNIFIER] blocked native zoom click', imageNode);
-  }
-
-  document.addEventListener('pointerdown', blockNativeZoom, true);
-  document.addEventListener('click', blockNativeZoom, true);
+    hideLens();
+  }, true);
 
   document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') hideLens();
