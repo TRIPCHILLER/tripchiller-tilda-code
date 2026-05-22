@@ -3463,6 +3463,10 @@ function setupDesktopAura() {
         farNext: mod(index + 2, len)
       };
     }
+    function getCurrentPhotoHref() {
+      if (len < 1 || current < 0 || !photos[current]) return '';
+      return getPhotoHref(photos[current]) || '';
+    }
 
     function setPhotoSlot(link, img, idx, role) {
       if (!img || idx < 0 || !photos[idx]) return;
@@ -3476,23 +3480,21 @@ function setupDesktopAura() {
       link.setAttribute('aria-label', href ? 'Открыть товар по фото' : alt);
       link.dataset.photoRole = role || '';
       link.dataset.photoIndex = String(idx);
-      link.dataset.productHref = href || '';
+      link.dataset.productHref = role === 'active' ? (href || '') : '';
+      link.removeAttribute('href');
+      link.removeAttribute('target');
       if (role === 'active' && href) {
-        link.href = href;
-        link.dataset.productHref = href;
-        link.target = '_self';
-        link.removeAttribute('aria-disabled');
-        link.classList.remove('is-not-linked');
         link.classList.add('is-linked');
+        link.classList.remove('is-not-linked');
+        link.setAttribute('role', 'button');
         link.tabIndex = 0;
+        link.removeAttribute('aria-disabled');
       } else {
-        link.removeAttribute('href');
-        link.dataset.productHref = '';
-        link.removeAttribute('target');
-        link.setAttribute('aria-disabled', 'true');
         link.classList.remove('is-linked');
         link.classList.add('is-not-linked');
+        link.removeAttribute('role');
         link.tabIndex = -1;
+        link.setAttribute('aria-disabled', 'true');
       }
     }
 
@@ -3786,14 +3788,26 @@ function setupDesktopAura() {
         e.stopPropagation();
         return;
       }
-      var href = activeLink ? activeLink.dataset.productHref : '';
-      if (!href || activeLink.classList.contains('is-not-linked')) {
+      var href = getCurrentPhotoHref();
+      if (window.__TC_DEBUG_USER_PHOTOS) {
+        console.log('[USER_PHOTOS] active click current href', {
+          current: current,
+          href: href,
+          datasetHref: activeLink ? activeLink.dataset.productHref : ''
+        });
+      }
+      if (!href || !activeLink || activeLink.classList.contains('is-not-linked')) {
         e.preventDefault();
         return;
       }
       e.preventDefault();
       e.stopPropagation();
       openTildaProductFromPhoto(href);
+    }
+    function onActiveLinkKeyDown(e) {
+      if (!e) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      onActiveLinkClick(e);
     }
     function onDragStart(e) {
       if (isSliding || len < 2) return;
@@ -3866,7 +3880,10 @@ function setupDesktopAura() {
       e.preventDefault();
     }
 
-    if (activeLink) activeLink.addEventListener('click', onActiveLinkClick);
+    if (activeLink) {
+      activeLink.addEventListener('click', onActiveLinkClick);
+      activeLink.addEventListener('keydown', onActiveLinkKeyDown);
+    }
     if (viewport) viewport.addEventListener('pointerdown', onDragStart);
     if (viewport) viewport.addEventListener('dragstart', preventNativePhotoDrag);
     window.addEventListener('pointermove', onDragMove, { passive: false });
@@ -3902,7 +3919,10 @@ function setupDesktopAura() {
         nextBtn.removeEventListener('click', onNext);
         if (prevLink) prevLink.removeEventListener('click', onPrevSlideClick);
         if (nextLink) nextLink.removeEventListener('click', onNextSlideClick);
-        if (activeLink) activeLink.removeEventListener('click', onActiveLinkClick);
+        if (activeLink) {
+          activeLink.removeEventListener('click', onActiveLinkClick);
+          activeLink.removeEventListener('keydown', onActiveLinkKeyDown);
+        }
         if (viewport) viewport.removeEventListener('pointerdown', onDragStart);
         if (viewport) viewport.removeEventListener('dragstart', preventNativePhotoDrag);
         window.removeEventListener('pointermove', onDragMove, { passive: false });
