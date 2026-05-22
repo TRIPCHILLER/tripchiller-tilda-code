@@ -4015,6 +4015,7 @@ function setupDesktopAura() {
   var lens = null;
   var lastDebugSrc = '';
   var imageMetaCache = {};
+  var lensUpdateSeq = 0;
 
   function debugLog() {
     if (!window.__TC_DEBUG_PRODUCT_MAGNIFIER || !window.console || !console.log) return;
@@ -4205,7 +4206,13 @@ function setupDesktopAura() {
       (-(x * rect.width * LENS_ZOOM - LENS_SIZE / 2)) + 'px ' +
       (-(y * rect.height * LENS_ZOOM - LENS_SIZE / 2)) + 'px';
 
+    lensUpdateSeq += 1;
+    var updateSeq = lensUpdateSeq;
+
     getImageMeta(src, function (meta) {
+      if (updateSeq !== lensUpdateSeq) return;
+      if (!lens || !lens.classList.contains('is-visible')) return;
+      if (lens.style.backgroundImage.indexOf(src) === -1) return;
       if (!meta || !meta.width || !meta.height) return;
 
       var naturalW = meta.width;
