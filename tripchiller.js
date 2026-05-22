@@ -3316,7 +3316,7 @@ function setupDesktopAura() {
   }
 
   function build(root) {
-    var topTickerText = '| ПРИ КАЖДОМ ЗАПУСКЕ ЭТОЙ СТРАНИЦЫ, ЗДЕСЬ ОТОБРАЖАЮТСЯ РАНДОМНЫЕ ФОТО НАШИХ АДЕПТОВ | ОСТАВЬ СВОЙ СЛЕД - ПРИШЛИ ФОТКУ В ЛЮБОМ ИЗДЕЛИИ В ДИРЕКТ: T.ME/TRIPCHILLER.OFFICIAL';
+    var topTickerText = '| ЗДЕСЬ ОТОБРАЖАЮТСЯ РАНДОМНЫЕ ФОТО НАШИХ АДЕПТОВ | ОСТАВЬ СВОЙ СЛЕД - ПРИШЛИ ФОТКУ В ЛЮБОМ ИЗДЕЛИИ В ДИРЕКТ: T.ME/TRIPCHILLER.OFFICIAL';
     var bottomTickerText = '| МЫ УВАЖАЕМ ПРИВАТНОСТЬ КАЖДОГО УЧАСТНИКА | В АРХИВ ПОПАДАЮТ ТОЛЬКО ФОТО, ПРИСЛАННЫЕ ВЛАДЕЛЬЦАМИ С ИХ РАЗРЕШЕНИЯ';
 
     function buildTickerLine(text) {
