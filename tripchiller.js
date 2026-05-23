@@ -2215,9 +2215,51 @@ eyeUnlockTimer = setTimeout(function(){
     nextBtn.addEventListener('click', function(ev){ if(dedupe(ev) && !audio.paused) next(); });
 
     var radioVisualTargets = [onUI, offUI, power, nextBtn].filter(Boolean);
+    var RADIO_BRIGHTNESS_OFF = 0.5;
+    var RADIO_BRIGHTNESS_ON = 1;
+    var RADIO_BRIGHTNESS_MS = 800;
+    var radioBrightnessValue = RADIO_BRIGHTNESS_OFF;
+    var radioBrightnessTarget = RADIO_BRIGHTNESS_OFF;
+    var radioBrightnessRaf = 0;
+    var radioBrightnessStart = 0;
+    var radioBrightnessFrom = RADIO_BRIGHTNESS_OFF;
     var radioHoverRaf = 0;
     var lastPointerEvent = null;
     var docHoverOpts = { passive: true };
+
+    function setRadioBrightness(value) {
+      radioBrightnessValue = value;
+      document.body.style.setProperty('--tc-radio-brightness', value.toFixed(3));
+    }
+
+    function easeRadioBrightness(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function animateRadioBrightnessTo(target) {
+      if (radioBrightnessTarget === target) return;
+      radioBrightnessTarget = target;
+      radioBrightnessFrom = radioBrightnessValue;
+      radioBrightnessStart = performance.now();
+
+      if (radioBrightnessRaf) cancelAnimationFrame(radioBrightnessRaf);
+
+      function tick(now) {
+        var t = Math.min(1, (now - radioBrightnessStart) / RADIO_BRIGHTNESS_MS);
+        var eased = easeRadioBrightness(t);
+        var next = radioBrightnessFrom + (radioBrightnessTarget - radioBrightnessFrom) * eased;
+        setRadioBrightness(next);
+
+        if (t < 1) {
+          radioBrightnessRaf = requestAnimationFrame(tick);
+        } else {
+          radioBrightnessRaf = 0;
+          setRadioBrightness(radioBrightnessTarget);
+        }
+      }
+
+      radioBrightnessRaf = requestAnimationFrame(tick);
+    }
 
     function isPointInsideRadio(x, y) {
       return radioVisualTargets.some(function(el) {
@@ -2230,6 +2272,7 @@ eyeUnlockTimer = setTimeout(function(){
 
     function clearRadioHovered(){
       document.body.classList.remove('tc-radio-hovered');
+      animateRadioBrightnessTo(RADIO_BRIGHTNESS_OFF);
     }
 
     function updateRadioHoverByPoint(ev){
@@ -2239,12 +2282,18 @@ eyeUnlockTimer = setTimeout(function(){
         radioHoverRaf = 0;
         if (!lastPointerEvent) return;
         var inside = isPointInsideRadio(lastPointerEvent.clientX, lastPointerEvent.clientY);
-        document.body.classList.toggle('tc-radio-hovered', inside);
+        if (inside) {
+          document.body.classList.add('tc-radio-hovered');
+          animateRadioBrightnessTo(RADIO_BRIGHTNESS_ON);
+        } else {
+          clearRadioHovered();
+        }
       });
     }
 
     function onRadioFocusIn(){
       document.body.classList.add('tc-radio-hovered');
+      animateRadioBrightnessTo(RADIO_BRIGHTNESS_ON);
     }
 
     function onRadioFocusOut(){
@@ -2262,6 +2311,7 @@ eyeUnlockTimer = setTimeout(function(){
     });
 
     audio.addEventListener('ended', next);
+    setRadioBrightness(RADIO_BRIGHTNESS_OFF);
 
     RADIO.destroy = function(){
       try{ audio.pause(); }catch(e){}
@@ -2277,8 +2327,11 @@ eyeUnlockTimer = setTimeout(function(){
       document.removeEventListener('mouseleave', clearRadioHovered, docHoverOpts);
       window.removeEventListener('blur', clearRadioHovered);
       if (radioHoverRaf) cancelAnimationFrame(radioHoverRaf);
+      if (radioBrightnessRaf) cancelAnimationFrame(radioBrightnessRaf);
       radioHoverRaf = 0;
+      radioBrightnessRaf = 0;
       lastPointerEvent = null;
+      document.body.style.removeProperty('--tc-radio-brightness');
       document.body.classList.remove('tc-radio-hovered');
     };
     return true;
