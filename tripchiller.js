@@ -1916,6 +1916,8 @@ eyeUnlockTimer = setTimeout(function(){
   var NOTE_INTERVAL_MS = 1200;
   var NOTE_CLASSES = ['note1', 'note2', 'note3', 'note4'];
   var NOTE_DX = { note1: '-28px', note2: '22px', note3: '-18px', note4: '30px' };
+  var NOTE_PARTICLE_SIZE = 24;
+  var NOTE_PARTICLE_SIZE_MOBILE = 20;
   var NOTE_PARTICLE_TIMEOUT_MS = 5600;
   var NOTE_ORIGIN_X_RATIO = 0.32;
   var NOTE_ORIGIN_Y_RATIO = 0.47;
@@ -1973,6 +1975,10 @@ eyeUnlockTimer = setTimeout(function(){
 
   function getTemplateAtom(noteClass) {
     return document.querySelector('.' + noteClass + ' .tn-atom');
+  }
+
+  function getNoteParticleSize() {
+    return window.innerWidth <= 768 ? NOTE_PARTICLE_SIZE_MOBILE : NOTE_PARTICLE_SIZE;
   }
 
   function getParticleOrigin(noteClass, templateRect) {
@@ -2044,14 +2050,17 @@ eyeUnlockTimer = setTimeout(function(){
 
     var templateRect = template.getBoundingClientRect();
     var origin = getParticleOrigin(noteClass, templateRect);
+    var particleSize = getNoteParticleSize();
 
     var particle = document.createElement('div');
     particle.className = 'tc-radio-note-particle tc-radio-note-particle--' + noteClass;
     particle.setAttribute('data-note-id', String(++noteParticleSeq));
     particle.style.left = origin.x + 'px';
     particle.style.top = origin.y + 'px';
-    particle.style.width = Math.max(1, templateRect.width || 0) + 'px';
-    particle.style.height = Math.max(1, templateRect.height || 0) + 'px';
+    particle.style.width = particleSize + 'px';
+    particle.style.height = particleSize + 'px';
+    particle.style.fontSize = particleSize + 'px';
+    particle.style.lineHeight = '1';
     particle.style.setProperty('--dx', NOTE_DX[noteClass] || '0px');
 
     var atomClone = template.cloneNode(true);
@@ -2061,6 +2070,11 @@ eyeUnlockTimer = setTimeout(function(){
     atomClone.style.animation = '';
     atomClone.style.opacity = '';
     atomClone.style.visibility = '';
+    atomClone.style.width = particleSize + 'px';
+    atomClone.style.height = particleSize + 'px';
+    atomClone.style.fontSize = particleSize + 'px';
+    atomClone.style.lineHeight = '1';
+    atomClone.style.display = 'block';
 
     particle.appendChild(atomClone);
     document.body.appendChild(particle);
