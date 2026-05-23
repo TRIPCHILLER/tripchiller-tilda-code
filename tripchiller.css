@@ -594,21 +594,17 @@ body.radio-playing .radio-on .tn-atom{
   .note3 .tn-atom{ --dx: -18px; }
   .note4 .tn-atom{ --dx: 30px; }
 
-  body.radio-notes-starting .tn-atom.tc-note-active,
-  body.radio-notes-playing .tn-atom.tc-note-active,
-  body.radio-notes-draining .tn-atom.tc-note-active{
-    opacity:1;
-    visibility:visible;
-    animation-play-state: running;
+  .tc-radio-note-clone{
+    pointer-events: none !important;
   }
 
-  body.radio-notes-playing .tn-atom.tc-note-active{
-    animation-iteration-count: infinite;
-  }
-
-  body.radio-notes-draining .tn-atom.tc-note-active,
-  body.radio-notes-starting .tn-atom.tc-note-active{
-    animation-iteration-count: 1;
+  .tc-radio-note-clone .tn-atom{
+    opacity: 1 !important;
+    visibility: visible !important;
+    animation: note-fly 5s linear both !important;
+    animation-iteration-count: 1 !important;
+    animation-play-state: running !important;
+    will-change: transform, opacity;
   }
 
   @keyframes note-fly{

@@ -1905,23 +1905,22 @@ eyeUnlockTimer = setTimeout(function(){
   if (window.__TRIP_RADIO__ && window.__TRIP_RADIO__.destroy) {
     try { window.__TRIP_RADIO__.destroy(); } catch(e){}
   }
-  if (window.__TC_RADIO_NOTES_V2__) {
-    try { window.__TC_RADIO_NOTES_V2__.destroy(); } catch (e) {}
+  if (window.__TC_RADIO_NOTES_CLONE_V1__) {
+    try { window.__TC_RADIO_NOTES_CLONE_V1__.destroy(); } catch (e) {}
   }
 
   var RADIO = window.__TRIP_RADIO__ = {};
-  window.__TC_RADIO_NOTES_V2__ = RADIO;
+  window.__TC_RADIO_NOTES_CLONE_V1__ = RADIO;
 
   var NOTE_DELAYS = [0, 280, 560, 840];
   var NOTE_INTERVAL_MS = 1200;
-  var NOTE_DRAIN_MS = 5100;
   var NOTE_CLASSES = ['note1', 'note2', 'note3', 'note4'];
 
   var noteState = 'off';
   var noteInterval = 0;
-  var noteDrainTimer = 0;
   var noteTimeouts = [];
   var noteIndex = 0;
+  var activeClones = 0;
 
   function isDebugNotes() {
     return window.__TC_DEBUG_RADIO_NOTES__ === true;
@@ -1938,10 +1937,6 @@ eyeUnlockTimer = setTimeout(function(){
     if (noteInterval) {
       clearInterval(noteInterval);
       noteInterval = 0;
-    }
-    if (noteDrainTimer) {
-      clearTimeout(noteDrainTimer);
-      noteDrainTimer = 0;
     }
     if (noteTimeouts.length) {
       noteTimeouts.forEach(function (id) { clearTimeout(id); });
@@ -1960,16 +1955,49 @@ eyeUnlockTimer = setTimeout(function(){
   }
 
   function getNoteNode(noteClass) {
-    return document.querySelector('.' + noteClass + ' .tn-atom');
+    return document.querySelector('.' + noteClass);
+  }
+
+  function removeIdsDeep(root) {
+    if (!root || root.nodeType !== 1) return;
+    root.removeAttribute('id');
+    root.querySelectorAll('[id]').forEach(function (el) {
+      el.removeAttribute('id');
+    });
+  }
+
+  function onCloneAnimationEnd(clone, noteClass) {
+    if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
+    if (activeClones > 0) activeClones -= 1;
+    notesLog('clone animationend:', noteClass);
+    notesLog('active clone count:', activeClones);
+    if (noteState === 'draining' && activeClones === 0) {
+      setNotesState('off');
+    }
   }
 
   function spawnNote(noteClass) {
     var note = getNoteNode(noteClass);
     if (!note) return;
-    note.classList.remove('tc-note-active');
-    void note.offsetWidth;
-    note.classList.add('tc-note-active');
-    notesLog('spawn note:', noteClass);
+
+    var clone = note.cloneNode(true);
+    clone.classList.add('tc-radio-note-clone');
+    removeIdsDeep(clone);
+
+    note.insertAdjacentElement('afterend', clone);
+
+    activeClones += 1;
+    notesLog('spawn clone:', noteClass);
+    notesLog('active clone count:', activeClones);
+
+    var atom = clone.querySelector('.tn-atom');
+    if (atom) {
+      atom.addEventListener('animationend', function () {
+        onCloneAnimationEnd(clone, noteClass);
+      }, { once: true });
+      return;
+    }
+    onCloneAnimationEnd(clone, noteClass);
   }
 
   function startNoteCycle() {
@@ -2004,22 +2032,10 @@ eyeUnlockTimer = setTimeout(function(){
     if (noteState === 'off') return;
     clearNoteTimers();
     setNotesState('draining');
-    noteDrainTimer = setTimeout(function () {
-      document.querySelectorAll('.note1 .tn-atom, .note2 .tn-atom, .note3 .tn-atom, .note4 .tn-atom').forEach(function (note) {
-        note.classList.remove('tc-note-active');
-      });
+    if (activeClones === 0) {
       setNotesState('off');
-    }, NOTE_DRAIN_MS);
+    }
   }
-
-  NOTE_CLASSES.forEach(function (cls) {
-    var note = getNoteNode(cls);
-    if (!note) return;
-    note.addEventListener('animationend', function () {
-      note.classList.remove('tc-note-active');
-      notesLog('note animationend:', cls);
-    });
-  });
 
 
   var PLAYLIST = [
