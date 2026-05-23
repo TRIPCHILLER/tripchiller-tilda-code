@@ -1912,7 +1912,6 @@ eyeUnlockTimer = setTimeout(function(){
   var RADIO = window.__TRIP_RADIO__ = {};
   window.__TC_RADIO_NOTES_CLONE_V1__ = RADIO;
 
-  var NOTE_DELAYS = [0, 280, 560, 840];
   var NOTE_INTERVAL_MS = 1200;
   var NOTE_CLASSES = ['note1', 'note2', 'note3', 'note4'];
   var NOTE_DX = { note1: '-28px', note2: '22px', note3: '-18px', note4: '30px' };
@@ -2104,20 +2103,10 @@ eyeUnlockTimer = setTimeout(function(){
     clearNoteTimers();
     cleanupStaleNoteArtifacts(false);
     noteIndex = 0;
-    setNotesState('starting');
-
-    NOTE_DELAYS.forEach(function (delay, idx) {
-      var tid = setTimeout(function () {
-        if (noteState !== 'starting') return;
-        spawnNote(NOTE_CLASSES[idx]);
-        noteIndex = idx + 1;
-        if (idx === NOTE_CLASSES.length - 1 && noteState === 'starting') {
-          setNotesState('playing');
-          startNoteCycle();
-        }
-      }, delay);
-      noteTimeouts.push(tid);
-    });
+    setNotesState('playing');
+    spawnNote(NOTE_CLASSES[noteIndex % NOTE_CLASSES.length]);
+    noteIndex += 1;
+    startNoteCycle();
   }
 
   function stopNotes() {
