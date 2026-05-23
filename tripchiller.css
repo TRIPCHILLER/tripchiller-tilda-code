@@ -706,8 +706,12 @@ body .radio-next .tn-atom,
 body .radio-on .tn-atom,
 body .radio-off .tn-atom,
 body .tc-radio-body .tn-atom{
-  filter: brightness(.5);
-  transition: filter .5s ease, opacity .5s ease;
+  filter:
+    brightness(.5)
+    drop-shadow(0 12px 18px rgba(0,0,0,.42));
+  transition:
+    filter .8s cubic-bezier(.16,.84,.24,1),
+    opacity .8s cubic-bezier(.16,.84,.24,1);
 }
 
 body.tc-radio-hovered .radio-power .tn-atom,
@@ -715,7 +719,9 @@ body.tc-radio-hovered .radio-next .tn-atom,
 body.tc-radio-hovered .radio-on .tn-atom,
 body.tc-radio-hovered .radio-off .tn-atom,
 body.tc-radio-hovered .tc-radio-body .tn-atom{
-  filter: brightness(1);
+  filter:
+    brightness(1)
+    drop-shadow(0 14px 22px rgba(0,0,0,.48));
 }
 
 .tc-legal-btn {

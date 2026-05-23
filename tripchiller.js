@@ -2214,23 +2214,51 @@ eyeUnlockTimer = setTimeout(function(){
     nextBtn.addEventListener('touchstart', function(){ if (!audio.paused) next(); }, {passive:true});
     nextBtn.addEventListener('click', function(ev){ if(dedupe(ev) && !audio.paused) next(); });
 
-    var hoverTargets = [power, nextBtn, onUI, offUI].filter(Boolean);
-    function isInsideRadio(target){
-      if (!target) return false;
-      return hoverTargets.some(function(el){ return el === target || el.contains(target); });
+    var radioVisualTargets = [onUI, offUI, power, nextBtn].filter(Boolean);
+    var radioHoverRaf = 0;
+    var lastPointerEvent = null;
+    var docHoverOpts = { passive: true };
+
+    function isPointInsideRadio(x, y) {
+      return radioVisualTargets.some(function(el) {
+        if (!el || !el.getBoundingClientRect) return false;
+        var r = el.getBoundingClientRect();
+        if (!r.width || !r.height) return false;
+        return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+      });
     }
-    function onHoverEnter(){
-      document.body.classList.add('tc-radio-hovered');
-    }
-    function onHoverLeave(ev){
-      if (isInsideRadio(ev.relatedTarget)) return;
+
+    function clearRadioHovered(){
       document.body.classList.remove('tc-radio-hovered');
     }
-    hoverTargets.forEach(function(el){
-      el.addEventListener('mouseenter', onHoverEnter);
-      el.addEventListener('mouseleave', onHoverLeave);
-      el.addEventListener('focusin', onHoverEnter);
-      el.addEventListener('focusout', onHoverLeave);
+
+    function updateRadioHoverByPoint(ev){
+      lastPointerEvent = ev;
+      if (radioHoverRaf) return;
+      radioHoverRaf = requestAnimationFrame(function(){
+        radioHoverRaf = 0;
+        if (!lastPointerEvent) return;
+        var inside = isPointInsideRadio(lastPointerEvent.clientX, lastPointerEvent.clientY);
+        document.body.classList.toggle('tc-radio-hovered', inside);
+      });
+    }
+
+    function onRadioFocusIn(){
+      document.body.classList.add('tc-radio-hovered');
+    }
+
+    function onRadioFocusOut(){
+      clearRadioHovered();
+    }
+
+    document.addEventListener('mousemove', updateRadioHoverByPoint, docHoverOpts);
+    document.addEventListener('pointermove', updateRadioHoverByPoint, docHoverOpts);
+    document.addEventListener('mouseleave', clearRadioHovered, docHoverOpts);
+    window.addEventListener('blur', clearRadioHovered);
+
+    [power, nextBtn].filter(Boolean).forEach(function(el){
+      el.addEventListener('focusin', onRadioFocusIn);
+      el.addEventListener('focusout', onRadioFocusOut);
     });
 
     audio.addEventListener('ended', next);
@@ -2244,6 +2272,13 @@ eyeUnlockTimer = setTimeout(function(){
       setNotesState('off');
       try{ power && unbind(power); }catch(e){}
       try{ nextBtn && unbind(nextBtn); }catch(e){}
+      document.removeEventListener('mousemove', updateRadioHoverByPoint, docHoverOpts);
+      document.removeEventListener('pointermove', updateRadioHoverByPoint, docHoverOpts);
+      document.removeEventListener('mouseleave', clearRadioHovered, docHoverOpts);
+      window.removeEventListener('blur', clearRadioHovered);
+      if (radioHoverRaf) cancelAnimationFrame(radioHoverRaf);
+      radioHoverRaf = 0;
+      lastPointerEvent = null;
       document.body.classList.remove('tc-radio-hovered');
     };
     return true;
