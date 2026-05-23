@@ -2163,6 +2163,7 @@ eyeUnlockTimer = setTimeout(function(){
     var p = audio.play();
     if (p && p.catch) p.catch(function(){});
     document.body.classList.add('radio-playing');
+    if (RADIO.syncRadioVisualState) RADIO.syncRadioVisualState();
     startNotes();
     bump();
   }
@@ -2170,6 +2171,7 @@ eyeUnlockTimer = setTimeout(function(){
   function pause(){
     audio.pause();
     document.body.classList.remove('radio-playing');
+    if (RADIO.syncRadioVisualState) RADIO.syncRadioVisualState();
     stopNotes();
     bump();
   }
@@ -2187,6 +2189,7 @@ eyeUnlockTimer = setTimeout(function(){
     var p = audio.play();
     if (p && p.catch) p.catch(function(){});
     document.body.classList.add('radio-playing');
+    if (RADIO.syncRadioVisualState) RADIO.syncRadioVisualState();
     bump();
   }
 
@@ -2214,9 +2217,74 @@ eyeUnlockTimer = setTimeout(function(){
     nextBtn.addEventListener('click', function(ev){ if(dedupe(ev) && !audio.paused) next(); });
 
     var radioVisualTargets = [onUI, offUI, power, nextBtn].filter(Boolean);
+    var radioOpacityTargets = [onUI, offUI]
+      .concat(Array.prototype.slice.call(document.querySelectorAll('.tc-radio-body')))
+      .filter(Boolean);
+    var RADIO_OPACITY_DIM = 0.5;
+    var RADIO_OPACITY_FULL = 1;
+    var RADIO_OPACITY_MS = 800;
+    var radioOpacityValue = RADIO_OPACITY_DIM;
+    var radioOpacityTarget = RADIO_OPACITY_DIM;
+    var radioOpacityFrom = RADIO_OPACITY_DIM;
+    var radioOpacityStart = 0;
+    var radioOpacityRaf = 0;
+    var radioPointerInside = false;
+    var radioFocusInside = false;
     var radioHoverRaf = 0;
     var lastPointerEvent = null;
     var docHoverOpts = { passive: true };
+    var radioViewportSyncOpts = { passive: true };
+
+    function setRadioVisualOpacity(value) {
+      radioOpacityValue = value;
+      radioOpacityTargets.forEach(function(el) {
+        if (!el || !el.style) return;
+        el.style.opacity = value.toFixed(3);
+        el.style.willChange = 'opacity';
+      });
+    }
+
+    function easeRadioOpacity(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function animateRadioOpacityTo(target) {
+      if (radioOpacityTarget === target) return;
+      radioOpacityTarget = target;
+      radioOpacityFrom = radioOpacityValue;
+      radioOpacityStart = performance.now();
+      if (radioOpacityRaf) cancelAnimationFrame(radioOpacityRaf);
+      function tick(now) {
+        var t = Math.min(1, (now - radioOpacityStart) / RADIO_OPACITY_MS);
+        var eased = easeRadioOpacity(t);
+        var next = radioOpacityFrom + (radioOpacityTarget - radioOpacityFrom) * eased;
+        setRadioVisualOpacity(next);
+        if (t < 1) {
+          radioOpacityRaf = requestAnimationFrame(tick);
+        } else {
+          radioOpacityRaf = 0;
+          setRadioVisualOpacity(radioOpacityTarget);
+        }
+      }
+      radioOpacityRaf = requestAnimationFrame(tick);
+    }
+
+    function isDesktopHoverMode() {
+      return window.matchMedia &&
+        window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    }
+
+    function shouldRadioBeFull() {
+      var isPlaying = document.body.classList.contains('radio-playing');
+      if (isPlaying) return true;
+      if (isDesktopHoverMode()) return radioPointerInside || radioFocusInside;
+      return false;
+    }
+
+    function syncRadioVisualState() {
+      animateRadioOpacityTo(shouldRadioBeFull() ? RADIO_OPACITY_FULL : RADIO_OPACITY_DIM);
+    }
+    RADIO.syncRadioVisualState = syncRadioVisualState;
 
     function isPointInsideRadio(x, y) {
       return radioVisualTargets.some(function(el) {
@@ -2228,7 +2296,10 @@ eyeUnlockTimer = setTimeout(function(){
     }
 
     function clearRadioHovered(){
+      radioPointerInside = false;
+      radioFocusInside = false;
       document.body.classList.remove('tc-radio-hovered');
+      syncRadioVisualState();
     }
 
     function updateRadioHoverByPoint(ev){
@@ -2238,22 +2309,39 @@ eyeUnlockTimer = setTimeout(function(){
         radioHoverRaf = 0;
         if (!lastPointerEvent) return;
         var inside = isPointInsideRadio(lastPointerEvent.clientX, lastPointerEvent.clientY);
+        radioPointerInside = inside;
         document.body.classList.toggle('tc-radio-hovered', inside);
+        syncRadioVisualState();
       });
     }
 
     function onRadioFocusIn(){
+      radioFocusInside = true;
       document.body.classList.add('tc-radio-hovered');
+      syncRadioVisualState();
     }
 
     function onRadioFocusOut(){
+      radioFocusInside = false;
       clearRadioHovered();
+    }
+
+    function resyncRadioHoverPosition() {
+      if (!lastPointerEvent || !isDesktopHoverMode()) {
+        syncRadioVisualState();
+        return;
+      }
+      radioPointerInside = isPointInsideRadio(lastPointerEvent.clientX, lastPointerEvent.clientY);
+      document.body.classList.toggle('tc-radio-hovered', radioPointerInside);
+      syncRadioVisualState();
     }
 
     document.addEventListener('mousemove', updateRadioHoverByPoint, docHoverOpts);
     document.addEventListener('pointermove', updateRadioHoverByPoint, docHoverOpts);
     document.addEventListener('mouseleave', clearRadioHovered, docHoverOpts);
     window.addEventListener('blur', clearRadioHovered);
+    window.addEventListener('scroll', resyncRadioHoverPosition, radioViewportSyncOpts);
+    window.addEventListener('resize', resyncRadioHoverPosition, radioViewportSyncOpts);
 
     [power, nextBtn].filter(Boolean).forEach(function(el){
       el.addEventListener('focusin', onRadioFocusIn);
@@ -2261,6 +2349,8 @@ eyeUnlockTimer = setTimeout(function(){
     });
 
     audio.addEventListener('ended', next);
+    setRadioVisualOpacity(RADIO_OPACITY_DIM);
+    syncRadioVisualState();
 
     RADIO.destroy = function(){
       try{ audio.pause(); }catch(e){}
@@ -2276,10 +2366,22 @@ eyeUnlockTimer = setTimeout(function(){
       document.removeEventListener('pointermove', updateRadioHoverByPoint, docHoverOpts);
       document.removeEventListener('mouseleave', clearRadioHovered, docHoverOpts);
       window.removeEventListener('blur', clearRadioHovered);
+      window.removeEventListener('scroll', resyncRadioHoverPosition, radioViewportSyncOpts);
+      window.removeEventListener('resize', resyncRadioHoverPosition, radioViewportSyncOpts);
       if (radioHoverRaf) cancelAnimationFrame(radioHoverRaf);
+      if (radioOpacityRaf) cancelAnimationFrame(radioOpacityRaf);
       radioHoverRaf = 0;
+      radioOpacityRaf = 0;
       lastPointerEvent = null;
+      radioPointerInside = false;
+      radioFocusInside = false;
       document.body.classList.remove('tc-radio-hovered');
+      radioOpacityTargets.forEach(function(el) {
+        if (!el || !el.style) return;
+        el.style.opacity = '';
+        el.style.willChange = '';
+      });
+      RADIO.syncRadioVisualState = null;
     };
     return true;
   }
