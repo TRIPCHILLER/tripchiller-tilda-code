@@ -1915,12 +1915,17 @@ eyeUnlockTimer = setTimeout(function(){
   var NOTE_DELAYS = [0, 280, 560, 840];
   var NOTE_INTERVAL_MS = 1200;
   var NOTE_CLASSES = ['note1', 'note2', 'note3', 'note4'];
+  var NOTE_DX = { note1: '-28px', note2: '22px', note3: '-18px', note4: '30px' };
+  var NOTE_PARTICLE_TIMEOUT_MS = 5600;
+  var NOTE_ORIGIN_X_RATIO = 0.32;
+  var NOTE_ORIGIN_Y_RATIO = 0.47;
 
   var noteState = 'off';
   var noteInterval = 0;
   var noteTimeouts = [];
   var noteIndex = 0;
   var activeClones = 0;
+  var noteParticleSeq = 0;
 
   function isDebugNotes() {
     return window.__TC_DEBUG_RADIO_NOTES__ === true;
@@ -1966,38 +1971,110 @@ eyeUnlockTimer = setTimeout(function(){
     });
   }
 
-  function onCloneAnimationEnd(clone, noteClass) {
-    if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
+  function getTemplateAtom(noteClass) {
+    return document.querySelector('.' + noteClass + ' .tn-atom');
+  }
+
+  function getParticleOrigin(noteClass, templateRect) {
+    if (templateRect && templateRect.width > 0 && templateRect.height > 0) {
+      return { x: templateRect.left, y: templateRect.top };
+    }
+
+    var radioAnchor = document.querySelector('.radio-power, .radio-next, .radio-on, .radio-off');
+    if (radioAnchor) {
+      var radioRect = radioAnchor.getBoundingClientRect();
+      return {
+        x: radioRect.left + radioRect.width * NOTE_ORIGIN_X_RATIO,
+        y: radioRect.top + radioRect.height * NOTE_ORIGIN_Y_RATIO
+      };
+    }
+
+    return { x: 0, y: 0 };
+  }
+
+  function removeParticle(particle, noteClass) {
+    if (!particle || particle.__tcRemoved) return;
+
+    particle.__tcRemoved = true;
+    if (particle.__tcTimeoutId) {
+      clearTimeout(particle.__tcTimeoutId);
+      particle.__tcTimeoutId = 0;
+    }
+
+    if (particle.parentNode) particle.parentNode.removeChild(particle);
     if (activeClones > 0) activeClones -= 1;
-    notesLog('clone animationend:', noteClass);
+
+    notesLog('remove particle:', noteClass, particle.getAttribute('data-note-id'));
     notesLog('active clone count:', activeClones);
+
     if (noteState === 'draining' && activeClones === 0) {
       setNotesState('off');
     }
   }
 
+  function cleanupStaleNoteArtifacts(force) {
+    document.querySelectorAll('.tc-radio-note-clone').forEach(function (legacyClone) {
+      if (legacyClone.parentNode) legacyClone.parentNode.removeChild(legacyClone);
+    });
+
+    document.querySelectorAll('.tc-radio-note-particle').forEach(function (particle) {
+      if (force) {
+        if (particle.parentNode) particle.parentNode.removeChild(particle);
+        return;
+      }
+
+      var atom = particle.querySelector('.tc-radio-note-particle-atom, .tn-atom');
+      var isRunning = false;
+      if (atom) {
+        var cs = getComputedStyle(atom);
+        isRunning = cs.animationName === 'note-fly' && cs.animationPlayState === 'running';
+      }
+
+      if (!isRunning || particle.getAttribute('data-stale') === '1') {
+        if (particle.parentNode) particle.parentNode.removeChild(particle);
+      }
+    });
+
+    activeClones = document.querySelectorAll('.tc-radio-note-particle').length;
+  }
+
   function spawnNote(noteClass) {
-    var note = getNoteNode(noteClass);
-    if (!note) return;
+    var template = getTemplateAtom(noteClass);
+    if (!template) return;
 
-    var clone = note.cloneNode(true);
-    clone.classList.add('tc-radio-note-clone');
-    removeIdsDeep(clone);
+    var templateRect = template.getBoundingClientRect();
+    var origin = getParticleOrigin(noteClass, templateRect);
 
-    note.insertAdjacentElement('afterend', clone);
+    var particle = document.createElement('div');
+    particle.className = 'tc-radio-note-particle tc-radio-note-particle--' + noteClass;
+    particle.setAttribute('data-note-id', String(++noteParticleSeq));
+    particle.style.left = origin.x + 'px';
+    particle.style.top = origin.y + 'px';
+    particle.style.width = Math.max(1, templateRect.width || 0) + 'px';
+    particle.style.height = Math.max(1, templateRect.height || 0) + 'px';
+    particle.style.setProperty('--dx', NOTE_DX[noteClass] || '0px');
+
+    var atomClone = template.cloneNode(true);
+    removeIdsDeep(atomClone);
+    atomClone.classList.add('tc-radio-note-particle-atom');
+    atomClone.style.transform = '';
+    atomClone.style.animation = '';
+    atomClone.style.opacity = '';
+    atomClone.style.visibility = '';
+
+    particle.appendChild(atomClone);
+    document.body.appendChild(particle);
 
     activeClones += 1;
-    notesLog('spawn clone:', noteClass);
+    notesLog('spawn particle:', noteClass, particle.getAttribute('data-note-id'));
     notesLog('active clone count:', activeClones);
 
-    var atom = clone.querySelector('.tn-atom');
-    if (atom) {
-      atom.addEventListener('animationend', function () {
-        onCloneAnimationEnd(clone, noteClass);
-      }, { once: true });
-      return;
-    }
-    onCloneAnimationEnd(clone, noteClass);
+    var done = function () {
+      removeParticle(particle, noteClass);
+    };
+
+    atomClone.addEventListener('animationend', done, { once: true });
+    particle.__tcTimeoutId = setTimeout(done, NOTE_PARTICLE_TIMEOUT_MS);
   }
 
   function startNoteCycle() {
@@ -2011,6 +2088,7 @@ eyeUnlockTimer = setTimeout(function(){
 
   function startNotes() {
     clearNoteTimers();
+    cleanupStaleNoteArtifacts(false);
     noteIndex = 0;
     setNotesState('starting');
 
@@ -2139,6 +2217,8 @@ eyeUnlockTimer = setTimeout(function(){
       try{ audio.pause(); }catch(e){}
       document.body.classList.remove('radio-playing','radio-bump');
       clearNoteTimers();
+      cleanupStaleNoteArtifacts(true);
+      activeClones = 0;
       setNotesState('off');
       try{ power && unbind(power); }catch(e){}
       try{ nextBtn && unbind(nextBtn); }catch(e){}

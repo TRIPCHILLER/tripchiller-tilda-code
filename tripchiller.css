@@ -594,11 +594,19 @@ body.radio-playing .radio-on .tn-atom{
   .note3 .tn-atom{ --dx: -18px; }
   .note4 .tn-atom{ --dx: 30px; }
 
-  .tc-radio-note-clone{
+  .tc-radio-note-particle{
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    z-index: 2147483000 !important;
     pointer-events: none !important;
+    overflow: visible !important;
+    transform: translate3d(0,0,0);
+    contain: layout style;
   }
 
-  .tc-radio-note-clone .tn-atom{
+  .tc-radio-note-particle .tn-atom,
+  .tc-radio-note-particle-atom{
     opacity: 1 !important;
     visibility: visible !important;
     animation: note-fly 5s linear both !important;
