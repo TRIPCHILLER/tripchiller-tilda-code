@@ -2214,6 +2214,25 @@ eyeUnlockTimer = setTimeout(function(){
     nextBtn.addEventListener('touchstart', function(){ if (!audio.paused) next(); }, {passive:true});
     nextBtn.addEventListener('click', function(ev){ if(dedupe(ev) && !audio.paused) next(); });
 
+    var hoverTargets = [power, nextBtn, onUI, offUI].filter(Boolean);
+    function isInsideRadio(target){
+      if (!target) return false;
+      return hoverTargets.some(function(el){ return el === target || el.contains(target); });
+    }
+    function onHoverEnter(){
+      document.body.classList.add('tc-radio-hovered');
+    }
+    function onHoverLeave(ev){
+      if (isInsideRadio(ev.relatedTarget)) return;
+      document.body.classList.remove('tc-radio-hovered');
+    }
+    hoverTargets.forEach(function(el){
+      el.addEventListener('mouseenter', onHoverEnter);
+      el.addEventListener('mouseleave', onHoverLeave);
+      el.addEventListener('focusin', onHoverEnter);
+      el.addEventListener('focusout', onHoverLeave);
+    });
+
     audio.addEventListener('ended', next);
 
     RADIO.destroy = function(){
@@ -2225,6 +2244,7 @@ eyeUnlockTimer = setTimeout(function(){
       setNotesState('off');
       try{ power && unbind(power); }catch(e){}
       try{ nextBtn && unbind(nextBtn); }catch(e){}
+      document.body.classList.remove('tc-radio-hovered');
     };
     return true;
   }

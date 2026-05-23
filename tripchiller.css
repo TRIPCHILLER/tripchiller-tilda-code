@@ -614,7 +614,6 @@ body.radio-playing .radio-on .tn-atom{
     font-size: inherit !important;
     line-height: 1 !important;
     display: block !important;
-    opacity: 1 !important;
     visibility: visible !important;
     animation: note-fly 5s linear both !important;
     animation-iteration-count: 1 !important;
@@ -642,6 +641,12 @@ body.radio-playing .radio-on .tn-atom{
     60%{
       transform: translate3d(calc(var(--dx)*.65), -150px, 0) scale(1.02);
       opacity:1;
+    }
+    70%{
+      opacity:.9;
+    }
+    88%{
+      opacity:.35;
     }
     100%{
       transform: translate3d(var(--dx), -220px, 0) scale(0.85);
@@ -695,6 +700,23 @@ body.radio-playing .radio-on .tn-atom{
 
   .radio-next { pointer-events: none; }
   body.radio-playing .radio-next { pointer-events: auto; }
+
+body .radio-power .tn-atom,
+body .radio-next .tn-atom,
+body .radio-on .tn-atom,
+body .radio-off .tn-atom,
+body .tc-radio-body .tn-atom{
+  filter: brightness(.5);
+  transition: filter .5s ease, opacity .5s ease;
+}
+
+body.tc-radio-hovered .radio-power .tn-atom,
+body.tc-radio-hovered .radio-next .tn-atom,
+body.tc-radio-hovered .radio-on .tn-atom,
+body.tc-radio-hovered .radio-off .tn-atom,
+body.tc-radio-hovered .tc-radio-body .tn-atom{
+  filter: brightness(1);
+}
 
 .tc-legal-btn {
     cursor: pointer !important;
