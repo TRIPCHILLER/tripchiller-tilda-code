@@ -2102,7 +2102,6 @@ eyeUnlockTimer = setTimeout(function(){
   function startNotes() {
     clearNoteTimers();
     cleanupStaleNoteArtifacts(false);
-    noteIndex = 0;
     setNotesState('playing');
     spawnNote(NOTE_CLASSES[noteIndex % NOTE_CLASSES.length]);
     noteIndex += 1;
@@ -2269,6 +2268,7 @@ eyeUnlockTimer = setTimeout(function(){
       clearNoteTimers();
       cleanupStaleNoteArtifacts(true);
       activeClones = 0;
+      noteIndex = 0;
       setNotesState('off');
       try{ power && unbind(power); }catch(e){}
       try{ nextBtn && unbind(nextBtn); }catch(e){}
