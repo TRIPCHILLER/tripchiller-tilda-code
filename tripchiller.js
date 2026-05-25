@@ -4016,14 +4016,20 @@ function setupDesktopAura() {
   }
 
   function build(root) {
+    var tickerSepToken = '\u00A0\u00A0|\u00A0\u00A0';
     var topTickerText =
-  'ЗДЕСЬ ОТОБРАЖАЮТСЯ РАНДОМНЫЕ ФОТО НАШИХ АДЕПТОВ  |  ОСТАВЬ СВОЙ СЛЕД - ПРИШЛИ ФОТКУ В ЛЮБОМ ИЗДЕЛИИ В ДИРЕКТ: ' +
-  '<a class="tc-user-photos__ticker-link" href="https://t.me/TRIPCHILLER_OFFICIAL" target="_blank" rel="noopener noreferrer">T.ME/TRIPCHILLER_OFFICIAL</a>';
-    var bottomTickerText = 'МЫ УВАЖАЕМ ПРИВАТНОСТЬ КАЖДОГО УЧАСТНИКА | В АРХИВ ПОПАДАЮТ ТОЛЬКО ФОТО, ПРИСЛАННЫЕ ВЛАДЕЛЬЦАМИ С ИХ РАЗРЕШЕНИЯ';
+      'ЗДЕСЬ ОТОБРАЖАЮТСЯ РАНДОМНЫЕ ФОТО НАШИХ АДЕПТОВ' +
+      tickerSepToken +
+      'ОСТАВЬ СВОЙ СЛЕД - ПРИШЛИ ФОТКУ В ЛЮБОМ ИЗДЕЛИИ В ДИРЕКТ: ' +
+      '<a class="tc-user-photos__ticker-link" href="https://t.me/TRIPCHILLER_OFFICIAL" target="_blank" rel="noopener noreferrer">T.ME/TRIPCHILLER_OFFICIAL</a>';
+    var bottomTickerText =
+      'МЫ УВАЖАЕМ ПРИВАТНОСТЬ КАЖДОГО УЧАСТНИКА' +
+      tickerSepToken +
+      'В АРХИВ ПОПАДАЮТ ТОЛЬКО ФОТО, ПРИСЛАННЫЕ ВЛАДЕЛЬЦАМИ С ИХ РАЗРЕШЕНИЯ';
 
     function buildTickerLine(text) {
       var item = '<span class="tc-user-photos__ticker-item">' + text + '</span>';
-      var sep = '<span class="tc-user-photos__ticker-sep" aria-hidden="true">|</span>';
+      var sep = '<span class="tc-user-photos__ticker-sep" aria-hidden="true">' + tickerSepToken + '</span>';
 
       return item + sep + item + sep + item + sep + item;
     }
