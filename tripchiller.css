@@ -208,20 +208,6 @@
     cursor: pointer;
   }
 
-  body:not(.egg-on):not(.egg-returning):not(.tc-eye-hard-hidden) .flower:not(.tc-egg-original-hidden) {
-    position: relative !important;
-    z-index: 60 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  body:not(.egg-on):not(.egg-returning):not(.tc-eye-hard-hidden) .flower:not(.tc-egg-original-hidden) .tn-atom,
-  body:not(.egg-on):not(.egg-returning):not(.tc-eye-hard-hidden) .flower:not(.tc-egg-original-hidden) img,
-  body:not(.egg-on):not(.egg-returning):not(.tc-eye-hard-hidden) .flower:not(.tc-egg-original-hidden) svg {
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
 
   .easter .tn-atom {
     opacity: 0;
