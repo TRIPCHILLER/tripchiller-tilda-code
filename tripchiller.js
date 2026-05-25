@@ -210,6 +210,8 @@ var INTRO_START_DELAY = EYE_START_DELAY + SCALE_DURATION + 1000;
       var BLINK_IN = 120;
       var BLINK_OUT = 180;
       var BLINK_EASE = 0.25;
+      var IDLE_FLOAT_Y = 2.2;
+      var IDLE_FLOAT_SPEED = 0.00135;
 
       var blinkTimeout = null;
 
@@ -308,8 +310,14 @@ curY += (targetY - curY) * EASE;
         var sx = scaleUni * common;
         var sy = scaleUni * common * blinkCur;
 
+        var idleFloatY = 0;
+
+        if (!isEyeParallaxLocked() && introDone && opacity > 0.98) {
+          idleFloatY = Math.sin(now * IDLE_FLOAT_SPEED) * IDLE_FLOAT_Y;
+        }
+
         var finalX = curX + introX;
-        var finalY = curY + introY;
+        var finalY = curY + introY + idleFloatY;
 
         eye.style.transform = "translate("+finalX+"px,"+finalY+"px) scale("+sx+","+sy+")";
         eye.style.opacity = String(opacity);
@@ -1082,10 +1090,17 @@ function syncDragWithPageScroll(){
     var movedEnough = false;
 
     var previousEyeLock = false;
-    var eyeLagX = 0;
+var eyeLagX = 0;
 var eyeLagY = 0;
 var eyeLagVX = 0;
 var eyeLagVY = 0;
+var eyeDragJitterX = 0;
+var eyeDragJitterY = 0;
+var eyeDragJitterRot = 0;
+var EYE_DRAG_JITTER_EASE = 0.22;
+var EYE_DRAG_JITTER_X = 0.45;
+var EYE_DRAG_JITTER_Y = 0.34;
+var EYE_DRAG_JITTER_ROT = 0.26;
 
 var lastEyeLagTime = 0;
 var lastEyeLagPosX = 0;
@@ -1170,6 +1185,34 @@ function updateEyeLag(time, active){
     eyeLagY = 0;
     eyeLagVX = 0;
     eyeLagVY = 0;
+  }
+}
+
+function updateEyeDragJitter(time, active){
+  var targetX = 0;
+  var targetY = 0;
+  var targetRot = 0;
+
+  if (active) {
+    targetX =
+      Math.sin(time * 0.091) * EYE_DRAG_JITTER_X +
+      Math.sin(time * 0.047) * 0.18;
+
+    targetY =
+      Math.cos(time * 0.083) * EYE_DRAG_JITTER_Y +
+      Math.sin(time * 0.061) * 0.14;
+
+    targetRot = Math.sin(time * 0.073) * EYE_DRAG_JITTER_ROT;
+  }
+
+  eyeDragJitterX += (targetX - eyeDragJitterX) * EYE_DRAG_JITTER_EASE;
+  eyeDragJitterY += (targetY - eyeDragJitterY) * EYE_DRAG_JITTER_EASE;
+  eyeDragJitterRot += (targetRot - eyeDragJitterRot) * EYE_DRAG_JITTER_EASE;
+
+  if (!active) {
+    if (Math.abs(eyeDragJitterX) < 0.01) eyeDragJitterX = 0;
+    if (Math.abs(eyeDragJitterY) < 0.01) eyeDragJitterY = 0;
+    if (Math.abs(eyeDragJitterRot) < 0.01) eyeDragJitterRot = 0;
   }
 }
 /* Auto-scroll while dragging flower near viewport edges */
@@ -1270,12 +1313,13 @@ function applyTransform(x, y, shakeX, shakeY, rot){
       Extra inertia only for pupil layer.
       Flower keeps original drag position.
     */
-    var extraX = el === eye ? eyeLagX : 0;
-    var extraY = el === eye ? eyeLagY : 0;
+    var extraX = el === eye ? eyeLagX + eyeDragJitterX : 0;
+    var extraY = el === eye ? eyeLagY + eyeDragJitterY : 0;
+    var extraRot = el === eye ? eyeDragJitterRot : 0;
 
     var transform =
       'translate3d(' + (x + shakeX + extraX).toFixed(2) + 'px,' + (y + shakeY + extraY).toFixed(2) + 'px,0) ' +
-      'rotate(' + rot.toFixed(3) + 'deg) ' +
+      'rotate(' + (rot + extraRot).toFixed(3) + 'deg) ' +
       'scale(' + holdScale.toFixed(4) + ')';
 
     el.style.transform = (base ? base + ' ' : '') + transform;
@@ -1302,6 +1346,7 @@ function updateHoldScale(){
 if (dragging) {
   updateDragAutoScroll();
   updateEyeLag(time, true);
+  updateEyeDragJitter(time, true);
   updateHoldScale();
 
   var shakeX =
@@ -1330,6 +1375,7 @@ if (dragging) {
           so the eye lags behind the returning flower instead of snapping flat.
         */
         updateEyeLag(time, true);
+        updateEyeDragJitter(time, false);
         updateHoldScale();
         applyTransform(posX, posY, 0, 0, 0);
 
@@ -1342,6 +1388,9 @@ posY = 0;
 holdScale = 1;
 holdScaleTarget = 1;
 resetEyeLag();
+eyeDragJitterX = 0;
+eyeDragJitterY = 0;
+eyeDragJitterRot = 0;
 applyTransform(0, 0, 0, 0, 0);
 
           document.body.classList.remove('tc-flower-returning');
