@@ -4017,7 +4017,7 @@ function setupDesktopAura() {
 
   function build(root) {
     var topTickerText =
-  'ЗДЕСЬ ОТОБРАЖАЮТСЯ РАНДОМНЫЕ ФОТО НАШИХ АДЕПТОВ | ОСТАВЬ СВОЙ СЛЕД - ПРИШЛИ ФОТКУ В ЛЮБОМ ИЗДЕЛИИ В ДИРЕКТ: ' +
+  'ЗДЕСЬ ОТОБРАЖАЮТСЯ РАНДОМНЫЕ ФОТО НАШИХ АДЕПТОВ  |  ОСТАВЬ СВОЙ СЛЕД - ПРИШЛИ ФОТКУ В ЛЮБОМ ИЗДЕЛИИ В ДИРЕКТ: ' +
   '<a class="tc-user-photos__ticker-link" href="https://t.me/TRIPCHILLER_OFFICIAL" target="_blank" rel="noopener noreferrer">T.ME/TRIPCHILLER_OFFICIAL</a>';
     var bottomTickerText = 'МЫ УВАЖАЕМ ПРИВАТНОСТЬ КАЖДОГО УЧАСТНИКА | В АРХИВ ПОПАДАЮТ ТОЛЬКО ФОТО, ПРИСЛАННЫЕ ВЛАДЕЛЬЦАМИ С ИХ РАЗРЕШЕНИЯ';
 
