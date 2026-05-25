@@ -1694,7 +1694,7 @@ dragClientY = 0;
   var EGG_RETURN_TIME = 1000;
   var EGG_FALL_TIME = 900;
 
-  var EYE_APPEAR_DELAY_AFTER_RETURN = 1000;
+  var EYE_APPEAR_DELAY_AFTER_RETURN = 500;
   var EYE_GROW_TIME = 560;
 
   function q(s) {
