@@ -163,6 +163,27 @@
     visibility: hidden;
   }
 
+  .uc-tw-welcome .flower .tn-atom,
+  .uc-tw-welcome .flower img,
+  .uc-tw-welcome .flower svg,
+  .tw-welcome .flower .tn-atom,
+  .tw-welcome .flower img,
+  .tw-welcome .flower svg,
+  .uc-tw-welcome .eye-desktop .tn-atom,
+  .uc-tw-welcome .eye-desktop img,
+  .uc-tw-welcome .eye-desktop svg,
+  .tw-welcome .eye-desktop .tn-atom,
+  .tw-welcome .eye-desktop img,
+  .tw-welcome .eye-desktop svg,
+  .uc-tw-welcome .eye-mobile .tn-atom,
+  .uc-tw-welcome .eye-mobile img,
+  .uc-tw-welcome .eye-mobile svg,
+  .tw-welcome .eye-mobile .tn-atom,
+  .tw-welcome .eye-mobile img,
+  .tw-welcome .eye-mobile svg {
+    visibility: visible !important;
+  }
+
   .tw-printing {
     color: #fff !important;
     font-family: var(--tc-font-main), monospace !important;
