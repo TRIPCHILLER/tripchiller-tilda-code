@@ -1311,7 +1311,11 @@ if (dragging) {
 
         posX = returnFromX * f;
         posY = returnFromY * f;
-updateEyeLag(time, false);
+        /*
+          Keep pupil inertia velocity-driven during magnetic return too,
+          so the eye lags behind the returning flower instead of snapping flat.
+        */
+        updateEyeLag(time, true);
         applyTransform(posX, posY, 0, 0, 0);
 
         if (t < 1) {
