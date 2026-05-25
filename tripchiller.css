@@ -50,6 +50,21 @@
     backface-visibility: hidden;
   }
 
+  .flower .tn-atom,
+  .flower img,
+  .flower svg{
+    filter: drop-shadow(0 10px 22px rgba(0,0,0,.24));
+  }
+
+  .eye-desktop .tn-atom,
+  .eye-desktop img,
+  .eye-desktop svg,
+  .eye-mobile .tn-atom,
+  .eye-mobile img,
+  .eye-mobile svg{
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,.2));
+  }
+
 
   .eye-desktop img, .eye-desktop svg,
   .eye-mobile  img, .eye-mobile  svg,
@@ -369,6 +384,20 @@
     opacity: 1 !important;
   }
 
+  body.tc-egg-pre-fall .flower .tn-atom,
+  body.tc-egg-pre-fall .flower img,
+  body.tc-egg-pre-fall .flower svg,
+  body.tc-egg-pre-fall .eye-desktop .tn-atom,
+  body.tc-egg-pre-fall .eye-desktop img,
+  body.tc-egg-pre-fall .eye-desktop svg,
+  body.tc-egg-pre-fall .eye-mobile .tn-atom,
+  body.tc-egg-pre-fall .eye-mobile img,
+  body.tc-egg-pre-fall .eye-mobile svg {
+    transform: scale(.94) !important;
+    transition: transform 136ms cubic-bezier(.35,0,.22,1) !important;
+    will-change: transform !important;
+  }
+
   @keyframes tc-white-mask-fall-front {
     0% {
       transform: translate3d(0,0,0) rotate(0deg);
@@ -389,12 +418,14 @@
 #tc-egg-fall-overlay .tc-egg-fall-piece.tc-egg-fall-flower {
   z-index: 2147483000 !important;
   animation: tc-white-mask-fall-front-flower 900ms cubic-bezier(.55,.02,.78,.45) forwards !important;
+  filter: drop-shadow(0 12px 26px rgba(0,0,0,.26)) !important;
 }
 
 /* Pupil falls slightly after, with its own direction */
 #tc-egg-fall-overlay .tc-egg-fall-piece.tc-egg-fall-eye {
   z-index: 2147483002 !important;
   animation: tc-white-mask-fall-front-eye 860ms cubic-bezier(.52,.02,.8,.46) 150ms forwards !important;
+  filter: drop-shadow(0 5px 12px rgba(0,0,0,.22)) !important;
 }
 /* Safety: falling clones must ignore global eye hiding */
 #tc-egg-fall-overlay .tc-egg-fall-piece,
@@ -434,13 +465,8 @@
     opacity: 1;
   }
 
-  14% {
-    transform: translate3d(-4px,-5px,0) rotate(2deg) scale(1.02);
-    opacity: 1;
-  }
-
   100% {
-    transform: translate3d(-34px,calc(120vh + 170px),0) rotate(-13deg) scale(.9);
+    transform: translate3d(-20px,calc(120vh + 170px),0) rotate(-9deg) scale(.94);
     opacity: 0;
   }
 }
