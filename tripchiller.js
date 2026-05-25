@@ -1857,7 +1857,6 @@ function createFallOverlay() {
 
     easter.querySelectorAll('.tn-atom, img, svg').forEach(function(el){
       setImportant(el, 'visibility', 'visible');
-      setImportant(el, 'opacity', '1');
       setImportant(el, 'pointer-events', 'none');
     });
   }
