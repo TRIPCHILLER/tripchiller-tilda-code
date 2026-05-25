@@ -2526,3 +2526,27 @@ html.tc-page-contacts .tw-type-1a .tn-atom {
 html.tc-page-contacts .tw-type-1a br {
   display: block;
 }
+
+@media (max-width: 768px) {
+  html.tc-page-legal,
+  html.tc-page-legal body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  html.tc-page-legal .t-rec,
+  html.tc-page-legal .t396,
+  html.tc-page-legal .t396__artboard {
+    max-width: 100vw;
+  }
+
+  html.tc-page-legal .t-text,
+  html.tc-page-legal .t-descr,
+  html.tc-page-legal .tn-atom,
+  html.tc-page-legal .t-text a,
+  html.tc-page-legal .t-descr a,
+  html.tc-page-legal .tn-atom a {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}

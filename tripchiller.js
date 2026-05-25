@@ -4721,6 +4721,16 @@ function setupDesktopAura() {
 })();
 
 (function () {
+  if (window.__TC_LEGAL_PAGE_CLASS_V1__) return;
+  window.__TC_LEGAL_PAGE_CLASS_V1__ = true;
+
+  var normalizedPath = (location.pathname || '/').replace(/\/+$/, '') || '/';
+  if (normalizedPath === '/data_processing_policy' || normalizedPath === '/offer_agreement') {
+    document.documentElement.classList.add('tc-page-legal');
+  }
+})();
+
+(function () {
   if (window.__TC_UI_ACTION_PRESS_V1__) return;
   window.__TC_UI_ACTION_PRESS_V1__ = true;
 
