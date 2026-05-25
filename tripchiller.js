@@ -1841,6 +1841,41 @@ function createFallOverlay() {
 
   setTimeout(removeFallOverlay, EGG_FALL_TIME + 240);
 }
+
+  function setImportant(el, prop, value) {
+    if (!el) return;
+    el.style.setProperty(prop, value, 'important');
+  }
+
+  function showRedEasterLayer() {
+    var easter = document.querySelector('.easter');
+    if (!easter) return;
+
+    setImportant(easter, 'visibility', 'visible');
+    setImportant(easter, 'opacity', '1');
+    setImportant(easter, 'pointer-events', 'none');
+
+    easter.querySelectorAll('.tn-atom, img, svg').forEach(function(el){
+      setImportant(el, 'visibility', 'visible');
+      setImportant(el, 'pointer-events', 'none');
+    });
+  }
+
+  function releaseRedEasterLayer() {
+    var easter = document.querySelector('.easter');
+    if (!easter) return;
+
+    easter.style.removeProperty('visibility');
+    easter.style.removeProperty('opacity');
+    easter.style.removeProperty('pointer-events');
+
+    easter.querySelectorAll('.tn-atom, img, svg').forEach(function(el){
+      el.style.removeProperty('visibility');
+      el.style.removeProperty('opacity');
+      el.style.removeProperty('pointer-events');
+    });
+  }
+
   function match(node) {
     return node && node.closest && node.closest('.flower, .eye-desktop, .eye-mobile');
   }
@@ -1870,6 +1905,7 @@ function createFallOverlay() {
 
       document.body.classList.remove('egg-on');
       document.body.classList.remove('egg-returning');
+      releaseRedEasterLayer();
 
       eggActive = false;
 
@@ -1918,6 +1954,7 @@ eyeUnlockTimer = setTimeout(function(){
     hardHideEyeForReturn();
 
     document.body.classList.add('egg-on');
+    showRedEasterLayer();
 
     eggTimer = setTimeout(hideEgg, EGG_HOLD_TIME);
   }
