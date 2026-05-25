@@ -210,8 +210,8 @@ var INTRO_START_DELAY = EYE_START_DELAY + SCALE_DURATION + 1000;
       var BLINK_IN = 120;
       var BLINK_OUT = 180;
       var BLINK_EASE = 0.25;
-      var IDLE_FLOAT_Y = 1.5;
-      var IDLE_FLOAT_SPEED = 0.00135;
+      var IDLE_FLOAT_Y = 1.0;
+      var IDLE_FLOAT_SPEED = 0.00100;
 
       var blinkTimeout = null;
 
