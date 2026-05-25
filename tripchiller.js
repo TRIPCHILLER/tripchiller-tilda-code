@@ -1034,6 +1034,10 @@ function onScroll(){
 
     var dragging = false;
     var returning = false;
+    var holdScale = 1;
+    var holdScaleTarget = 1;
+    var HOLD_SCALE_PRESSED = 0.965;
+    var HOLD_SCALE_EASE = 0.22;
 
     var startX = 0;
     var startY = 0;
@@ -1271,10 +1275,19 @@ function applyTransform(x, y, shakeX, shakeY, rot){
 
     var transform =
       'translate3d(' + (x + shakeX + extraX).toFixed(2) + 'px,' + (y + shakeY + extraY).toFixed(2) + 'px,0) ' +
-      'rotate(' + rot.toFixed(3) + 'deg)';
+      'rotate(' + rot.toFixed(3) + 'deg) ' +
+      'scale(' + holdScale.toFixed(4) + ')';
 
     el.style.transform = (base ? base + ' ' : '') + transform;
   });
+}
+
+function updateHoldScale(){
+  holdScale += (holdScaleTarget - holdScale) * HOLD_SCALE_EASE;
+
+  if (Math.abs(holdScale - holdScaleTarget) < 0.001) {
+    holdScale = holdScaleTarget;
+  }
 }
 
     function startLoop(){
@@ -1289,6 +1302,7 @@ function applyTransform(x, y, shakeX, shakeY, rot){
 if (dragging) {
   updateDragAutoScroll();
   updateEyeLag(time, true);
+  updateHoldScale();
 
   var shakeX =
           Math.sin(time * 0.052) * 1.35 +
@@ -1316,6 +1330,7 @@ if (dragging) {
           so the eye lags behind the returning flower instead of snapping flat.
         */
         updateEyeLag(time, true);
+        updateHoldScale();
         applyTransform(posX, posY, 0, 0, 0);
 
         if (t < 1) {
@@ -1324,6 +1339,8 @@ if (dragging) {
           returning = false;
 posX = 0;
 posY = 0;
+holdScale = 1;
+holdScaleTarget = 1;
 resetEyeLag();
 applyTransform(0, 0, 0, 0, 0);
 
@@ -1351,6 +1368,7 @@ applyTransform(0, 0, 0, 0, 0);
       document.body.classList.add('tc-eye-parallax-locked');
 
       dragging = true;
+      holdScaleTarget = HOLD_SCALE_PRESSED;
       returning = false;
       movedEnough = false;
 
@@ -1402,6 +1420,7 @@ function moveDrag(e){
       if (!dragging) return;
 
       dragging = false;
+      holdScaleTarget = 1;
       returning = true;
 dragClientY = 0;
 
