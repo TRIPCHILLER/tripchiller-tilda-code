@@ -150,6 +150,20 @@
   }
 
 
+  .uc-tw-welcome [field="text"],
+  .uc-tw-welcome .t-descr,
+  .uc-tw-welcome .t-text,
+  .uc-tw-welcome .t-title,
+  .uc-tw-welcome .tn-atom,
+  .tw-welcome [field="text"],
+  .tw-welcome .t-descr,
+  .tw-welcome .t-text,
+  .tw-welcome .t-title,
+  .tw-welcome .tn-atom {
+    visibility: hidden;
+  }
+
+
   .tw-printing {
     color: #fff !important;
     font-family: var(--tc-font-main), monospace !important;
