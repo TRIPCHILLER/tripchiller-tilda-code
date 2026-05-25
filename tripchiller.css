@@ -62,7 +62,7 @@
   .eye-mobile .tn-atom,
   .eye-mobile img,
   .eye-mobile svg{
-    filter: drop-shadow(0 3px 3px rgba(0,0,0,.2));
+    filter: drop-shadow(0 3px 2px rgba(0,0,0,.2));
   }
 
 
