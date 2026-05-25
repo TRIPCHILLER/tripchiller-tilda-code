@@ -9,6 +9,60 @@
   function qInner(root){
     return root ? (root.querySelector(".tn-atom, img, svg") || root) : null;
   }
+
+  function restoreHeroBaseVisibility(reason){
+    if (!document.body) return;
+
+    if (
+      document.body.classList.contains('egg-on') ||
+      document.body.classList.contains('egg-returning') ||
+      document.body.classList.contains('tc-eye-hard-hidden')
+    ) {
+      return;
+    }
+
+    var isMobile = window.innerWidth <= 768;
+
+    function setImportant(el, prop, value){
+      if (!el) return;
+      el.style.setProperty(prop, value, 'important');
+    }
+
+    var flower = document.querySelector('.flower');
+    var eyeDesktop = document.querySelector('.eye-desktop');
+    var eyeMobile = document.querySelector('.eye-mobile');
+
+    if (flower && !flower.classList.contains('tc-egg-original-hidden')) {
+      setImportant(flower, 'visibility', 'visible');
+      setImportant(flower, 'opacity', '1');
+    }
+
+    if (eyeDesktop && !eyeDesktop.classList.contains('tc-egg-original-hidden')) {
+      setImportant(eyeDesktop, 'visibility', isMobile ? 'hidden' : 'visible');
+      setImportant(eyeDesktop, 'opacity', isMobile ? '0' : '1');
+    }
+
+    if (eyeMobile && !eyeMobile.classList.contains('tc-egg-original-hidden')) {
+      setImportant(eyeMobile, 'visibility', isMobile ? 'visible' : 'hidden');
+      setImportant(eyeMobile, 'opacity', isMobile ? '1' : '0');
+    }
+
+    [
+      '.flower .tn-atom',
+      '.flower img',
+      '.flower svg',
+      '.eye-desktop .tn-atom',
+      '.eye-desktop img',
+      '.eye-desktop svg',
+      '.eye-mobile .tn-atom',
+      '.eye-mobile img',
+      '.eye-mobile svg'
+    ].forEach(function(sel){
+      document.querySelectorAll(sel).forEach(function(el){
+        setImportant(el, 'visibility', 'visible');
+      });
+    });
+  }
 function isEyeParallaxLocked(){
   return (
     window.__TC_EYE_PARALLAX_LOCKED__ === true ||
@@ -32,6 +86,30 @@ function forceEyeCenterInstant(){
 
 window.__TC_FORCE_EYE_CENTER__ = forceEyeCenterInstant;
   ready(function(){
+
+    restoreHeroBaseVisibility('ready');
+
+    requestAnimationFrame(function(){
+      restoreHeroBaseVisibility('raf-1');
+
+      requestAnimationFrame(function(){
+        restoreHeroBaseVisibility('raf-2');
+      });
+    });
+
+    [50, 150, 400, 900, 1600, 2600].forEach(function(delay){
+      setTimeout(function(){
+        restoreHeroBaseVisibility('timeout-' + delay);
+      }, delay);
+    });
+
+    window.addEventListener('load', function(){
+      restoreHeroBaseVisibility('load');
+    });
+
+    window.addEventListener('resize', function(){
+      restoreHeroBaseVisibility('resize');
+    });
 
     (function(){
       if (window.innerWidth <= 768) return;

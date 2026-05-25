@@ -150,40 +150,6 @@
   }
 
 
-  .uc-tw-welcome [field="text"],
-  .uc-tw-welcome .t-descr,
-  .uc-tw-welcome .t-text,
-  .uc-tw-welcome .t-title,
-  .uc-tw-welcome .tn-atom,
-  .tw-welcome [field="text"],
-  .tw-welcome .t-descr,
-  .tw-welcome .t-text,
-  .tw-welcome .t-title,
-  .tw-welcome .tn-atom {
-    visibility: hidden;
-  }
-
-  .uc-tw-welcome .flower .tn-atom,
-  .uc-tw-welcome .flower img,
-  .uc-tw-welcome .flower svg,
-  .tw-welcome .flower .tn-atom,
-  .tw-welcome .flower img,
-  .tw-welcome .flower svg,
-  .uc-tw-welcome .eye-desktop .tn-atom,
-  .uc-tw-welcome .eye-desktop img,
-  .uc-tw-welcome .eye-desktop svg,
-  .tw-welcome .eye-desktop .tn-atom,
-  .tw-welcome .eye-desktop img,
-  .tw-welcome .eye-desktop svg,
-  .uc-tw-welcome .eye-mobile .tn-atom,
-  .uc-tw-welcome .eye-mobile img,
-  .uc-tw-welcome .eye-mobile svg,
-  .tw-welcome .eye-mobile .tn-atom,
-  .tw-welcome .eye-mobile img,
-  .tw-welcome .eye-mobile svg {
-    visibility: visible !important;
-  }
-
   .tw-printing {
     color: #fff !important;
     font-family: var(--tc-font-main), monospace !important;
@@ -228,25 +194,6 @@
     pointer-events: auto !important;
     cursor: pointer;
   }
-
-.flower,
-.eye-desktop,
-.eye-mobile {
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-.flower .tn-atom,
-.flower img,
-.flower svg,
-.eye-desktop .tn-atom,
-.eye-desktop img,
-.eye-desktop svg,
-.eye-mobile .tn-atom,
-.eye-mobile img,
-.eye-mobile svg {
-  visibility: visible !important;
-}
 
 
   .easter .tn-atom {
