@@ -1694,6 +1694,8 @@ dragClientY = 0;
   var EGG_RETURN_TIME = 1000;
   var EGG_FALL_TIME = 900;
   var EGG_EYE_FALL_DELAY = 150;
+  var EGG_EYE_FALL_TIME = 960;
+  var EGG_PRE_FALL_TIME = 136;
 
   var EYE_APPEAR_DELAY_AFTER_RETURN = 500;
   var EYE_GROW_TIME = 560;
@@ -1844,7 +1846,10 @@ function createFallOverlay() {
     el.classList.add('tc-egg-original-hidden');
   });
 
-  setTimeout(removeFallOverlay, EGG_FALL_TIME + EGG_EYE_FALL_DELAY + 240);
+  setTimeout(
+    removeFallOverlay,
+    Math.max(EGG_FALL_TIME, EGG_EYE_FALL_DELAY + EGG_EYE_FALL_TIME) + 240
+  );
 }
 
   function setImportant(el, prop, value) {
@@ -1950,18 +1955,24 @@ eyeUnlockTimer = setTimeout(function(){
     document.body.classList.remove('egg-returning');
     document.body.classList.remove('tc-eye-grow-after-egg');
     document.body.classList.remove('tc-eye-hard-hidden');
+    document.body.classList.remove('tc-egg-pre-fall');
 
     lockEyeParallax();
+    document.body.classList.add('tc-egg-pre-fall');
 
-    createFallOverlay();
+    setTimeout(function(){
+      if (!eggActive) return;
 
+      document.body.classList.remove('tc-egg-pre-fall');
+      createFallOverlay();
 
-    hardHideEyeForReturn();
+      hardHideEyeForReturn();
 
-    document.body.classList.add('egg-on');
-    showRedEasterLayer();
+      document.body.classList.add('egg-on');
+      showRedEasterLayer();
 
-    eggTimer = setTimeout(hideEgg, EGG_HOLD_TIME);
+      eggTimer = setTimeout(hideEgg, EGG_HOLD_TIME);
+    }, EGG_PRE_FALL_TIME);
   }
 
   function onTouch(e) {
