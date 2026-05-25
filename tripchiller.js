@@ -1693,6 +1693,7 @@ dragClientY = 0;
   var EGG_HOLD_TIME = 5000;
   var EGG_RETURN_TIME = 1000;
   var EGG_FALL_TIME = 900;
+  var EGG_EYE_FALL_DELAY = 450;
 
   var EYE_APPEAR_DELAY_AFTER_RETURN = 500;
   var EYE_GROW_TIME = 560;
@@ -1843,7 +1844,7 @@ function createFallOverlay() {
     el.classList.add('tc-egg-original-hidden');
   });
 
-  setTimeout(removeFallOverlay, EGG_FALL_TIME + 240);
+  setTimeout(removeFallOverlay, EGG_FALL_TIME + EGG_EYE_FALL_DELAY + 240);
 }
 
   function setImportant(el, prop, value) {
