@@ -229,6 +229,25 @@
     cursor: pointer;
   }
 
+.flower,
+.eye-desktop,
+.eye-mobile {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.flower .tn-atom,
+.flower img,
+.flower svg,
+.eye-desktop .tn-atom,
+.eye-desktop img,
+.eye-desktop svg,
+.eye-mobile .tn-atom,
+.eye-mobile img,
+.eye-mobile svg {
+  visibility: visible !important;
+}
+
 
   .easter .tn-atom {
     opacity: 0;
