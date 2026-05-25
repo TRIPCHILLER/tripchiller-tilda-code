@@ -424,7 +424,7 @@
 /* Pupil falls slightly after, with its own direction */
 #tc-egg-fall-overlay .tc-egg-fall-piece.tc-egg-fall-eye {
   z-index: 2147483002 !important;
-  animation: tc-white-mask-fall-front-eye 860ms cubic-bezier(.52,.02,.8,.46) 150ms forwards !important;
+  animation: tc-white-mask-fall-front-eye 960ms cubic-bezier(.52,.02,.8,.46) 150ms forwards !important;
   filter: drop-shadow(0 5px 12px rgba(0,0,0,.22)) !important;
 }
 /* Safety: falling clones must ignore global eye hiding */
