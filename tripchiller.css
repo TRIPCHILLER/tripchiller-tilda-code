@@ -2,6 +2,12 @@
    TRIPCHILLER / BASE
    ========================= */
 
+:root {
+  --tc-font-main: 'ofont.ru_DS VTCorona Cyr';
+  --tc-font-ui: var(--tc-font-main);
+  --tc-font-display: var(--tc-font-main);
+}
+
 .flower{ z-index:1; }
   .eye-desktop, .eye-mobile{ z-index:2; }
   .eye-desktop .tn-atom,
@@ -153,7 +159,7 @@
 
   .tw-printing {
     color: #fff !important;
-    font-family: 'BetterVCR', monospace !important;
+    font-family: var(--tc-font-main), monospace !important;
     font-size: inherit !important;
     line-height: inherit !important;
     white-space: pre-wrap;
@@ -866,7 +872,7 @@ body .t-zoomer__arrow-right {
   box-shadow: none !important;
   text-shadow: none !important;
 
-  font-family: 'BetterVCR', Arial, sans-serif !important;
+  font-family: var(--tc-font-ui), Arial, sans-serif !important;
 
   overflow: hidden !important;
   box-sizing: border-box !important;
@@ -943,7 +949,7 @@ button.t778__showmore,
     1px 0 0 rgba(255, 0, 0, 0.55),
     -1px 0 0 rgba(0, 130, 255, 0.45) !important;
 
-  font-family: 'BetterVCR', Arial, sans-serif !important;
+  font-family: var(--tc-font-ui), Arial, sans-serif !important;
 
   overflow: hidden !important;
   box-sizing: border-box !important;
@@ -1464,7 +1470,7 @@ body {
     align-items: center; /* теперь обе строки центрируются одинаково */
     gap: 4px;
 
-    font-family: 'BetterVCR', monospace !important;
+    font-family: var(--tc-font-main), monospace !important;
     position: relative;
     z-index: 30;
   }
@@ -1498,7 +1504,7 @@ body {
     background: #000;
     color: #808080;
 
-    font-family: 'BetterVCR', monospace !important;
+    font-family: var(--tc-font-main), monospace !important;
     font-size: clamp(13px, 2.05vw, 28px);
     line-height: 1;
     letter-spacing: 0.01em;
@@ -1628,7 +1634,7 @@ body {
   margin: 42px auto 56px;
   text-align: center;
   overflow: visible;
-  font-family: 'BetterVCR', monospace !important;
+  font-family: var(--tc-font-main), monospace !important;
 }
 
 
@@ -1642,7 +1648,7 @@ body {
 .tc-user-photos__title {
   margin: 0 0 var(--tc-user-photos-title-gap);
   color: #fff;
-  font-family: 'BetterVCR', Arial, monospace;
+  font-family: var(--tc-font-display), Arial, monospace;
   text-transform: uppercase;
   text-align: center;
   font-size: clamp(22px, 3.1vw, 44px);
@@ -1816,7 +1822,7 @@ body {
   border: 0;
   background: #000;
   color: #fff;
-  font-family: 'BetterVCR', Arial, monospace;
+  font-family: var(--tc-font-display), Arial, monospace;
   font-size: 34px;
   line-height: 0;
   display: flex;
