@@ -5133,14 +5133,14 @@ function setupDesktopAura() {
   function cleanStoreUi(root){
     var scope = root || document;
 
-    scope.querySelectorAll('.t-store__parts-switch-btn').forEach(function(btn){
+    scope.querySelectorAll('.t-store__parts-switch-btn, .t-catalog__parts-switch-btn, .t-catalog [class*="parts"] a, .t-catalog [class*="parts"] button, .js-catalog [class*="parts"] a, .js-catalog [class*="parts"] button').forEach(function(btn){
       var txt = normalize(btn.textContent);
       if (txt === 'fruits') {
         btn.style.setProperty('display', 'none', 'important');
       }
     });
 
-    scope.querySelectorAll('.t-store__prod-popup .js-store-close-btn, .t-store__prod-popup .t-store__prod-popup__back, .t-store__prod-popup a, .t-store__prod-popup button, .t-store__prod-popup [role="button"]').forEach(function(back){
+    scope.querySelectorAll('.t-store__prod-popup .js-store-close-btn, .t-store__prod-popup .t-store__prod-popup__back, .t-store__prod-popup a, .t-store__prod-popup button, .t-store__prod-popup [role="button"], .t-catalog .t-popup .js-store-close-btn, .t-catalog .t-popup .t-store__prod-popup__back, .t-catalog .t-popup a, .t-catalog .t-popup button, .t-catalog .t-popup [role="button"], .js-catalog .t-popup .js-store-close-btn, .js-catalog .t-popup .t-store__prod-popup__back, .js-catalog .t-popup a, .js-catalog .t-popup button, .js-catalog .t-popup [role="button"]').forEach(function(back){
       var txt = normalize(back.textContent);
       if (txt.indexOf('more products') !== -1 || txt.indexOf('назад') !== -1 || txt.indexOf('каталог') !== -1) {
         back.textContent = '← НАЗАД В КАТАЛОГ';
@@ -5148,7 +5148,7 @@ function setupDesktopAura() {
       }
     });
 
-    scope.querySelectorAll('.t-store__card *, .t-store__prod-popup *').forEach(function(node){
+    scope.querySelectorAll('.t-store__card *, .t-store__prod-popup *, .t-catalog .t-store__card *, .t-catalog .t-popup *, .js-catalog .t-store__card *, .js-catalog .t-popup *').forEach(function(node){
       var txt = normalize(node.textContent);
       if (!txt) return;
 
@@ -5163,9 +5163,18 @@ function setupDesktopAura() {
       }
 
       if (txt === 'custom') {
-        var badgeLike = node.closest('[class*="badge"], [class*="mark"], [data-product-mark], [data-store-badge]') || node;
+        var badgeLike = node.closest('.t-catalog [class*="badge"], .t-catalog [class*="mark"], .t-catalog [data-product-mark], .t-catalog [data-store-badge], .js-catalog [class*="badge"], .js-catalog [class*="mark"], .js-catalog [data-product-mark], .js-catalog [data-store-badge], [class*="badge"], [class*="mark"], [data-product-mark], [data-store-badge]') || node;
         badgeLike.style.setProperty('display', 'none', 'important');
       }
+    });
+
+    scope.querySelectorAll('.t-catalog .js-block-header-title[field="title"][data-editable="false"], .js-catalog .js-block-header-title[field="title"][data-editable="false"]').forEach(function(title){
+      title.style.setProperty('display', 'none', 'important');
+      var container = title.closest('.t-section__container');
+      if (!container) return;
+      if (!container.contains(title)) return;
+      if (container.querySelector('.t-store, .t-catalog, .js-catalog, .t-store__grid, .t-store__card, .js-product')) return;
+      container.style.setProperty('display', 'none', 'important');
     });
   }
 
