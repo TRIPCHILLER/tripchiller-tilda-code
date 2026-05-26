@@ -2738,8 +2738,9 @@ html.tc-page-contacts .tw-type-1a br {
   text-decoration: none !important;
   pointer-events: auto !important;
   display: inline-flex !important;
-  width: auto !important;
+  width: fit-content !important;
   max-width: max-content !important;
+  align-self: flex-start !important;
   cursor: pointer !important;
 }
 

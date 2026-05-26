@@ -5195,7 +5195,8 @@ function setupDesktopAura() {
 
         var isLeafLike = node.children.length === 0;
 
-        if (isLeafLike && (txt.indexOf('артикул:') === 0 || txt.indexOf('sku:') === 0)) {
+        var isSkuLike = /^артикул\b/.test(txt) || /^sku\b/.test(txt);
+        if (isLeafLike && isSkuLike) {
           node.style.setProperty('display', 'none', 'important');
         }
 
@@ -5244,4 +5245,4 @@ function setupDesktopAura() {
   });
 
   observer.observe(document.documentElement, { childList: true, subtree: true });
-})();;
+})();
