@@ -3001,3 +3001,47 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
     margin: 0 !important;
   }
 }
+
+@media (min-width: 980px) {
+  #recME202 .tc-menu-eye-logo,
+  .t228 .tc-menu-eye-logo,
+  .t228__positionfixed .tc-menu-eye-logo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(54px, 4vw, 72px);
+    height: clamp(54px, 4vw, 72px);
+    pointer-events: none;
+    z-index: 3;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .tc-menu-eye-logo__base,
+  .tc-menu-eye-logo__pupil {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .tc-menu-eye-logo__pupil {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(0, 0);
+    will-change: transform;
+  }
+}
+
+html.tc-product-page .tc-menu-eye-logo,
+body.tc-product-page .tc-menu-eye-logo,
+html.tc-product-page-active .tc-menu-eye-logo,
+body.tc-product-page-active .tc-menu-eye-logo {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
