@@ -5140,6 +5140,10 @@ function setupDesktopAura() {
     return txt;
   }
 
+  function isDirectProductRoute(){
+    return /^\/product\//.test(location.pathname || '');
+  }
+
   function getCatalogRecords(scope){
     var records = [];
     var seen = new Set();
@@ -5153,8 +5157,34 @@ function setupDesktopAura() {
     return records;
   }
 
+  function getDirectProductRecords(scope){
+    var records = [];
+    var seen = new Set();
+    var selectors = [
+      '.t-store__prod-popup',
+      '.t-popup',
+      '[data-product-lid]',
+      '[data-product-gen-uid]',
+      '.js-store-product',
+      '.t-store__prod-popup__info',
+      '.t-store__prod-popup__wrapper',
+      '.t-store__prod-popup__container'
+    ].join(', ');
+    scope.querySelectorAll(selectors).forEach(function(node){
+      var record = node.closest('.r, .r-rec, .t-rec, [id^="rec"], .t-store__prod-popup, .t-popup, #allrecords') || node;
+      if (!record || seen.has(record)) return;
+      seen.add(record);
+      record.classList.add('tc-catalog-record', 'tc-product-record');
+      records.push(record);
+    });
+    return records;
+  }
+
   function applyPartsState(record, activeLabel){
-    var activeNormalized = normalizePartLabel(activeLabel);
+    var storedActive = normalizePartLabel(record.dataset.tcActivePart || '');
+    var headerActive = normalizePartLabel(activeLabel);
+    var activeNormalized = storedActive || headerActive;
+    if (!activeNormalized || activeNormalized === 'каталог') activeNormalized = 'все';
     record.querySelectorAll('.t-store__parts-switch-btn, .t-catalog__parts-switch-btn, [id^="parts-above"] a, [class*="parts"] a, [class*="parts"] button').forEach(function(btn){
       var txt = normalizePartLabel(btn.textContent);
       if (txt === 'fruits') {
@@ -5162,9 +5192,8 @@ function setupDesktopAura() {
         return;
       }
       var hasActiveClass = btn.matches('.t-active, .active, [aria-selected="true"], [class*="_active"]') || !!btn.closest('.t-active, .active, [aria-selected="true"], [class*="_active"]');
+      if (!activeNormalized && hasActiveClass) activeNormalized = txt;
       var isActive = !!activeNormalized && txt === activeNormalized;
-      if (!isActive && !activeNormalized) isActive = hasActiveClass;
-      if (!isActive && hasActiveClass && txt === activeNormalized) isActive = true;
       btn.classList.toggle('tc-catalog-part-active', !!isActive);
       btn.style.setProperty('color', isActive ? '#fff' : 'rgba(255,255,255,.55)', 'important');
       btn.style.setProperty('opacity', '1', 'important');
@@ -5177,19 +5206,31 @@ function setupDesktopAura() {
 
   function cleanStoreUi(root){
     var scope = root || document;
+    var directRoute = isDirectProductRoute();
+    if (directRoute) {
+      document.documentElement.classList.add('tc-product-page');
+      if (document.body) document.body.classList.add('tc-product-page');
+    }
 
-    getCatalogRecords(scope).forEach(function(record){
+    var records = getCatalogRecords(scope);
+    if (directRoute) {
+      getDirectProductRecords(scope).forEach(function(record){
+        if (records.indexOf(record) === -1) records.push(record);
+      });
+    }
+
+    records.forEach(function(record){
       record.querySelectorAll('.t-store__prod-popup .js-store-close-btn, .t-store__prod-popup .t-store__prod-popup__back, .t-store__prod-popup a, .t-store__prod-popup button, .t-store__prod-popup [role="button"], .t-popup .js-store-close-btn, .t-popup .t-store__prod-popup__back, .t-popup a, .t-popup button, .t-popup [role="button"]').forEach(function(back){
         var txt = normalize(back.textContent);
         if (txt.indexOf('more products') !== -1 || txt.indexOf('назад') !== -1 || txt.indexOf('каталог') !== -1) {
-          back.textContent = '← НАЗАД В КАТАЛОГ';
+          back.textContent = '← НАЗАД В ГАЛЕРЕЮ...';
           back.classList.add('tc-store-back-link');
           var zone = back.closest('.t-popup__close, .t-popup__close-wrapper, .js-store-close-btn, .t-store__prod-popup__close') || back.parentElement;
           if (zone) zone.classList.add('tc-store-back-zone');
         }
       });
 
-      record.querySelectorAll('.t-store__card *, .t-store__prod-popup *, .t-popup *').forEach(function(node){
+      record.querySelectorAll('.t-store__card *, .t-store__prod-popup *, .t-popup *, .js-store-product *').forEach(function(node){
         var txt = normalize(node.textContent);
         if (!txt) return;
 
@@ -5205,8 +5246,24 @@ function setupDesktopAura() {
         }
 
         if (txt === 'custom') {
-          var badgeLike = node.closest('[class*="badge"], [class*="mark"], [data-product-mark], [data-store-badge]') || node;
-          badgeLike.style.setProperty('display', 'none', 'important');
+          var dataBadge = node.closest('[data-product-mark], [data-store-badge]');
+          if (dataBadge) {
+            dataBadge.style.setProperty('display', 'none', 'important');
+            return;
+          }
+
+          var classBadge = node.closest('[class*="badge"], [class*="mark"]');
+          if (classBadge) {
+            var classBadgeTxt = normalize(classBadge.textContent);
+            if (classBadgeTxt === 'custom') {
+              classBadge.style.setProperty('display', 'none', 'important');
+            }
+            return;
+          }
+
+          if (isLeafLike) {
+            node.style.setProperty('display', 'none', 'important');
+          }
         }
       });
 
@@ -5223,7 +5280,45 @@ function setupDesktopAura() {
         }
       }
 
+      if (!activeLabel || normalizePartLabel(activeLabel) === 'каталог') {
+        activeLabel = 'все';
+      }
+
+
+      record.querySelectorAll('.t-store__parts-switch-btn, .t-catalog__parts-switch-btn, [id^="parts-above"] a, [class*="parts"] a, [class*="parts"] button').forEach(function(btn){
+        if (btn.dataset.tcPartBound === '1') return;
+        btn.dataset.tcPartBound = '1';
+        btn.addEventListener('click', function(){
+          var picked = normalizePartLabel(btn.textContent);
+          if (!picked) return;
+          record.dataset.tcActivePart = picked;
+          applyPartsState(record, picked);
+        });
+      });
       applyPartsState(record, activeLabel);
+    });
+
+    if (directRoute) {
+      scope.querySelectorAll('.tc-product-record *, .t-store__prod-popup *, .t-popup *, [data-product-lid] *, [data-product-gen-uid] *, .js-store-product *').forEach(function(node){
+        var txt = normalize(node.textContent);
+        if (!txt) return;
+        if (node.children.length !== 0) return;
+        if (/^артикул\b/.test(txt) || /^sku\b/.test(txt) || txt.indexOf('тип изделия:') === 0 || txt.indexOf('формат:') === 0) {
+          node.style.setProperty('display', 'none', 'important');
+        }
+      });
+    }
+
+    var titleWhitelist = new Set(['каталог', 'все', 'кепка', 'кепки', 'футболка', 'футболки', 'верх', 'архив']);
+    scope.querySelectorAll('.js-block-header-title[field="title"][data-editable="false"]').forEach(function(title){
+      var txt = normalizePartLabel(title.textContent);
+      if (!titleWhitelist.has(txt)) return;
+      if (!scope.querySelector('.t-catalog.js-catalog, .js-catalog, .t-catalog')) return;
+      title.style.setProperty('display', 'none', 'important');
+      var container = title.closest('.t-section__container, .t-section_container, .t-container');
+      if (container && !container.querySelector('.t-catalog, .js-catalog, .t-store, .t-store__card, .js-product, .t-catalog__product, .t-store__grid')) {
+        container.style.setProperty('display', 'none', 'important');
+      }
     });
   }
 
