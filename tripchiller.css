@@ -1119,6 +1119,30 @@ html.tc-product-page #rec2312983111 {
   background-repeat: no-repeat !important;
   background-attachment: fixed !important;
   min-height: 100vh !important;
+  animation: tcProductRecordFadeIn .55s ease both !important;
+  will-change: opacity !important;
+}
+
+@keyframes tcProductRecordFadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+html.tc-product-page #rec2312983111 .js-catalog-product .t-animate,
+html.tc-product-page #rec2312983111 .t-catalog__product-snippet .t-animate,
+html.tc-product-page #rec2312983111 .t-catalog__product .t-animate,
+html.tc-product-page #rec2312983111 .js-catalog-product .t-animate_started,
+html.tc-product-page #rec2312983111 .t-catalog__product-snippet .t-animate_started,
+html.tc-product-page #rec2312983111 .t-catalog__product .t-animate_started,
+html.tc-product-page #rec2312983111 .js-catalog-product [data-animate-style],
+html.tc-product-page #rec2312983111 .t-catalog__product-snippet [data-animate-style],
+html.tc-product-page #rec2312983111 .t-catalog__product [data-animate-style] {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+  transition-property: opacity, color, background-color, border-color !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
 }
 
 html.tc-product-page #allrecords,
