@@ -2563,6 +2563,7 @@ html.tc-page-contacts .tw-type-1a br {
 }
 
 /* 1) скрываем автозаголовок Каталог только для блоков магазина */
+#allrecords .t-store .js-block-header-title[field="title"][data-editable="false"],
 #allrecords .t-store .t-section__title,
 #allrecords .t-store .t-title.t-title_xs,
 #allrecords .t-store .t-section__descr {
@@ -2688,15 +2689,13 @@ html.tc-page-contacts .tw-type-1a br {
   display: none !important;
 }
 
-#allrecords .t-store__prod-popup .t-store__prod-popup__btn,
-#allrecords .t-store__prod-popup .js-store-close-btn,
-#allrecords .t-store__prod-popup .js-store-prod-popup-close,
-#allrecords .t-store__prod-popup .t-store__prod-popup__back {
-  color: #fff !important;
+#allrecords .t-store__prod-popup .tc-store-back-link {
+  color: #2a4434 !important;
   opacity: 1 !important;
   font-family: var(--tc-font-main), monospace !important;
   letter-spacing: .04em !important;
   text-transform: uppercase !important;
+  text-decoration: none !important;
 }
 
 /* 7) мобильная сетка: 2 в ряд */

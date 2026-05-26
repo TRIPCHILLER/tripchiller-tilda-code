@@ -5140,10 +5140,11 @@ function setupDesktopAura() {
       }
     });
 
-    scope.querySelectorAll('.t-store__prod-popup .t-store__prod-popup__btn, .t-store__prod-popup .js-store-close-btn, .t-store__prod-popup .t-store__prod-popup__back').forEach(function(back){
+    scope.querySelectorAll('.t-store__prod-popup .js-store-close-btn, .t-store__prod-popup .t-store__prod-popup__back, .t-store__prod-popup a, .t-store__prod-popup button, .t-store__prod-popup [role="button"]').forEach(function(back){
       var txt = normalize(back.textContent);
       if (txt.indexOf('more products') !== -1 || txt.indexOf('назад') !== -1 || txt.indexOf('каталог') !== -1) {
         back.textContent = '← НАЗАД В КАТАЛОГ';
+        back.classList.add('tc-store-back-link');
       }
     });
 
