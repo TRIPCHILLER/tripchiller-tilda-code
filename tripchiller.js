@@ -5422,7 +5422,111 @@ function setupDesktopAura() {
     });
   }
 
+
+  function resolveMenuEyeAsset(type){
+    var selectors = type === 'base'
+      ? ['.eye-mobile img', '.eye-desktop img', '.flower img']
+      : ['.eye-desktop [class*="pupil"] img', '.eye-mobile [class*="pupil"] img', '.eye-desktop img', '.eye-mobile img'];
+    for (var i = 0; i < selectors.length; i++) {
+      var el = document.querySelector(selectors[i]);
+      var src = el && el.getAttribute && el.getAttribute('src');
+      if (src) return src;
+    }
+    return '';
+  }
+
+  function getMenuEyeHost(){
+    return document.querySelector('#recME202 .t228, #recME202 .t228__positionfixed, #recME202 [data-record-type="202"], #recME202, .t228__positionfixed, .t228');
+  }
+
+  function ensureMenuEyeLogo(){
+    var host = getMenuEyeHost();
+    if (!host) return;
+    var existing = host.querySelector('.tc-menu-eye-logo');
+    if (existing) return;
+
+    var baseSrc = resolveMenuEyeAsset('base');
+    var pupilSrc = resolveMenuEyeAsset('pupil');
+    if (!baseSrc || !pupilSrc) return;
+
+    if (getComputedStyle(host).position === 'static') {
+      host.style.position = 'relative';
+    }
+
+    var wrap = document.createElement('div');
+    wrap.className = 'tc-menu-eye-logo';
+    wrap.setAttribute('aria-hidden', 'true');
+
+    var base = document.createElement('img');
+    base.className = 'tc-menu-eye-logo__base';
+    base.src = baseSrc;
+    base.alt = '';
+    base.decoding = 'async';
+
+    var pupil = document.createElement('img');
+    pupil.className = 'tc-menu-eye-logo__pupil';
+    pupil.src = pupilSrc;
+    pupil.alt = '';
+    pupil.decoding = 'async';
+
+    wrap.appendChild(base);
+    wrap.appendChild(pupil);
+    host.appendChild(wrap);
+  }
+
+  function initMenuEyeParallax(){
+    if (window.__TC_MENU_EYE_PARALLAX_INIT__) return;
+    window.__TC_MENU_EYE_PARALLAX_INIT__ = true;
+
+    var state = { tx: 0, ty: 0, x: 0, y: 0, lastMoveTs: 0 };
+    var idleBackMs = 1000;
+    var maxShift = 5;
+
+    function isDesktop(){ return window.matchMedia('(min-width: 980px)').matches; }
+    function isProductMode(){
+      var html = document.documentElement;
+      var body = document.body;
+      return !!((html && (html.classList.contains('tc-product-page') || html.classList.contains('tc-product-page-active'))) ||
+        (body && (body.classList.contains('tc-product-page') || body.classList.contains('tc-product-page-active'))));
+    }
+
+    document.addEventListener('mousemove', function(e){
+      if (!isDesktop() || isProductMode()) return;
+      var pupil = document.querySelector('.tc-menu-eye-logo__pupil');
+      if (!pupil) return;
+      var rect = pupil.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var dx = (e.clientX - cx) / Math.max(window.innerWidth * 0.5, 1);
+      var dy = (e.clientY - cy) / Math.max(window.innerHeight * 0.5, 1);
+      state.tx = Math.max(-maxShift, Math.min(maxShift, dx * maxShift));
+      state.ty = Math.max(-maxShift, Math.min(maxShift, dy * maxShift));
+      state.lastMoveTs = Date.now();
+    }, { passive: true });
+
+    function tick(){
+      var pupil = document.querySelector('.tc-menu-eye-logo__pupil');
+      if (pupil && isDesktop() && !isProductMode()) {
+        var now = Date.now();
+        if (now - state.lastMoveTs > idleBackMs) {
+          state.tx *= 0.92;
+          state.ty *= 0.92;
+        }
+        state.x += (state.tx - state.x) * 0.12;
+        state.y += (state.ty - state.y) * 0.12;
+
+        var idleX = Math.sin(now / 1400) * 1.2;
+        var idleY = Math.cos(now / 1700) * 0.9;
+        pupil.style.transform = 'translate(' + (state.x + idleX).toFixed(2) + 'px,' + (state.y + idleY).toFixed(2) + 'px)';
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
   function scheduleClean(){
+    ensureMenuEyeLogo();
+    initMenuEyeParallax();
     cleanStoreUi(document);
     requestAnimationFrame(function(){ cleanStoreUi(document); });
     setTimeout(function(){ cleanStoreUi(document); }, 250);
@@ -5454,6 +5558,7 @@ function setupDesktopAura() {
   }
 
   var observer = new MutationObserver(function(){
+    ensureMenuEyeLogo();
     cleanStoreUi(document);
   });
 
