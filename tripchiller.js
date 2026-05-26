@@ -5119,3 +5119,66 @@ function setupDesktopAura() {
 
   observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
+
+(function(){
+  "use strict";
+
+  if (window.__TC_STORE_ST340C_CLEANUP__) return;
+  window.__TC_STORE_ST340C_CLEANUP__ = true;
+
+  function normalize(str){
+    return String(str || "").replace(/\s+/g, " ").trim().toLowerCase();
+  }
+
+  function cleanStoreUi(root){
+    var scope = root || document;
+
+    scope.querySelectorAll('.t-store__parts-switch-btn').forEach(function(btn){
+      var txt = normalize(btn.textContent);
+      if (txt === 'fruits') {
+        btn.style.setProperty('display', 'none', 'important');
+      }
+    });
+
+    scope.querySelectorAll('.t-store__prod-popup .t-store__prod-popup__btn, .t-store__prod-popup .js-store-close-btn, .t-store__prod-popup .t-store__prod-popup__back').forEach(function(back){
+      var txt = normalize(back.textContent);
+      if (txt.indexOf('more products') !== -1 || txt.indexOf('назад') !== -1 || txt.indexOf('каталог') !== -1) {
+        back.textContent = '← НАЗАД В КАТАЛОГ';
+      }
+    });
+
+    scope.querySelectorAll('.t-store__card *, .t-store__prod-popup *').forEach(function(node){
+      var txt = normalize(node.textContent);
+      if (!txt) return;
+      if (txt.indexOf('артикул:') === 0 || txt.indexOf('sku:') === 0) {
+        node.style.setProperty('display', 'none', 'important');
+      }
+      if (txt.indexOf('тип изделия:') === 0 || txt.indexOf('формат:') === 0) {
+        node.style.setProperty('display', 'none', 'important');
+      }
+      if (txt === 'custom') {
+        var badgeLike = node.closest('[class*="badge"], [class*="mark"], [data-product-mark], [data-store-badge]') || node;
+        badgeLike.style.setProperty('display', 'none', 'important');
+      }
+    });
+  }
+
+  function scheduleClean(){
+    cleanStoreUi(document);
+    requestAnimationFrame(function(){ cleanStoreUi(document); });
+    setTimeout(function(){ cleanStoreUi(document); }, 250);
+    setTimeout(function(){ cleanStoreUi(document); }, 1000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scheduleClean);
+  } else {
+    scheduleClean();
+  }
+
+  var observer = new MutationObserver(function(){
+    cleanStoreUi(document);
+  });
+
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
