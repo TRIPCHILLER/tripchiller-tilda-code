@@ -2569,9 +2569,8 @@ html.tc-page-contacts .tw-type-1a br {
 #allrecords .t-store .t-section__title,
 #allrecords .t-store .t-title.t-title_xs,
 #allrecords .t-store .t-section__descr,
-#allrecords .t-catalog .js-block-header-title[field="title"][data-editable="false"],
-#allrecords .t-catalog .t-section__title,
-#allrecords .t-catalog .js-block-header-descr[field="bdescr"][data-editable="false"] {
+#allrecords .tc-catalog-record .js-block-header-title[field="title"][data-editable="false"],
+#allrecords .tc-catalog-record .js-block-header-descr[field="bdescr"][data-editable="false"] {
   display: none !important;
 }
 
@@ -2606,40 +2605,28 @@ html.tc-page-contacts .tw-type-1a br {
   border-color: #9d191c !important;
 }
 
-#allrecords .t-catalog [class*="parts"] a,
-#allrecords .t-catalog [class*="parts"] button,
-#allrecords .js-catalog .t-catalog__parts-switch-btn,
-#allrecords .js-catalog .t-store__parts-switch-btn {
+#allrecords .tc-catalog-record [class*="parts"] a,
+#allrecords .tc-catalog-record [class*="parts"] button {
   color: rgba(255, 255, 255, 0.55) !important;
   opacity: 1 !important;
 }
 
-#allrecords .t-catalog [class*="parts"] a:hover,
-#allrecords .t-catalog [class*="parts"] button:hover,
-#allrecords .js-catalog .t-catalog__parts-switch-btn:hover,
-#allrecords .js-catalog .t-store__parts-switch-btn:hover {
+#allrecords .tc-catalog-record [class*="parts"] a:hover,
+#allrecords .tc-catalog-record [class*="parts"] button:hover {
   color: #fff !important;
   opacity: 1 !important;
 }
 
-#allrecords .t-catalog [class*="parts"] a.t-active,
-#allrecords .t-catalog [class*="parts"] button.t-active,
-#allrecords .t-catalog [class*="parts"] a.t-catalog__parts-switch-btn_active,
-#allrecords .t-catalog [class*="parts"] button.t-catalog__parts-switch-btn_active,
-#allrecords .t-catalog [class*="parts"] a[aria-selected="true"],
-#allrecords .t-catalog [class*="parts"] button[aria-selected="true"],
-#allrecords .t-catalog [class*="parts"] a.active,
-#allrecords .t-catalog [class*="parts"] button.active,
-#allrecords .js-catalog .t-catalog__parts-switch-btn.t-active,
-#allrecords .js-catalog .t-catalog__parts-switch-btn_active,
-#allrecords .js-catalog .t-catalog__parts-switch-btn[aria-selected="true"],
-#allrecords .js-catalog .t-catalog__parts-switch-btn.active,
-#allrecords .js-catalog .t-store__parts-switch-btn.t-active,
-#allrecords .js-catalog .t-store__parts-switch-btn_active,
-#allrecords .js-catalog .t-store__parts-switch-btn[aria-selected="true"],
-#allrecords .js-catalog .t-store__parts-switch-btn.active {
+#allrecords .tc-catalog-record [class*="parts"] a.tc-catalog-part-active,
+#allrecords .tc-catalog-record [class*="parts"] button.tc-catalog-part-active {
   color: #fff !important;
   opacity: 1 !important;
+}
+
+#allrecords .tc-catalog-record [class*="parts"] a *,
+#allrecords .tc-catalog-record [class*="parts"] button * {
+  color: inherit !important;
+  opacity: inherit !important;
 }
 
 #allrecords .t-store__parts-switch-btn[data-storepart-uid="FRUITS"],
@@ -2728,23 +2715,33 @@ html.tc-page-contacts .tw-type-1a br {
 }
 
 /* 6) product page: оставляем один возврат, крестик прячем */
-#allrecords .t-store__prod-popup .t-store__prod-popup__close,
-#allrecords .t-store__prod-popup .t-popup__close,
-#allrecords .t-store__prod-popup .t-popup__close-wrapper,
-#allrecords .t-catalog .t-popup__close-icon_cross,
-#allrecords .js-catalog .t-popup__close-icon_cross,
-#allrecords .t-catalog .t-popup__close,
-#allrecords .js-catalog .t-popup__close {
+#allrecords .tc-catalog-record .t-popup__close-icon_cross,
+#allrecords .tc-catalog-record .t-popup__close-icon,
+#allrecords .tc-catalog-record .t-popup__close-wrapper,
+#allrecords .tc-catalog-record .t-popup__close {
   display: none !important;
 }
 
-#allrecords .t-store__prod-popup .tc-store-back-link {
+#allrecords .tc-catalog-record .t-popup__close,
+#allrecords .tc-catalog-record .t-popup__close-wrapper,
+#allrecords .tc-catalog-record .js-store-close-btn,
+#allrecords .tc-catalog-record .tc-store-back-zone {
+  pointer-events: none !important;
+}
+
+#allrecords .tc-catalog-record .tc-store-back-link {
   color: #2a4434 !important;
   opacity: 1 !important;
   font-family: var(--tc-font-main), monospace !important;
   letter-spacing: .04em !important;
   text-transform: uppercase !important;
   text-decoration: none !important;
+  pointer-events: auto !important;
+  display: inline-flex !important;
+  width: fit-content !important;
+  max-width: max-content !important;
+  align-self: flex-start !important;
+  cursor: pointer !important;
 }
 
 /* 7) мобильная сетка: 2 в ряд */
