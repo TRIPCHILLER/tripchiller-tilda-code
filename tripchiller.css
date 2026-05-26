@@ -2703,15 +2703,38 @@ html.tc-page-contacts .tw-type-1a br {
   display: none !important;
 }
 
-#allrecords .t-store__card [class*="badge"],
-#allrecords .t-store__card [class*="mark"],
 #allrecords .t-store__card [data-product-mark],
 #allrecords .t-store__card [data-store-badge],
-#allrecords .t-catalog [class*="badge"],
-#allrecords .t-catalog [class*="mark"],
 #allrecords .t-catalog [data-product-mark],
 #allrecords .t-catalog [data-store-badge] {
   display: none !important;
+}
+
+#allrecords .t-catalog .t-store__card__textwrapper,
+#allrecords .t-catalog .t-store__card__title,
+#allrecords .t-catalog .js-store-prod-name,
+#allrecords .t-catalog .t-store__card__descr,
+#allrecords .t-catalog .js-store-prod-descr,
+#allrecords .t-catalog .t-store__card__price,
+#allrecords .t-catalog .js-product-price {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#allrecords .t-catalog .t-store__card__title,
+#allrecords .t-catalog .js-store-prod-name {
+  color: #9d191c !important;
+}
+
+#allrecords .t-catalog .t-store__card__descr,
+#allrecords .t-catalog .js-store-prod-descr {
+  color: #7a7a7a !important;
+}
+
+#allrecords .t-catalog .t-store__card__price,
+#allrecords .t-catalog .js-product-price {
+  color: #000 !important;
 }
 
 /* 6) product page: оставляем один возврат, крестик прячем */
@@ -2742,10 +2765,23 @@ html.tc-page-contacts .tw-type-1a br {
   max-width: max-content !important;
   align-self: flex-start !important;
   cursor: pointer !important;
+  font-size: 20px !important;
+  line-height: 1.2 !important;
 }
 
+
+#allrecords .tc-catalog-record [class*="parts"] a,
+#allrecords .tc-catalog-record [class*="parts"] button,
+#allrecords .tc-catalog-record [class*="parts"] a *,
+#allrecords .tc-catalog-record [class*="parts"] button * {
+  transition: color .55s ease, opacity .55s ease, text-shadow .55s ease;
+}
 /* 7) мобильная сетка: 2 в ряд */
 @media (max-width: 640px) {
+  #allrecords .tc-catalog-record .tc-store-back-link {
+    font-size: 16px !important;
+  }
+
   #allrecords .t-store .t-store__grid-cont,
   #allrecords .t-store .t-store__grid,
   #allrecords .t-store .js-store-grid-cont {
