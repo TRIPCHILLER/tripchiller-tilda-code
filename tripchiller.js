@@ -5145,11 +5145,23 @@ function setupDesktopAura() {
     return /^\/product\//.test(path) || /^\/tproduct\//.test(path);
   }
 
+  function isElementVisible(el){
+    if (!el) return false;
+    var cs = window.getComputedStyle(el);
+    var rect = el.getBoundingClientRect();
+    return cs.display !== 'none'
+      && cs.visibility !== 'hidden'
+      && cs.opacity !== '0'
+      && rect.width > 0
+      && rect.height > 0;
+  }
+
   function hasVisibleProductView(scope){
     var root = scope || document;
     var rec = root.querySelector('#rec2312983111') || document.querySelector('#rec2312983111');
     if (!rec) return false;
 
+    var isRouteProduct = isProductRoute();
     var selectors = [
       '.js-catalog-product',
       '.t-catalog__product-snippet',
@@ -5159,7 +5171,11 @@ function setupDesktopAura() {
     ];
 
     return selectors.some(function(sel){
-      return !!rec.querySelector(sel);
+      return Array.prototype.some.call(rec.querySelectorAll(sel), function(el){
+        if (!isElementVisible(el)) return false;
+        if (el.matches('.t-popup, .t-store__prod-popup') && !el.classList.contains('t-popup_show') && !isRouteProduct) return false;
+        return true;
+      });
     });
   }
 
