@@ -1165,6 +1165,47 @@ html.tc-product-page #rec2312983111 {
   z-index: 50 !important;
 }
 
+html.tc-product-page #recME202,
+body.tc-product-page #recME202,
+html.tc-product-page-active #recME202,
+body.tc-product-page-active #recME202,
+html.tc-product-page [data-record-type="202"],
+body.tc-product-page [data-record-type="202"],
+html.tc-product-page-active [data-record-type="202"],
+body.tc-product-page-active [data-record-type="202"],
+html.tc-product-page .t228,
+body.tc-product-page .t228,
+html.tc-product-page-active .t228,
+body.tc-product-page-active .t228,
+html.tc-product-page .t228__positionfixed,
+body.tc-product-page .t228__positionfixed,
+html.tc-product-page-active .t228__positionfixed,
+body.tc-product-page-active .t228__positionfixed,
+html.tc-product-page .tmenu-mobile,
+body.tc-product-page .tmenu-mobile,
+html.tc-product-page-active .tmenu-mobile,
+body.tc-product-page-active .tmenu-mobile,
+html.tc-product-page .t-menuburger,
+body.tc-product-page .t-menuburger,
+html.tc-product-page-active .t-menuburger,
+body.tc-product-page-active .t-menuburger,
+html.tc-product-page .t450__menu,
+body.tc-product-page .t450__menu,
+html.tc-product-page-active .t450__menu,
+body.tc-product-page-active .t450__menu,
+html.tc-product-page .t451__menu,
+body.tc-product-page .t451__menu,
+html.tc-product-page-active .t451__menu,
+body.tc-product-page-active .t451__menu,
+html.tc-product-page .t456,
+body.tc-product-page .t456,
+html.tc-product-page-active .t456,
+body.tc-product-page-active .t456 {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 html.tc-product-page #tc-disk-switcher-root,
 body.tc-product-page #tc-disk-switcher-root,
 html.tc-product-page .tc-disk-switcher,
