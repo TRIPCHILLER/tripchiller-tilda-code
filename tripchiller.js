@@ -5423,14 +5423,47 @@ function setupDesktopAura() {
   }
 
 
+  function getAssetUrlFromElement(el){
+    if (!el) return '';
+    if (el.tagName === 'IMG') {
+      return el.getAttribute('src') || el.src || '';
+    }
+
+    var href = el.getAttribute('href') || el.getAttribute('xlink:href');
+    if (!href && el.href && typeof el.href.baseVal === 'string') href = el.href.baseVal;
+    if (href) return href;
+
+    var bg = '';
+    try { bg = getComputedStyle(el).backgroundImage || ''; } catch (_) { bg = ''; }
+    if (bg && bg !== 'none') {
+      var m = bg.match(/url\((['"]?)(.*?)\1\)/i);
+      if (m && m[2]) return m[2];
+    }
+    return '';
+  }
+
   function resolveMenuEyeAsset(type){
-    var selectors = type === 'base'
-      ? ['.eye-mobile img', '.eye-desktop img', '.flower img']
-      : ['.eye-desktop [class*="pupil"] img', '.eye-mobile [class*="pupil"] img', '.eye-desktop img', '.eye-mobile img'];
-    for (var i = 0; i < selectors.length; i++) {
-      var el = document.querySelector(selectors[i]);
-      var src = el && el.getAttribute && el.getAttribute('src');
-      if (src) return src;
+    var baseCandidates = [
+      '.flower img',
+      '.flower svg image',
+      'img[src*="2p_t.svg"], image[href*="2p_t.svg"], image[xlink\:href*="2p_t.svg"]',
+      '[style*="2p_t.svg"], [style*="flower"]',
+      'img[src*="flower"], image[href*="flower"], image[xlink\:href*="flower"]'
+    ];
+    var pupilCandidates = [
+      '[class*="pupil"] img',
+      '[class*="pupil"] image',
+      'img[src*="pupil.svg"], image[href*="pupil.svg"], image[xlink\:href*="pupil.svg"]',
+      '[style*="pupil.svg"]',
+      '.eye-desktop img',
+      '.eye-mobile img'
+    ];
+    var candidates = type === 'base' ? baseCandidates : pupilCandidates;
+
+    for (var i = 0; i < candidates.length; i++) {
+      var node = document.querySelector(candidates[i]);
+      var url = getAssetUrlFromElement(node);
+      if (url) return url;
     }
     return '';
   }
@@ -5442,12 +5475,16 @@ function setupDesktopAura() {
   function ensureMenuEyeLogo(){
     var host = getMenuEyeHost();
     if (!host) return;
-    var existing = host.querySelector('.tc-menu-eye-logo');
+    var existing = document.querySelector('.tc-menu-eye-logo');
     if (existing) return;
 
     var baseSrc = resolveMenuEyeAsset('base');
     var pupilSrc = resolveMenuEyeAsset('pupil');
     if (!baseSrc || !pupilSrc) return;
+    if (baseSrc === pupilSrc) {
+      console.warn('[tc-menu-eye-logo] base and pupil assets are identical, skip init', baseSrc);
+      return;
+    }
 
     if (getComputedStyle(host).position === 'static') {
       host.style.position = 'relative';
