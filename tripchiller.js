@@ -5185,8 +5185,11 @@ function setupDesktopAura() {
     var headerActive = normalizePartLabel(activeLabel);
     var activeNormalized = storedActive || headerActive;
     if (!activeNormalized || activeNormalized === 'каталог') activeNormalized = 'все';
-    record.querySelectorAll('.t-store__parts-switch-btn, .t-catalog__parts-switch-btn, [id^="parts-above"] a, [class*="parts"] a, [class*="parts"] button').forEach(function(btn){
+    var hasAll = false;
+    record.querySelectorAll('.t-catalog__parts-switch-btn, .t-store__parts-switch-btn, .js-catalog-parts-switcher, .t-catalog__parts-button-base').forEach(function(btn){
       var txt = normalizePartLabel(btn.textContent);
+      if (!txt) return;
+      if (txt === 'все') hasAll = true;
       if (txt === 'fruits') {
         btn.style.setProperty('display', 'none', 'important');
         return;
@@ -5202,6 +5205,7 @@ function setupDesktopAura() {
         inner.style.setProperty('opacity', '1', 'important');
       });
     });
+    if (!hasAll && activeNormalized === 'все') record.dataset.tcActivePart = '';
   }
 
   function cleanStoreUi(root){
@@ -5252,15 +5256,6 @@ function setupDesktopAura() {
             return;
           }
 
-          var classBadge = node.closest('[class*="badge"], [class*="mark"]');
-          if (classBadge) {
-            var classBadgeTxt = normalize(classBadge.textContent);
-            if (classBadgeTxt === 'custom') {
-              classBadge.style.setProperty('display', 'none', 'important');
-            }
-            return;
-          }
-
           if (isLeafLike) {
             node.style.setProperty('display', 'none', 'important');
           }
@@ -5269,11 +5264,12 @@ function setupDesktopAura() {
 
       var titleNode = record.querySelector('.js-block-header-title[field="title"][data-editable="false"]');
       var activeLabel = titleNode ? titleNode.textContent : '';
-      record.querySelectorAll('.js-block-header-title[field="title"][data-editable="false"], .js-block-header-descr[field="bdescr"][data-editable="false"]').forEach(function(title){
-        title.style.setProperty('display', 'none', 'important');
-      });
-
       if (titleNode) {
+        var titleTxt = normalizePartLabel(titleNode.textContent);
+        var titleWhitelist = new Set(['каталог', 'все', 'кепка', 'кепки', 'футболка', 'футболки', 'верх', 'архив']);
+        if (titleWhitelist.has(titleTxt)) {
+          titleNode.style.setProperty('display', 'none', 'important');
+        }
         var container = titleNode.closest('.t-section__container, .t-section_container, .t-container');
         if (container && !container.querySelector('.t-catalog, .js-catalog, .t-store, .t-store__card, .js-product, .t-catalog__product, .t-store__grid')) {
           container.style.setProperty('display', 'none', 'important');
@@ -5285,7 +5281,7 @@ function setupDesktopAura() {
       }
 
 
-      record.querySelectorAll('.t-store__parts-switch-btn, .t-catalog__parts-switch-btn, [id^="parts-above"] a, [class*="parts"] a, [class*="parts"] button').forEach(function(btn){
+      record.querySelectorAll('.t-catalog__parts-switch-btn, .t-store__parts-switch-btn, .js-catalog-parts-switcher, .t-catalog__parts-button-base').forEach(function(btn){
         if (btn.dataset.tcPartBound === '1') return;
         btn.dataset.tcPartBound = '1';
         btn.addEventListener('click', function(){

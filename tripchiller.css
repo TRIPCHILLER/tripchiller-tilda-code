@@ -2628,26 +2628,34 @@ html.tc-page-contacts .tw-type-1a br {
   border-color: #9d191c !important;
 }
 
-#allrecords .tc-catalog-record [class*="parts"] a,
-#allrecords .tc-catalog-record [class*="parts"] button {
+#allrecords .tc-catalog-record .t-catalog__parts-switch-btn,
+#allrecords .tc-catalog-record .t-store__parts-switch-btn,
+#allrecords .tc-catalog-record .js-catalog-parts-switcher,
+#allrecords .tc-catalog-record .t-catalog__parts-button-base {
   color: rgba(255, 255, 255, 0.55) !important;
   opacity: 1 !important;
 }
 
-#allrecords .tc-catalog-record [class*="parts"] a:hover,
-#allrecords .tc-catalog-record [class*="parts"] button:hover {
+#allrecords .tc-catalog-record .t-catalog__parts-switch-btn:hover,
+#allrecords .tc-catalog-record .t-store__parts-switch-btn:hover,
+#allrecords .tc-catalog-record .js-catalog-parts-switcher:hover,
+#allrecords .tc-catalog-record .t-catalog__parts-button-base:hover {
   color: #fff !important;
   opacity: 1 !important;
 }
 
-#allrecords .tc-catalog-record [class*="parts"] a.tc-catalog-part-active,
-#allrecords .tc-catalog-record [class*="parts"] button.tc-catalog-part-active {
+#allrecords .tc-catalog-record .t-catalog__parts-switch-btn.tc-catalog-part-active,
+#allrecords .tc-catalog-record .t-store__parts-switch-btn.tc-catalog-part-active,
+#allrecords .tc-catalog-record .js-catalog-parts-switcher.tc-catalog-part-active,
+#allrecords .tc-catalog-record .t-catalog__parts-button-base.tc-catalog-part-active {
   color: #fff !important;
   opacity: 1 !important;
 }
 
-#allrecords .tc-catalog-record [class*="parts"] a *,
-#allrecords .tc-catalog-record [class*="parts"] button * {
+#allrecords .tc-catalog-record .t-catalog__parts-switch-btn *,
+#allrecords .tc-catalog-record .t-store__parts-switch-btn *,
+#allrecords .tc-catalog-record .js-catalog-parts-switcher *,
+#allrecords .tc-catalog-record .t-catalog__parts-button-base * {
   color: inherit !important;
   opacity: inherit !important;
 }
@@ -2727,36 +2735,36 @@ html.tc-page-contacts .tw-type-1a br {
 }
 
 #allrecords .t-store__card [data-product-mark],
-#allrecords .t-store__card [data-store-badge],
-#allrecords .t-catalog [data-product-mark],
-#allrecords .t-catalog [data-store-badge] {
+#allrecords .t-store__card [data-store-badge] {
   display: none !important;
 }
 
-#allrecords .t-catalog .t-store__card__textwrapper,
-#allrecords .t-catalog .t-store__card__title,
-#allrecords .t-catalog .js-store-prod-name,
-#allrecords .t-catalog .t-store__card__descr,
-#allrecords .t-catalog .js-store-prod-descr,
-#allrecords .t-catalog .t-store__card__price,
-#allrecords .t-catalog .js-product-price {
-  display: block !important;
+#allrecords .t-catalog__card .t-catalog__card__wrap_txt-and-opts,
+#allrecords .t-catalog__card .t-catalog__card__wrap_txt-and-opts *,
+#allrecords .t-catalog__card .t-name,
+#allrecords .t-catalog__card .t-descr,
+#allrecords .t-catalog__card .js-product-name,
+#allrecords .t-catalog__card .js-product-price,
+#allrecords .t-catalog__card [class*="price"] {
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-#allrecords .t-catalog .t-store__card__title,
-#allrecords .t-catalog .js-store-prod-name {
+#allrecords .t-catalog__card .t-catalog__card__wrap_txt-and-opts {
+  display: block !important;
+}
+
+#allrecords .t-catalog__card .t-name,
+#allrecords .t-catalog__card .js-product-name {
   color: #9d191c !important;
 }
 
-#allrecords .t-catalog .t-store__card__descr,
-#allrecords .t-catalog .js-store-prod-descr {
+#allrecords .t-catalog__card .t-descr {
   color: #7a7a7a !important;
 }
 
-#allrecords .t-catalog .t-store__card__price,
-#allrecords .t-catalog .js-product-price {
+#allrecords .t-catalog__card .js-product-price,
+#allrecords .t-catalog__card [class*="price"] {
   color: #000 !important;
 }
 
@@ -2793,11 +2801,15 @@ html.tc-page-contacts .tw-type-1a br {
 }
 
 
-#allrecords .tc-catalog-record [class*="parts"] a,
-#allrecords .tc-catalog-record [class*="parts"] button,
-#allrecords .tc-catalog-record [class*="parts"] a *,
-#allrecords .tc-catalog-record [class*="parts"] button * {
-  transition: color .55s ease, opacity .55s ease, text-shadow .55s ease;
+#allrecords .tc-catalog-record .t-catalog__parts-switch-btn,
+#allrecords .tc-catalog-record .t-store__parts-switch-btn,
+#allrecords .tc-catalog-record .js-catalog-parts-switcher,
+#allrecords .tc-catalog-record .t-catalog__parts-button-base,
+#allrecords .tc-catalog-record .t-catalog__parts-switch-btn *,
+#allrecords .tc-catalog-record .t-store__parts-switch-btn *,
+#allrecords .tc-catalog-record .js-catalog-parts-switcher *,
+#allrecords .tc-catalog-record .t-catalog__parts-button-base * {
+  transition: color .28s ease, opacity .28s ease, text-shadow .28s ease;
 }
 /* 7) мобильная сетка: 2 в ряд */
 @media (max-width: 640px) {
