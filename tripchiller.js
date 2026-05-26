@@ -5150,12 +5150,17 @@ function setupDesktopAura() {
     scope.querySelectorAll('.t-store__card *, .t-store__prod-popup *').forEach(function(node){
       var txt = normalize(node.textContent);
       if (!txt) return;
-      if (txt.indexOf('артикул:') === 0 || txt.indexOf('sku:') === 0) {
+
+      var isLeafLike = node.children.length === 0;
+
+      if (isLeafLike && (txt.indexOf('артикул:') === 0 || txt.indexOf('sku:') === 0)) {
         node.style.setProperty('display', 'none', 'important');
       }
-      if (txt.indexOf('тип изделия:') === 0 || txt.indexOf('формат:') === 0) {
+
+      if (isLeafLike && (txt.indexOf('тип изделия:') === 0 || txt.indexOf('формат:') === 0)) {
         node.style.setProperty('display', 'none', 'important');
       }
+
       if (txt === 'custom') {
         var badgeLike = node.closest('[class*="badge"], [class*="mark"], [data-product-mark], [data-store-badge]') || node;
         badgeLike.style.setProperty('display', 'none', 'important');

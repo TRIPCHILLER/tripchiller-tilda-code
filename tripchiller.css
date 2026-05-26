@@ -2619,8 +2619,6 @@ html.tc-page-contacts .tw-type-1a br {
 }
 
 /* 4) скрываем технический хвост характеристик в основном теле */
-#allrecords .t-store__prod-popup .t-store__prod-popup__text,
-#allrecords .t-store__prod-popup .t-store__prod-popup__tabs,
 #allrecords .t-store__prod-popup .js-store-prod-all-charcs,
 #allrecords .t-store__prod-popup .js-store-prod-charcs,
 #allrecords .t-store__prod-popup .t-store__prod-popup__charcs {
