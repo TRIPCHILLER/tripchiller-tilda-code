@@ -5140,9 +5140,45 @@ function setupDesktopAura() {
     return txt;
   }
 
-  function isDirectProductRoute(){
+  function isProductRoute(){
     var path = location.pathname || '';
     return /^\/product\//.test(path) || /^\/tproduct\//.test(path);
+  }
+
+  function hasVisibleProductView(scope){
+    var root = scope || document;
+    var rec = root.querySelector('#rec2312983111') || document.querySelector('#rec2312983111');
+    if (!rec) return false;
+
+    var selectors = [
+      '.js-catalog-product',
+      '.t-catalog__product-snippet',
+      '.t-catalog__product',
+      '.t-store__prod-popup',
+      '.t-popup.t-popup_show'
+    ];
+
+    return selectors.some(function(sel){
+      return !!rec.querySelector(sel);
+    });
+  }
+
+  function syncProductPageMode(scope){
+    var productMode = isProductRoute() || hasVisibleProductView(scope);
+    var html = document.documentElement;
+    var body = document.body;
+    var rec = (scope || document).querySelector('#rec2312983111') || document.querySelector('#rec2312983111');
+
+    if (productMode) {
+      html.classList.add('tc-product-page', 'tc-product-page-active');
+      if (body) body.classList.add('tc-product-page', 'tc-product-page-active');
+      if (rec) rec.classList.add('tc-product-record', 'tc-catalog-record');
+      return true;
+    }
+
+    html.classList.remove('tc-product-page', 'tc-product-page-active');
+    if (body) body.classList.remove('tc-product-page', 'tc-product-page-active');
+    return false;
   }
 
   function getCatalogRecords(scope){
@@ -5215,17 +5251,10 @@ function setupDesktopAura() {
 
   function cleanStoreUi(root){
     var scope = root || document;
-    var directRoute = isDirectProductRoute();
-    if (directRoute) {
-      document.documentElement.classList.add('tc-product-page');
-      if (document.body) document.body.classList.add('tc-product-page');
-    } else {
-      document.documentElement.classList.remove('tc-product-page');
-      if (document.body) document.body.classList.remove('tc-product-page');
-    }
+    var productMode = syncProductPageMode(scope);
 
     var records = getCatalogRecords(scope);
-    if (directRoute) {
+    if (productMode) {
       getDirectProductRecords(scope).forEach(function(record){
         if (records.indexOf(record) === -1) records.push(record);
       });
@@ -5298,7 +5327,7 @@ function setupDesktopAura() {
       applyPartsState(record, activeLabel);
     });
 
-    if (directRoute) {
+    if (productMode) {
       scope.querySelectorAll('.tc-product-record *, .t-catalog__card *, .js-catalog-product *, .t-catalog__product-snippet *, .t-catalog__product *, .t-store__prod-popup *, .t-popup *, [data-product-lid] *, [data-product-gen-uid] *, .js-store-product *').forEach(function(node){
         var txt = normalize(node.textContent);
         if (!txt) return;
