@@ -5141,7 +5141,8 @@ function setupDesktopAura() {
   }
 
   function isDirectProductRoute(){
-    return /^\/product\//.test(location.pathname || '');
+    var path = location.pathname || '';
+    return /^\/product\//.test(path) || /^\/tproduct\//.test(path);
   }
 
   function getCatalogRecords(scope){
@@ -5166,6 +5167,10 @@ function setupDesktopAura() {
       '[data-product-lid]',
       '[data-product-gen-uid]',
       '.js-store-product',
+      '.js-catalog-product',
+      '.t-catalog__product-snippet',
+      '.t-catalog__product',
+      '.js-catalog-product-snippet',
       '.t-store__prod-popup__info',
       '.t-store__prod-popup__wrapper',
       '.t-store__prod-popup__container'
@@ -5234,7 +5239,7 @@ function setupDesktopAura() {
         }
       });
 
-      record.querySelectorAll('.t-store__card *, .t-store__prod-popup *, .t-popup *, .js-store-product *').forEach(function(node){
+      record.querySelectorAll('.t-store__card *, .t-catalog__card *, .t-store__prod-popup *, .t-popup *, .js-store-product *, .js-catalog-product *, .t-catalog__product-snippet *, .t-catalog__product *').forEach(function(node){
         var txt = normalize(node.textContent);
         if (!txt) return;
 
@@ -5295,7 +5300,7 @@ function setupDesktopAura() {
     });
 
     if (directRoute) {
-      scope.querySelectorAll('.tc-product-record *, .t-store__prod-popup *, .t-popup *, [data-product-lid] *, [data-product-gen-uid] *, .js-store-product *').forEach(function(node){
+      scope.querySelectorAll('.tc-product-record *, .t-catalog__card *, .js-catalog-product *, .t-catalog__product-snippet *, .t-catalog__product *, .t-store__prod-popup *, .t-popup *, [data-product-lid] *, [data-product-gen-uid] *, .js-store-product *').forEach(function(node){
         var txt = normalize(node.textContent);
         if (!txt) return;
         if (node.children.length !== 0) return;
@@ -5306,7 +5311,7 @@ function setupDesktopAura() {
     }
 
     var titleWhitelist = new Set(['каталог', 'все', 'кепка', 'кепки', 'футболка', 'футболки', 'верх', 'архив']);
-    scope.querySelectorAll('.js-block-header-title[field="title"][data-editable="false"]').forEach(function(title){
+    scope.querySelectorAll('#rec2312983111 .js-block-header-title[field="title"][data-editable="false"]').forEach(function(title){
       var txt = normalizePartLabel(title.textContent);
       if (!titleWhitelist.has(txt)) return;
       if (!scope.querySelector('.t-catalog.js-catalog, .js-catalog, .t-catalog')) return;
