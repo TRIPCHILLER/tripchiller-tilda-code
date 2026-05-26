@@ -2607,6 +2607,12 @@ html.tc-page-contacts .tw-type-1a br {
   opacity: 0 !important;
 }
 
+#rec2312983111 .js-block-header-title.t-section__title {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
 /* 2) разделы каталога */
 #allrecords .t-store__parts-switch-wrapper,
 #allrecords .t-store__parts-switch {

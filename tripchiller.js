@@ -5272,12 +5272,8 @@ function setupDesktopAura() {
       if (titleNode) {
         var titleTxt = normalizePartLabel(titleNode.textContent);
         var titleWhitelist = new Set(['каталог', 'все', 'кепка', 'кепки', 'футболка', 'футболки', 'верх', 'архив']);
-        if (titleWhitelist.has(titleTxt)) {
+        if (titleWhitelist.has(titleTxt) && titleNode.children.length === 0) {
           titleNode.style.setProperty('display', 'none', 'important');
-        }
-        var container = titleNode.closest('.t-section__container, .t-section_container, .t-container');
-        if (container && !container.querySelector('.t-catalog, .js-catalog, .t-store, .t-store__card, .js-product, .t-catalog__product, .t-store__grid')) {
-          container.style.setProperty('display', 'none', 'important');
         }
       }
 
@@ -5310,16 +5306,22 @@ function setupDesktopAura() {
       });
     }
 
-    var titleWhitelist = new Set(['каталог', 'все', 'кепка', 'кепки', 'футболка', 'футболки', 'верх', 'архив']);
-    scope.querySelectorAll('#rec2312983111 .js-block-header-title[field="title"][data-editable="false"]').forEach(function(title){
-      var txt = normalizePartLabel(title.textContent);
-      if (!titleWhitelist.has(txt)) return;
-      if (!scope.querySelector('.t-catalog.js-catalog, .js-catalog, .t-catalog')) return;
-      title.style.setProperty('display', 'none', 'important');
-      var container = title.closest('.t-section__container, .t-section_container, .t-container');
-      if (container && !container.querySelector('.t-catalog, .js-catalog, .t-store, .t-store__card, .js-product, .t-catalog__product, .t-store__grid')) {
-        container.style.setProperty('display', 'none', 'important');
-      }
+    hideCatalogDynamicHeader(scope);
+  }
+
+  function hideCatalogDynamicHeader(scope){
+    var root = scope || document;
+    var norm = function(s){ return String(s || '').replace(/\s+/g, ' ').trim().toLowerCase(); };
+    var whitelist = new Set(['каталог', 'все', 'кепка', 'кепки', 'футболка', 'футболки', 'верх', 'архив']);
+
+    root.querySelectorAll('#rec2312983111 .js-block-header-title, #rec2312983111 .t-section__title').forEach(function(el){
+      var txt = norm(el.textContent);
+      if (!whitelist.has(txt)) return;
+      if (el.children.length !== 0) return;
+      if (el.closest('.t-catalog__parts-above-item, .t-catalog__parts-wrapper, .t-catalog__parts-switch-btn, .js-catalog-parts-switcher, .t-catalog__parts-button-base')) return;
+      el.style.setProperty('display', 'none', 'important');
+      el.style.setProperty('visibility', 'hidden', 'important');
+      el.style.setProperty('opacity', '0', 'important');
     });
   }
 
