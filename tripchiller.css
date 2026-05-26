@@ -1159,6 +1159,29 @@ html.tc-product-page .t-popup {
   min-height: 100vh !important;
 }
 
+
+html.tc-product-page #rec2312983111 {
+  position: relative !important;
+  z-index: 50 !important;
+}
+
+html.tc-product-page #tc-disk-switcher-root,
+body.tc-product-page #tc-disk-switcher-root,
+html.tc-product-page .tc-disk-switcher,
+body.tc-product-page .tc-disk-switcher,
+html.tc-product-page .tc-path-row,
+body.tc-product-page .tc-path-row,
+html.tc-product-page .flower,
+body.tc-product-page .flower,
+html.tc-product-page .eye-desktop,
+body.tc-product-page .eye-desktop,
+html.tc-product-page .eye-mobile,
+body.tc-product-page .eye-mobile {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 html,
 body {
   background: #000 !important;
