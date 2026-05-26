@@ -2801,6 +2801,49 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
   color: #000 !important;
 }
 
+/* 5.1) ST340C: плавная смена второй фотографии на hover (V2 из console test) */
+#rec2312983111 .t-catalog__card {
+  background-color: #fff !important;
+  overflow: hidden !important;
+}
+
+#rec2312983111 .t-catalog__card__wrap_txt-and-opts,
+#rec2312983111 .t-catalog__card__wrap_txt-and-opts *,
+#rec2312983111 .t-catalog__card__descr,
+#rec2312983111 .t-catalog__card__price {
+  background-color: transparent !important;
+}
+
+#rec2312983111 .t-catalog__card__wrap_txt-and-opts {
+  background: #fff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+#rec2312983111 .t-catalog__card__imgwrapper {
+  overflow: hidden !important;
+  isolation: isolate !important;
+  background-color: #0b0b0b !important;
+}
+
+#rec2312983111 .t-catalog__card img,
+#rec2312983111 .t-catalog__card .t-bgimg,
+#rec2312983111 .t-catalog__card .t-img,
+#rec2312983111 .t-catalog__card__img,
+#rec2312983111 .t-catalog__card [style*="background-image"] {
+  transition: opacity .45s ease, filter .45s ease, transform .45s ease !important;
+  backface-visibility: hidden !important;
+  will-change: opacity, filter, transform !important;
+}
+
+#rec2312983111 .t-catalog__card:hover img,
+#rec2312983111 .t-catalog__card:hover .t-bgimg,
+#rec2312983111 .t-catalog__card:hover .t-img,
+#rec2312983111 .t-catalog__card:hover .t-catalog__card__img,
+#rec2312983111 .t-catalog__card:hover [style*="background-image"] {
+  transition: opacity .45s ease, filter .45s ease, transform .45s ease !important;
+}
+
 /* 6) product page: оставляем один возврат, крестик прячем */
 #allrecords .tc-catalog-record .t-popup__close-icon_cross,
 #allrecords .tc-catalog-record .t-popup__close-icon,
