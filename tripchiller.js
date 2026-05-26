@@ -5140,6 +5140,10 @@ function setupDesktopAura() {
     return txt;
   }
 
+  function isDirectProductRoute(){
+    return /^\/product\//.test(location.pathname || '');
+  }
+
   function getCatalogRecords(scope){
     var records = [];
     var seen = new Set();
@@ -5148,6 +5152,29 @@ function setupDesktopAura() {
       if (!record || seen.has(record)) return;
       seen.add(record);
       record.classList.add('tc-catalog-record');
+      records.push(record);
+    });
+    return records;
+  }
+
+  function getDirectProductRecords(scope){
+    var records = [];
+    var seen = new Set();
+    var selectors = [
+      '.t-store__prod-popup',
+      '.t-popup',
+      '[data-product-lid]',
+      '[data-product-gen-uid]',
+      '.js-store-product',
+      '.t-store__prod-popup__info',
+      '.t-store__prod-popup__wrapper',
+      '.t-store__prod-popup__container'
+    ].join(', ');
+    scope.querySelectorAll(selectors).forEach(function(node){
+      var record = node.closest('.r, .r-rec, .t-rec, [id^="rec"], .t-store__prod-popup, .t-popup, #allrecords') || node;
+      if (!record || seen.has(record)) return;
+      seen.add(record);
+      record.classList.add('tc-catalog-record', 'tc-product-record');
       records.push(record);
     });
     return records;
@@ -5179,8 +5206,20 @@ function setupDesktopAura() {
 
   function cleanStoreUi(root){
     var scope = root || document;
+    var directRoute = isDirectProductRoute();
+    if (directRoute) {
+      document.documentElement.classList.add('tc-product-page');
+      if (document.body) document.body.classList.add('tc-product-page');
+    }
 
-    getCatalogRecords(scope).forEach(function(record){
+    var records = getCatalogRecords(scope);
+    if (directRoute) {
+      getDirectProductRecords(scope).forEach(function(record){
+        if (records.indexOf(record) === -1) records.push(record);
+      });
+    }
+
+    records.forEach(function(record){
       record.querySelectorAll('.t-store__prod-popup .js-store-close-btn, .t-store__prod-popup .t-store__prod-popup__back, .t-store__prod-popup a, .t-store__prod-popup button, .t-store__prod-popup [role="button"], .t-popup .js-store-close-btn, .t-popup .t-store__prod-popup__back, .t-popup a, .t-popup button, .t-popup [role="button"]').forEach(function(back){
         var txt = normalize(back.textContent);
         if (txt.indexOf('more products') !== -1 || txt.indexOf('назад') !== -1 || txt.indexOf('каталог') !== -1) {
@@ -5191,7 +5230,7 @@ function setupDesktopAura() {
         }
       });
 
-      record.querySelectorAll('.t-store__card *, .t-store__prod-popup *, .t-popup *').forEach(function(node){
+      record.querySelectorAll('.t-store__card *, .t-store__prod-popup *, .t-popup *, .js-store-product *').forEach(function(node){
         var txt = normalize(node.textContent);
         if (!txt) return;
 
@@ -5258,6 +5297,17 @@ function setupDesktopAura() {
       });
       applyPartsState(record, activeLabel);
     });
+
+    if (directRoute) {
+      scope.querySelectorAll('.tc-product-record *, .t-store__prod-popup *, .t-popup *, [data-product-lid] *, [data-product-gen-uid] *, .js-store-product *').forEach(function(node){
+        var txt = normalize(node.textContent);
+        if (!txt) return;
+        if (node.children.length !== 0) return;
+        if (/^артикул\b/.test(txt) || /^sku\b/.test(txt) || txt.indexOf('тип изделия:') === 0 || txt.indexOf('формат:') === 0) {
+          node.style.setProperty('display', 'none', 'important');
+        }
+      });
+    }
 
     var titleWhitelist = new Set(['каталог', 'все', 'кепка', 'кепки', 'футболка', 'футболки', 'верх', 'архив']);
     scope.querySelectorAll('.js-block-header-title[field="title"][data-editable="false"]').forEach(function(title){

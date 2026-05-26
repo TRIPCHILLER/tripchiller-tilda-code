@@ -1100,6 +1100,29 @@ body.tc-product-popup-open .t-store__prod-popup__close {
   pointer-events: auto !important;
 }
 
+html.tc-product-page,
+html.tc-product-page body {
+  min-height: 100%;
+}
+
+html.tc-product-page body {
+  background-color: #fff !important;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.64)),
+    url("https://static.tildacdn.com/tild3362-3366-4538-a237-326166303836/BGwb.webp") !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
+  background-repeat: no-repeat !important;
+}
+
+html.tc-product-page #allrecords,
+html.tc-product-page .tc-product-record,
+html.tc-product-page .t-store__prod-popup,
+html.tc-product-page .t-popup {
+  min-height: 100vh !important;
+}
+
 html,
 body {
   background: #000 !important;
