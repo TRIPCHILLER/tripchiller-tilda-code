@@ -1107,20 +1107,29 @@ html.tc-product-page body {
 
 html.tc-product-page body {
   background-color: #fff !important;
+}
+
+html.tc-product-page #rec2312983111 {
+  background-color: #fff !important;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.64)),
+    linear-gradient(rgba(255,255,255,.50), rgba(255,255,255,.50)),
     url("https://static.tildacdn.com/tild3362-3366-4538-a237-326166303836/BGwb.webp") !important;
   background-size: cover !important;
   background-position: center center !important;
-  background-attachment: fixed !important;
   background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+  min-height: 100vh !important;
 }
 
 html.tc-product-page #allrecords,
-html.tc-product-page .tc-product-record,
 html.tc-product-page .js-catalog-product,
 html.tc-product-page .t-catalog__product-snippet,
-html.tc-product-page .t-catalog__product,
+html.tc-product-page .t-catalog__product {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html.tc-product-page .tc-product-record,
 html.tc-product-page .t-store__prod-popup,
 html.tc-product-page .t-popup {
   min-height: 100vh !important;
