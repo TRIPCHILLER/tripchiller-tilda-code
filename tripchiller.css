@@ -1118,6 +1118,9 @@ html.tc-product-page body {
 
 html.tc-product-page #allrecords,
 html.tc-product-page .tc-product-record,
+html.tc-product-page .js-catalog-product,
+html.tc-product-page .t-catalog__product-snippet,
+html.tc-product-page .t-catalog__product,
 html.tc-product-page .t-store__prod-popup,
 html.tc-product-page .t-popup {
   min-height: 100vh !important;
@@ -2595,6 +2598,13 @@ html.tc-page-contacts .tw-type-1a br {
 #allrecords .tc-catalog-record .js-block-header-title[field="title"][data-editable="false"],
 #allrecords .tc-catalog-record .js-block-header-descr[field="bdescr"][data-editable="false"] {
   display: none !important;
+}
+
+#rec2312983111 .js-block-header-title[field="title"][data-editable="false"],
+#rec2312983111 .js-block-header-descr[field="bdescr"][data-editable="false"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
 }
 
 /* 2) разделы каталога */
