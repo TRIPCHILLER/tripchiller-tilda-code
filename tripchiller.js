@@ -5219,6 +5219,9 @@ function setupDesktopAura() {
     if (directRoute) {
       document.documentElement.classList.add('tc-product-page');
       if (document.body) document.body.classList.add('tc-product-page');
+    } else {
+      document.documentElement.classList.remove('tc-product-page');
+      if (document.body) document.body.classList.remove('tc-product-page');
     }
 
     var records = getCatalogRecords(scope);
@@ -5232,7 +5235,7 @@ function setupDesktopAura() {
       record.querySelectorAll('.t-store__prod-popup .js-store-close-btn, .t-store__prod-popup .t-store__prod-popup__back, .t-store__prod-popup a, .t-store__prod-popup button, .t-store__prod-popup [role="button"], .t-popup .js-store-close-btn, .t-popup .t-store__prod-popup__back, .t-popup a, .t-popup button, .t-popup [role="button"]').forEach(function(back){
         var txt = normalize(back.textContent);
         if (txt.indexOf('more products') !== -1 || txt.indexOf('назад') !== -1 || txt.indexOf('каталог') !== -1) {
-          back.textContent = '← НАЗАД В ГАЛЕРЕЮ...';
+          back.textContent = 'НАЗАД В ГАЛЕРЕЮ...';
           back.classList.add('tc-store-back-link');
           var zone = back.closest('.t-popup__close, .t-popup__close-wrapper, .js-store-close-btn, .t-store__prod-popup__close') || back.parentElement;
           if (zone) zone.classList.add('tc-store-back-zone');
@@ -5323,13 +5326,31 @@ function setupDesktopAura() {
       target.style.setProperty('opacity', '0', 'important');
     });
 
-    var walker = document.createTreeWalker(rec, NodeFilter.SHOW_TEXT, null);
+    rec.querySelectorAll('script.tc-store-back-link, style.tc-store-back-link').forEach(function(el){
+      el.classList.remove('tc-store-back-link');
+      el.removeAttribute('style');
+      el.style.setProperty('display', 'none', 'important');
+      el.style.setProperty('visibility', 'hidden', 'important');
+    });
+
+    var walker = document.createTreeWalker(rec, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(node){
+        if (!node || !node.nodeValue || !/more products/i.test(node.nodeValue)) return NodeFilter.FILTER_SKIP;
+        var parent = node.parentElement;
+        if (!parent) return NodeFilter.FILTER_REJECT;
+        if (parent.closest('script, style, noscript, template')) return NodeFilter.FILTER_REJECT;
+        if (parent.matches('[hidden], [aria-hidden="true"]')) return NodeFilter.FILTER_REJECT;
+        if (parent.closest('[hidden], [aria-hidden="true"]')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
     var node;
     while ((node = walker.nextNode())) {
-      if (!node || !node.nodeValue || !/more products/i.test(node.nodeValue)) continue;
-      node.nodeValue = node.nodeValue.replace(/more products/ig, '← НАЗАД В ГАЛЕРЕЮ...');
       var parent = node.parentElement;
       if (!parent) continue;
+      var txt = String(parent.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!txt || txt.length > 80) continue;
+      parent.textContent = 'НАЗАД В ГАЛЕРЕЮ...';
       parent.classList.add('tc-store-back-link');
       parent.style.setProperty('font-size', '20px', 'important');
       parent.style.setProperty('line-height', '1.2', 'important');

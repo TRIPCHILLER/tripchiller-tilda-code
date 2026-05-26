@@ -2816,6 +2816,12 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
   pointer-events: none !important;
 }
 
+#rec2312983111 script.tc-store-back-link,
+#rec2312983111 style.tc-store-back-link {
+  display: none !important;
+  visibility: hidden !important;
+}
+
 #allrecords .tc-catalog-record .tc-store-back-link {
   color: #2a4434 !important;
   opacity: 1 !important;
