@@ -2550,3 +2550,167 @@ html.tc-page-contacts .tw-type-1a br {
     word-break: break-word;
   }
 }
+
+/* =========================
+   TRIPCHILLER / STORE ST340C CLEANUP
+   ========================= */
+#allrecords .t-store,
+#allrecords .js-store,
+#allrecords .t-store__container,
+#allrecords .t-store__parts-switch-btn,
+#allrecords .t-store__parts-switch-btn * {
+  font-family: var(--tc-font-main), monospace !important;
+}
+
+/* 1) скрываем автозаголовок Каталог только для блоков магазина */
+#allrecords .t-store .js-block-header-title[field="title"][data-editable="false"],
+#allrecords .t-store .t-section__title,
+#allrecords .t-store .t-title.t-title_xs,
+#allrecords .t-store .t-section__descr {
+  display: none !important;
+}
+
+/* 2) разделы каталога */
+#allrecords .t-store__parts-switch-wrapper,
+#allrecords .t-store__parts-switch {
+  background: transparent !important;
+}
+
+#allrecords .t-store__parts-switch-btn {
+  color: rgba(255, 255, 255, 0.86) !important;
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  border-radius: 9999px !important;
+  padding: 8px 14px !important;
+  margin: 0 8px 8px 0 !important;
+}
+
+#allrecords .t-store__parts-switch-btn:hover {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+#allrecords .t-store__parts-switch-btn.t-active,
+#allrecords .t-store__parts-switch-btn_active,
+#allrecords .t-store__parts-switch-btn[aria-selected="true"] {
+  color: #fff !important;
+  opacity: 1 !important;
+  background: #9d191c !important;
+  border-color: #9d191c !important;
+}
+
+#allrecords .t-store__parts-switch-btn[data-storepart-uid="FRUITS"],
+#allrecords .t-store__parts-switch-btn[data-storepart-title="FRUITS"],
+#allrecords .t-store__parts-switch-btn[data-part-title="FRUITS"] {
+  display: none !important;
+}
+
+/* 3) скрываем SKU/Артикул, но не удаляем из данных */
+#allrecords .t-store__card .js-product-sku,
+#allrecords .t-store__card .t-store__card__sku,
+#allrecords .t-store__card [class*="sku"],
+#allrecords .t-store__prod-popup .js-store-prod-sku,
+#allrecords .t-store__prod-popup .js-product-sku,
+#allrecords .t-store__prod-popup [class*="sku"],
+#allrecords .t-store__prod-popup [data-product-sku],
+#allrecords .t-store__prod-popup [data-store-sku] {
+  display: none !important;
+}
+
+/* 4) скрываем технический хвост характеристик в основном теле */
+#allrecords .t-store__prod-popup .js-store-prod-all-charcs,
+#allrecords .t-store__prod-popup .js-store-prod-charcs,
+#allrecords .t-store__prod-popup .t-store__prod-popup__charcs {
+  display: none !important;
+}
+
+/* 5) базовый clean-up карточек списка */
+#allrecords .t-store__card {
+  border-radius: 14px !important;
+  overflow: hidden !important;
+}
+
+#allrecords .t-store__card .t-store__card__imgwrapper {
+  aspect-ratio: 1 / 1;
+  border-radius: 14px 14px 0 0 !important;
+  overflow: hidden !important;
+}
+
+#allrecords .t-store__card .t-store__card__img,
+#allrecords .t-store__card .t-bgimg,
+#allrecords .t-store__card img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+#allrecords .t-store__card .t-store__card__textwrapper {
+  background: #fff !important;
+  padding: 12px 12px 13px !important;
+}
+
+#allrecords .t-store__card .js-store-prod-name,
+#allrecords .t-store__card .t-store__card__title {
+  color: #9d191c !important;
+}
+
+#allrecords .t-store__card .t-store__card__descr,
+#allrecords .t-store__card .t-store__card__opt,
+#allrecords .t-store__card .js-store-prod-descr {
+  color: #7a7a7a !important;
+}
+
+#allrecords .t-store__card .t-store__card__price,
+#allrecords .t-store__card .js-product-price {
+  color: #000 !important;
+}
+
+#allrecords .t-store__card .t-store__card__btn,
+#allrecords .t-store__card .t-store__card__btns-wrapper,
+#allrecords .t-store__card .js-store-prod-btn,
+#allrecords .t-store__card .js-product-btn,
+#allrecords .t-store__card .t-btn {
+  display: none !important;
+}
+
+#allrecords .t-store__card [class*="badge"],
+#allrecords .t-store__card [class*="mark"],
+#allrecords .t-store__card [data-product-mark],
+#allrecords .t-store__card [data-store-badge] {
+  display: none !important;
+}
+
+/* 6) product page: оставляем один возврат, крестик прячем */
+#allrecords .t-store__prod-popup .t-store__prod-popup__close,
+#allrecords .t-store__prod-popup .t-popup__close,
+#allrecords .t-store__prod-popup .t-popup__close-wrapper {
+  display: none !important;
+}
+
+#allrecords .t-store__prod-popup .tc-store-back-link {
+  color: #2a4434 !important;
+  opacity: 1 !important;
+  font-family: var(--tc-font-main), monospace !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+}
+
+/* 7) мобильная сетка: 2 в ряд */
+@media (max-width: 640px) {
+  #allrecords .t-store .t-store__grid-cont,
+  #allrecords .t-store .t-store__grid,
+  #allrecords .t-store .js-store-grid-cont {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  #allrecords .t-store .t-store__card,
+  #allrecords .t-store .js-product {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+}
