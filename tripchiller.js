@@ -5306,7 +5306,40 @@ function setupDesktopAura() {
       });
     }
 
+    cleanProductSkuAndBackLink(scope);
     hideCatalogDynamicHeader(scope);
+  }
+
+
+  function cleanProductSkuAndBackLink(scope){
+    var root = scope || document;
+    var rec = root.querySelector('#rec2312983111') || document.querySelector('#rec2312983111') || document.body;
+    if (!rec) return;
+
+    rec.querySelectorAll('.t-catalog__prod-popup__sku, .js-catalog-prod-sku, .js-product-sku').forEach(function(el){
+      var target = el.closest('.t-catalog__prod-popup__sku') || el;
+      target.style.setProperty('display', 'none', 'important');
+      target.style.setProperty('visibility', 'hidden', 'important');
+      target.style.setProperty('opacity', '0', 'important');
+    });
+
+    var walker = document.createTreeWalker(rec, NodeFilter.SHOW_TEXT, null);
+    var node;
+    while ((node = walker.nextNode())) {
+      if (!node || !node.nodeValue || !/more products/i.test(node.nodeValue)) continue;
+      node.nodeValue = node.nodeValue.replace(/more products/ig, '← НАЗАД В ГАЛЕРЕЮ...');
+      var parent = node.parentElement;
+      if (!parent) continue;
+      parent.classList.add('tc-store-back-link');
+      parent.style.setProperty('font-size', '20px', 'important');
+      parent.style.setProperty('line-height', '1.2', 'important');
+      parent.style.setProperty('letter-spacing', '.02em', 'important');
+      parent.style.setProperty('width', 'fit-content', 'important');
+      parent.style.setProperty('max-width', 'max-content', 'important');
+      parent.style.setProperty('display', 'inline-flex', 'important');
+      parent.style.setProperty('align-items', 'center', 'important');
+      parent.style.setProperty('cursor', 'pointer', 'important');
+    }
   }
 
   function hideCatalogDynamicHeader(scope){
