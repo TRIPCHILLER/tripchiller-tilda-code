@@ -96,7 +96,7 @@ body.tc-site-header-visible .tc-site-header {
   color: #c8c8c8;
   opacity: 1;
   font-family: var(--tc-font-ui), monospace;
-  font-size: clamp(15px, 1.1vw, 18px);
+  font-size: clamp(18px, 1.25vw, 23px);
   line-height: 1;
   letter-spacing: .06em;
   text-decoration: none;
@@ -105,10 +105,18 @@ body.tc-site-header-visible .tc-site-header {
   transition: color .2s ease;
 }
 
-.tc-site-header__link:hover,
-.tc-site-header__link:focus-visible,
+.tc-site-header__link:not(.tc-site-header__link--active):hover,
+.tc-site-header__link:not(.tc-site-header__link--active):focus-visible {
+  color: #9c0006;
+  opacity: 1;
+}
+
 .tc-site-header__link--active,
-.tc-site-header__link[aria-current="page"] {
+.tc-site-header__link--active:hover,
+.tc-site-header__link--active:focus-visible,
+.tc-site-header__link[aria-current="page"],
+.tc-site-header__link[aria-current="page"]:hover,
+.tc-site-header__link[aria-current="page"]:focus-visible {
   color: #fff;
   opacity: 1;
 }
@@ -249,7 +257,7 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
   }
 
   .tc-site-header__mobile-panel .tc-site-header__link {
-    font-size: clamp(26px, 8vw, 42px);
+    font-size: clamp(29px, 8.5vw, 46px);
     line-height: 1.1;
     text-align: center;
   }

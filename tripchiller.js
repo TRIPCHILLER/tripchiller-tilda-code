@@ -35,9 +35,33 @@
     }
   }
 
+  function isLegalHeaderPage(pathname){
+    var path = normalizeHeaderPath(pathname);
+    return path === '/offer_agreement' || path === '/data_processing_policy';
+  }
+
+  function isAlwaysVisibleHeaderPage(pathname){
+    var path = normalizeHeaderPath(pathname);
+    return path === '/shipping'
+      || path === '/contacts'
+      || path === '/contact'
+      || path === '/reviews'
+      || path === '/review'
+      || path === '/offer_agreement'
+      || path === '/data_processing_policy';
+  }
+
+  function isSiteHeaderProductMode(){
+    var html = document.documentElement;
+    var body = document.body;
+    return !!((html && (html.classList.contains('tc-product-page') || html.classList.contains('tc-product-page-active'))) ||
+      (body && (body.classList.contains('tc-product-page') || body.classList.contains('tc-product-page-active'))));
+  }
+
   function getActiveHeaderKey(pathname){
     var path = normalizeHeaderPath(pathname);
 
+    if (isLegalHeaderPage(pathname)) return '';
     if (path === '/' || path === '/gallery' || /^\/tproduct(\/|$)/.test(path) || /^\/product(\/|$)/.test(path)) return 'gallery';
     if (path === '/shipping') return 'shipping';
     if (path === '/contacts' || path === '/contact') return 'contacts';
@@ -52,7 +76,7 @@
 
   function shouldCreateSiteHeader(){
     var activeKey = getActiveHeaderKey(window.location.pathname);
-    if (activeKey) return true;
+    if (activeKey || isLegalHeaderPage(window.location.pathname)) return true;
 
     var path = normalizeHeaderPath(window.location.pathname);
     return TC_HEADER_LINKS.some(function(link){
@@ -77,7 +101,12 @@
   }
 
   function syncSiteHeaderReveal() {
-    var shouldShow = getPageScrollY() > 60;
+    if (isSiteHeaderProductMode()) {
+      setHeaderGlobalClass('tc-site-header-visible', false);
+      return;
+    }
+
+    var shouldShow = isAlwaysVisibleHeaderPage(window.location.pathname) || getPageScrollY() > 60;
     setHeaderGlobalClass('tc-site-header-visible', shouldShow);
   }
 
