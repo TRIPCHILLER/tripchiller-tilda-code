@@ -14,7 +14,7 @@
     { label: 'ГАЛЕРЕЯ', href: '/', key: 'gallery', side: 'left' },
     { label: 'ДОСТАВКА', href: '/shipping', key: 'shipping', side: 'left' },
     { label: 'КОНТАКТЫ', href: '/contacts', key: 'contacts', side: 'right' },
-    { label: 'ОТЗЫВЫ', href: '/reviews', key: 'reviews', side: 'right' }
+    { label: 'ОТЗЫВЫ', href: 'https://vk.com/topic-187277176_49250444', key: 'reviews', side: 'right' }
   ];
 
   window.TC_HEADER_LINKS = TC_HEADER_LINKS;
