@@ -22,7 +22,7 @@
   --tc-site-header-height: 60px;
   --tc-site-header-side-padding: clamp(24px, 4vw, 64px);
   --tc-site-header-gap: clamp(22px, 3vw, 44px);
-  --tc-site-header-logo-slot: clamp(74px, 8vw, 116px);
+  --tc-site-header-logo-slot: clamp(86px, 10vw, 132px);
 }
 
 .tc-site-header,
@@ -96,7 +96,7 @@ body.tc-site-header-visible .tc-site-header {
   color: #c8c8c8;
   opacity: 1;
   font-family: var(--tc-font-ui), monospace;
-  font-size: clamp(18px, 1.25vw, 23px);
+  font-size: clamp(23px, 1.55vw, 28px);
   line-height: 1;
   letter-spacing: .06em;
   text-decoration: none;
@@ -205,16 +205,40 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
     max-height: 64px;
   }
 
+  .tc-site-header__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--tc-site-header-logo-slot) minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .tc-site-header__nav--left {
+    grid-column: 1;
+    justify-content: flex-end;
+  }
+
   .tc-site-header__logo-slot {
+    grid-column: 2;
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: var(--tc-site-header-logo-slot);
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: none;
+  }
+
+  .tc-site-header__nav--right {
+    grid-column: 3;
+    justify-content: flex-start;
   }
 
   .tc-site-header-eye {
     position: relative;
-    width: clamp(42px, 3.6vw, 58px);
-    height: clamp(42px, 3.6vw, 58px);
+    width: clamp(24px, 1.8vw, 32px);
+    height: clamp(24px, 1.8vw, 32px);
     pointer-events: none;
     opacity: 1;
     transform: none;
