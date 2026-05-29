@@ -172,6 +172,162 @@
     });
   }
 
+  function getTripchillerAssetBaseUrl(){
+    var script = document.querySelector('script[src*="tripchiller.js"]');
+    if (!script || !script.src) return '';
+    return script.src.replace(/tripchiller\.js.*$/, '');
+  }
+
+  function getSiteHeaderEyeAssetUrl(fileName){
+    var base = getTripchillerAssetBaseUrl();
+    return base ? base + 'assets/' + fileName : '';
+  }
+
+  function ensureSiteHeaderEye(header){
+    if (!header || !header.querySelector) return null;
+
+    var logoSlot = header.querySelector('.tc-site-header__logo-slot');
+    if (!logoSlot) return null;
+
+    var existingEye = logoSlot.querySelector('.tc-site-header-eye');
+    if (existingEye) return existingEye;
+
+    var baseUrl = getSiteHeaderEyeAssetUrl('2_pt.svg');
+    var pupilUrl = getSiteHeaderEyeAssetUrl('3_pt.svg');
+    if (!baseUrl || !pupilUrl) {
+      if (window.console && typeof window.console.warn === 'function') {
+        window.console.warn('TRIPCHILLER: cannot create site header eye because tripchiller.js asset base URL was not found.');
+      }
+      return null;
+    }
+
+    var eye = document.createElement('div');
+    eye.className = 'tc-site-header-eye';
+    eye.setAttribute('aria-hidden', 'true');
+
+    var base = document.createElement('img');
+    base.className = 'tc-site-header-eye__base';
+    base.src = baseUrl;
+    base.alt = '';
+    base.decoding = 'async';
+
+    var pupil = document.createElement('img');
+    pupil.className = 'tc-site-header-eye__pupil';
+    pupil.src = pupilUrl;
+    pupil.alt = '';
+    pupil.decoding = 'async';
+
+    eye.appendChild(base);
+    eye.appendChild(pupil);
+    logoSlot.appendChild(eye);
+    return eye;
+  }
+
+  function initSiteHeaderEyeMotion(){
+    if (window.__TC_SITE_HEADER_EYE_MOTION_V1__) return;
+    window.__TC_SITE_HEADER_EYE_MOTION_V1__ = true;
+
+    var media = window.matchMedia ? window.matchMedia('(min-width: 980px)') : null;
+    var amplitude = 4.6;
+    var ease = 0.15;
+    var idleDelay = 1000;
+    var targetX = 0;
+    var targetY = 0;
+    var currentX = 0;
+    var currentY = 0;
+    var blinkScale = 1;
+    var nextBlinkAt = 0;
+    var lastPointerAt = 0;
+    var rafId = 0;
+
+    function isDesktop(){
+      return !media || media.matches;
+    }
+
+    function getPupil(){
+      return document.querySelector('.tc-site-header-eye__pupil');
+    }
+
+    function scheduleNextBlink(now){
+      nextBlinkAt = now + 5000 + Math.random() * 2000;
+    }
+
+    function updateBlink(now){
+      if (!nextBlinkAt) scheduleNextBlink(now);
+      var blinkElapsed = now - nextBlinkAt;
+
+      if (blinkElapsed >= 0 && blinkElapsed <= 150) {
+        var progress = blinkElapsed / 150;
+        blinkScale = progress < 0.5
+          ? 1 - (progress / 0.5) * 0.84
+          : 0.16 + ((progress - 0.5) / 0.5) * 0.84;
+      } else {
+        blinkScale = 1;
+        if (blinkElapsed > 150) scheduleNextBlink(now);
+      }
+    }
+
+    function tick(now){
+      var pupil = getPupil();
+
+      if (!isDesktop()) {
+        targetX = 0;
+        targetY = 0;
+        currentX += (0 - currentX) * ease;
+        currentY += (0 - currentY) * ease;
+        blinkScale = 1;
+        if (pupil) pupil.style.transform = 'translate(-50%, -50%) translate(0px, 0px) scaleY(1)';
+        rafId = window.requestAnimationFrame(tick);
+        return;
+      }
+
+      if (!lastPointerAt || now - lastPointerAt > idleDelay) {
+        targetX = 0;
+        targetY = 0;
+      }
+
+      currentX += (targetX - currentX) * ease;
+      currentY += (targetY - currentY) * ease;
+
+      var idleX = Math.sin(now / 1800) * 0.8;
+      var idleY = Math.cos(now / 2300) * 0.6;
+
+      updateBlink(now);
+
+      if (pupil) {
+        var x = currentX + idleX;
+        var y = currentY + idleY;
+        pupil.style.transform = 'translate(-50%, -50%) translate(' + x.toFixed(2) + 'px, ' + y.toFixed(2) + 'px) scaleY(' + blinkScale.toFixed(3) + ')';
+      }
+
+      rafId = window.requestAnimationFrame(tick);
+    }
+
+    document.addEventListener('mousemove', function(event){
+      if (!isDesktop()) return;
+
+      var pupil = getPupil();
+      var eye = pupil && pupil.closest ? pupil.closest('.tc-site-header-eye') : null;
+      if (!eye) return;
+
+      var rect = eye.getBoundingClientRect();
+      var centerX = rect.left + rect.width / 2;
+      var centerY = rect.top + rect.height / 2;
+      var dx = (event.clientX - centerX) / Math.max(window.innerWidth / 2, 1);
+      var dy = (event.clientY - centerY) / Math.max(window.innerHeight / 2, 1);
+
+      targetX = Math.max(-1, Math.min(1, dx)) * amplitude;
+      targetY = Math.max(-1, Math.min(1, dy)) * amplitude;
+      lastPointerAt = window.performance && window.performance.now ? window.performance.now() : Date.now();
+    }, { passive: true });
+
+    rafId = window.requestAnimationFrame(tick);
+
+    window.addEventListener('beforeunload', function(){
+      if (rafId) window.cancelAnimationFrame(rafId);
+    });
+  }
+
   function initSiteHeader(){
     if (window.__TC_SITE_HEADER_V1__) return;
     if (!document.body || !shouldCreateSiteHeader()) return;
@@ -251,6 +407,9 @@
 
     var burger = header.querySelector('.tc-site-header__burger');
     var mobilePanel = header.querySelector('.tc-site-header__mobile-panel');
+
+    ensureSiteHeaderEye(header);
+    initSiteHeaderEyeMotion();
 
     document.body.classList.add('tc-custom-header-enabled');
     removeLegacyMenuEyeLogo();
