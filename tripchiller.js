@@ -249,7 +249,7 @@
     var media = window.matchMedia ? window.matchMedia('(min-width: 980px)') : null;
     var HEADER_EYE_MOTION = {
       maxX: 0.6,
-      maxY: 0.6,
+      maxY: 0.5,
       ease: 0.15,
       idleDelay: 1000
     };
