@@ -22,7 +22,7 @@
   --tc-site-header-height: 60px;
   --tc-site-header-side-padding: clamp(24px, 4vw, 64px);
   --tc-site-header-gap: clamp(22px, 3vw, 44px);
-  --tc-site-header-logo-slot: clamp(86px, 10vw, 132px);
+  --tc-site-header-logo-slot: clamp(24px, 1.8vw, 32px);
 }
 
 .tc-site-header,
@@ -86,6 +86,32 @@ body.tc-site-header-visible .tc-site-header {
   width: var(--tc-site-header-logo-slot);
   height: 100%;
   transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.tc-site-header-eye-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: 100%;
+  color: inherit;
+  line-height: 0;
+  text-decoration: none;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.tc-site-header-eye-link:hover,
+.tc-site-header-eye-link:focus,
+.tc-site-header-eye-link:focus-visible {
+  color: inherit;
+  text-decoration: none;
+}
+
+.tc-site-header-eye,
+.tc-site-header-eye__base,
+.tc-site-header-eye__pupil {
   pointer-events: none;
 }
 
