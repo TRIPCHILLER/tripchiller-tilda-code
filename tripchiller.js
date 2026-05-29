@@ -14,7 +14,7 @@
     { label: 'ГАЛЕРЕЯ', href: '/', key: 'gallery', side: 'left' },
     { label: 'ДОСТАВКА', href: '/shipping', key: 'shipping', side: 'left' },
     { label: 'КОНТАКТЫ', href: '/contacts', key: 'contacts', side: 'right' },
-    { label: 'ОТЗЫВЫ', href: '/reviews', key: 'reviews', side: 'right' }
+    { label: 'ОТЗЫВЫ', href: 'https://vk.com/topic-187277176_49250444', key: 'reviews', side: 'right', external: true }
   ];
 
   window.TC_HEADER_LINKS = TC_HEADER_LINKS;
@@ -45,8 +45,6 @@
     return path === '/shipping'
       || path === '/contacts'
       || path === '/contact'
-      || path === '/reviews'
-      || path === '/review'
       || path === '/offer_agreement'
       || path === '/data_processing_policy';
   }
@@ -65,10 +63,9 @@
     if (path === '/' || path === '/gallery' || /^\/tproduct(\/|$)/.test(path) || /^\/product(\/|$)/.test(path)) return 'gallery';
     if (path === '/shipping') return 'shipping';
     if (path === '/contacts' || path === '/contact') return 'contacts';
-    if (path === '/reviews' || path === '/review') return 'reviews';
 
     for (var i = 0; i < TC_HEADER_LINKS.length; i++) {
-      if (getHeaderLinkPath(TC_HEADER_LINKS[i].href) === path) return TC_HEADER_LINKS[i].key;
+      if (!TC_HEADER_LINKS[i].external && getHeaderLinkPath(TC_HEADER_LINKS[i].href) === path) return TC_HEADER_LINKS[i].key;
     }
 
     return '';
@@ -80,7 +77,7 @@
 
     var path = normalizeHeaderPath(window.location.pathname);
     return TC_HEADER_LINKS.some(function(link){
-      return getHeaderLinkPath(link.href) === path;
+      return !link.external && getHeaderLinkPath(link.href) === path;
     });
   }
 
@@ -360,12 +357,16 @@
       var item = document.createElement('a');
       var linkPath = getHeaderLinkPath(link.href);
       var currentPath = normalizeHeaderPath(window.location.pathname);
-      var isActive = link.key === activeKey || linkPath === currentPath;
+      var isActive = !link.external && (link.key === activeKey || linkPath === currentPath);
 
       item.className = 'tc-site-header__link';
       item.href = link.href;
       item.textContent = link.label;
       item.dataset.tcHeaderKey = link.key;
+      if (link.external === true) {
+        item.target = '_blank';
+        item.rel = 'noopener noreferrer';
+      }
       if (isActive) {
         item.classList.add('tc-site-header__link--active');
         item.setAttribute('aria-current', 'page');
