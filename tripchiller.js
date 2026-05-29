@@ -67,6 +67,76 @@
     if (body) body.classList.toggle(name, enabled);
   }
 
+  function getPageScrollY() {
+    return Math.max(
+      window.scrollY || 0,
+      window.pageYOffset || 0,
+      document.documentElement ? document.documentElement.scrollTop || 0 : 0,
+      document.body ? document.body.scrollTop || 0 : 0
+    );
+  }
+
+  function syncSiteHeaderReveal() {
+    var shouldShow = getPageScrollY() > 60;
+    setHeaderGlobalClass('tc-site-header-visible', shouldShow);
+  }
+
+  function normalizeLegacyHeaderText(value){
+    return String(value || '').replace(/\s+/g, ' ').trim().toUpperCase();
+  }
+
+  function isLegacyHeaderExcluded(node){
+    if (!node || !node.matches) return true;
+    if (node.closest('.tc-site-header')) return true;
+    if (node.matches('#rec2312983111, .t-catalog, .js-catalog, .t-store, .tc-site-header')) return true;
+    if (node.closest('#rec2312983111, .t-catalog, .js-catalog, .t-store, .tc-site-header')) return true;
+    if (node.matches('.t-store__card, .t-catalog__card, .js-store-product, .js-catalog-product, .t-catalog__product-snippet, .t-catalog__product, .t-store__prod-popup, .t-popup, [data-product-lid], [class*="gallery"]')) return true;
+    if (node.closest('.t-store__card, .t-catalog__card, .js-store-product, .js-catalog-product, .t-catalog__product-snippet, .t-catalog__product, .t-store__prod-popup, .t-popup, [data-product-lid], [class*="gallery"]')) return true;
+    return false;
+  }
+
+  function hideLegacyTildaHeader(){
+    if (!document.body || !document.body.classList.contains('tc-custom-header-enabled')) return;
+
+    var labels = ['ГАЛЕРЕЯ', 'ДОСТАВКА', 'КОНТАКТЫ', 'ОТЗЫВЫ'];
+    var linkSelector = [
+      'a',
+      'button',
+      '[role="link"]',
+      '[role="button"]',
+      '.t-menu__link-item',
+      '.t228__list_item',
+      '.t450__menu a',
+      '.t451__menu a',
+      '.t456 a'
+    ].join(', ');
+    var containerSelector = '.r.t-rec, .t-rec, [id^="rec"], [data-record-type], .t228, .t228__positionfixed, .tmenu-mobile, .t-menuburger, .t450, .t451, .t456';
+    var seen = [];
+
+    document.querySelectorAll(linkSelector).forEach(function(el){
+      if (!el || !el.closest || el.closest('.tc-site-header')) return;
+
+      var text = normalizeLegacyHeaderText(el.textContent);
+      var hasMenuLabel = labels.some(function(label){ return text.indexOf(label) !== -1; });
+      if (!hasMenuLabel) return;
+
+      var container = el.closest(containerSelector);
+      if (!container || seen.indexOf(container) !== -1) return;
+      seen.push(container);
+      if (isLegacyHeaderExcluded(container)) return;
+      if (container.querySelector('.tc-site-header')) return;
+
+      var containerText = normalizeLegacyHeaderText(container.textContent);
+      var matchesCount = labels.reduce(function(count, label){
+        return count + (containerText.indexOf(label) !== -1 ? 1 : 0);
+      }, 0);
+
+      if (matchesCount >= 2) {
+        container.classList.add('tc-legacy-header-hidden');
+      }
+    });
+  }
+
   function removeLegacyMenuEyeLogo(){
     document.querySelectorAll('.tc-menu-eye-logo').forEach(function(node){
       if (node && node.parentNode) node.parentNode.removeChild(node);
@@ -97,10 +167,6 @@
         item.setAttribute('aria-current', 'page');
       }
       return item;
-    }
-
-    function syncReveal(){
-      setHeaderGlobalClass('tc-site-header-visible', window.scrollY > 60);
     }
 
     function setMenuOpen(open){
@@ -159,10 +225,14 @@
 
     document.body.classList.add('tc-custom-header-enabled');
     removeLegacyMenuEyeLogo();
-    syncReveal();
+    hideLegacyTildaHeader();
+    syncSiteHeaderReveal();
+    requestAnimationFrame(syncSiteHeaderReveal);
+    setTimeout(syncSiteHeaderReveal, 100);
+    setTimeout(syncSiteHeaderReveal, 500);
 
-    window.addEventListener('scroll', syncReveal, { passive: true });
-    window.addEventListener('resize', syncReveal, { passive: true });
+    window.addEventListener('scroll', syncSiteHeaderReveal, { passive: true });
+    window.addEventListener('resize', syncSiteHeaderReveal, { passive: true });
 
     if (burger && mobilePanel) {
       burger.addEventListener('click', function(){
@@ -5744,10 +5814,24 @@ function setupDesktopAura() {
   function scheduleClean(){
     ensureMenuEyeLogo();
     initMenuEyeParallax();
+    hideLegacyTildaHeader();
+    syncSiteHeaderReveal();
     cleanStoreUi(document);
-    requestAnimationFrame(function(){ cleanStoreUi(document); });
-    setTimeout(function(){ cleanStoreUi(document); }, 250);
-    setTimeout(function(){ cleanStoreUi(document); }, 1000);
+    requestAnimationFrame(function(){
+      hideLegacyTildaHeader();
+      syncSiteHeaderReveal();
+      cleanStoreUi(document);
+    });
+    setTimeout(function(){
+      hideLegacyTildaHeader();
+      syncSiteHeaderReveal();
+      cleanStoreUi(document);
+    }, 250);
+    setTimeout(function(){
+      hideLegacyTildaHeader();
+      syncSiteHeaderReveal();
+      cleanStoreUi(document);
+    }, 1000);
   }
 
 
@@ -5776,6 +5860,8 @@ function setupDesktopAura() {
 
   var observer = new MutationObserver(function(){
     ensureMenuEyeLogo();
+    hideLegacyTildaHeader();
+    syncSiteHeaderReveal();
     cleanStoreUi(document);
   });
 

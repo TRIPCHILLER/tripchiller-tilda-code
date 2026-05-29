@@ -178,6 +178,13 @@ body.tc-custom-header-enabled [data-record-type="202"] {
   display: none !important;
 }
 
+body.tc-custom-header-enabled .tc-legacy-header-hidden {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 body.tc-custom-header-enabled .tc-menu-eye-logo {
   opacity: 0 !important;
   visibility: hidden !important;
