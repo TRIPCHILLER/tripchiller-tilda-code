@@ -248,8 +248,8 @@
 
     var media = window.matchMedia ? window.matchMedia('(min-width: 980px)') : null;
     var HEADER_EYE_MOTION = {
-      maxX: 2.4,
-      maxY: 2.2,
+      maxX: 1.0,
+      maxY: 1.0,
       ease: 0.15,
       idleDelay: 1000
     };
