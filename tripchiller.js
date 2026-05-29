@@ -188,9 +188,27 @@
 
     var logoSlot = header.querySelector('.tc-site-header__logo-slot');
     if (!logoSlot) return null;
+    logoSlot.removeAttribute('aria-hidden');
 
+    var existingLink = logoSlot.querySelector('.tc-site-header-eye-link');
     var existingEye = logoSlot.querySelector('.tc-site-header-eye');
-    if (existingEye) return existingEye;
+    if (existingLink) {
+      existingLink.href = '/';
+      existingLink.setAttribute('aria-label', 'На главную TRIPCHILLER');
+      return existingLink.querySelector('.tc-site-header-eye') || existingEye;
+    }
+
+    var link = document.createElement('a');
+    link.className = 'tc-site-header-eye-link';
+    link.href = '/';
+    link.setAttribute('aria-label', 'На главную TRIPCHILLER');
+
+    if (existingEye) {
+      logoSlot.insertBefore(link, existingEye);
+      link.appendChild(existingEye);
+      existingEye.setAttribute('aria-hidden', 'true');
+      return existingEye;
+    }
 
     var baseUrl = getSiteHeaderEyeAssetUrl('2_pt.svg');
     var pupilUrl = getSiteHeaderEyeAssetUrl('3_pt.svg');
@@ -219,7 +237,8 @@
 
     eye.appendChild(base);
     eye.appendChild(pupil);
-    logoSlot.appendChild(eye);
+    link.appendChild(eye);
+    logoSlot.appendChild(link);
     return eye;
   }
 
@@ -228,9 +247,12 @@
     window.__TC_SITE_HEADER_EYE_MOTION_V1__ = true;
 
     var media = window.matchMedia ? window.matchMedia('(min-width: 980px)') : null;
-    var amplitude = 4.6;
-    var ease = 0.15;
-    var idleDelay = 1000;
+    var HEADER_EYE_MOTION = {
+      maxX: 2.4,
+      maxY: 2.2,
+      ease: 0.15,
+      idleDelay: 1000
+    };
     var targetX = 0;
     var targetY = 0;
     var currentX = 0;
@@ -273,30 +295,27 @@
       if (!isDesktop()) {
         targetX = 0;
         targetY = 0;
-        currentX += (0 - currentX) * ease;
-        currentY += (0 - currentY) * ease;
+        currentX += (0 - currentX) * HEADER_EYE_MOTION.ease;
+        currentY += (0 - currentY) * HEADER_EYE_MOTION.ease;
         blinkScale = 1;
         if (pupil) pupil.style.transform = 'translate(-50%, -50%) translate(0px, 0px) scaleY(1)';
         rafId = window.requestAnimationFrame(tick);
         return;
       }
 
-      if (!lastPointerAt || now - lastPointerAt > idleDelay) {
+      if (!lastPointerAt || now - lastPointerAt > HEADER_EYE_MOTION.idleDelay) {
         targetX = 0;
         targetY = 0;
       }
 
-      currentX += (targetX - currentX) * ease;
-      currentY += (targetY - currentY) * ease;
-
-      var idleX = Math.sin(now / 1800) * 0.8;
-      var idleY = Math.cos(now / 2300) * 0.6;
+      currentX += (targetX - currentX) * HEADER_EYE_MOTION.ease;
+      currentY += (targetY - currentY) * HEADER_EYE_MOTION.ease;
 
       updateBlink(now);
 
       if (pupil) {
-        var x = currentX + idleX;
-        var y = currentY + idleY;
+        var x = Math.max(-HEADER_EYE_MOTION.maxX, Math.min(HEADER_EYE_MOTION.maxX, currentX));
+        var y = Math.max(-HEADER_EYE_MOTION.maxY, Math.min(HEADER_EYE_MOTION.maxY, currentY));
         pupil.style.transform = 'translate(-50%, -50%) translate(' + x.toFixed(2) + 'px, ' + y.toFixed(2) + 'px) scaleY(' + blinkScale.toFixed(3) + ')';
       }
 
@@ -316,8 +335,8 @@
       var dx = (event.clientX - centerX) / Math.max(window.innerWidth / 2, 1);
       var dy = (event.clientY - centerY) / Math.max(window.innerHeight / 2, 1);
 
-      targetX = Math.max(-1, Math.min(1, dx)) * amplitude;
-      targetY = Math.max(-1, Math.min(1, dy)) * amplitude;
+      targetX = Math.max(-HEADER_EYE_MOTION.maxX, Math.min(HEADER_EYE_MOTION.maxX, dx * HEADER_EYE_MOTION.maxX));
+      targetY = Math.max(-HEADER_EYE_MOTION.maxY, Math.min(HEADER_EYE_MOTION.maxY, dy * HEADER_EYE_MOTION.maxY));
       lastPointerAt = window.performance && window.performance.now ? window.performance.now() : Date.now();
     }, { passive: true });
 
@@ -373,7 +392,6 @@
 
       var logoSlot = document.createElement('div');
       logoSlot.className = 'tc-site-header__logo-slot';
-      logoSlot.setAttribute('aria-hidden', 'true');
 
       var rightNav = document.createElement('div');
       rightNav.className = 'tc-site-header__nav tc-site-header__nav--right';
