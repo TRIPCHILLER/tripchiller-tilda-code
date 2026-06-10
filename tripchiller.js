@@ -5804,6 +5804,19 @@ function setupDesktopAura() {
     return records;
   }
 
+  function setAllPartLabel(btn){
+    if (!btn || normalizePartLabel(btn.textContent) !== 'все') return;
+    if (btn.children.length === 0) {
+      btn.textContent = 'ВСЕ';
+      return;
+    }
+    Array.prototype.forEach.call(btn.childNodes, function(node){
+      if (node.nodeType === 3 && normalizePartLabel(node.nodeValue) === 'все') {
+        node.nodeValue = node.nodeValue.replace(/Все/g, 'ВСЕ').replace(/все/g, 'ВСЕ');
+      }
+    });
+  }
+
   function applyPartsState(record, activeLabel){
     var storedActive = normalizePartLabel(record.dataset.tcActivePart || '');
     var headerActive = normalizePartLabel(activeLabel);
@@ -5813,7 +5826,10 @@ function setupDesktopAura() {
     record.querySelectorAll('.t-catalog__parts-switch-btn, .t-store__parts-switch-btn, .js-catalog-parts-switcher, .t-catalog__parts-button-base').forEach(function(btn){
       var txt = normalizePartLabel(btn.textContent);
       if (!txt) return;
-      if (txt === 'все') hasAll = true;
+      if (txt === 'все') {
+        hasAll = true;
+        setAllPartLabel(btn);
+      }
       if (txt === 'fruits') {
         btn.style.setProperty('display', 'none', 'important');
         return;
@@ -5822,7 +5838,7 @@ function setupDesktopAura() {
       if (!activeNormalized && hasActiveClass) activeNormalized = txt;
       var isActive = !!activeNormalized && txt === activeNormalized;
       btn.classList.toggle('tc-catalog-part-active', !!isActive);
-      btn.style.setProperty('color', isActive ? '#fff' : 'rgba(255,255,255,.55)', 'important');
+      btn.style.setProperty('color', isActive ? '#fff' : '#8f8f8f', 'important');
       btn.style.setProperty('opacity', '1', 'important');
       btn.querySelectorAll('*').forEach(function(inner){
         inner.style.setProperty('color', 'inherit', 'important');

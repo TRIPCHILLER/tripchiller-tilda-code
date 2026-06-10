@@ -3094,8 +3094,9 @@ html.tc-page-contacts .tw-type-1a br {
 #allrecords .tc-catalog-record .t-store__parts-switch-btn,
 #allrecords .tc-catalog-record .js-catalog-parts-switcher,
 #allrecords .tc-catalog-record .t-catalog__parts-button-base {
-  color: rgba(255, 255, 255, 0.55) !important;
+  color: #8f8f8f !important;
   opacity: 1 !important;
+  text-transform: uppercase !important;
 }
 
 #allrecords .tc-catalog-record .t-catalog__parts-switch-btn:hover,
@@ -3120,6 +3121,61 @@ html.tc-page-contacts .tw-type-1a br {
 #allrecords .tc-catalog-record .t-catalog__parts-button-base * {
   color: inherit !important;
   opacity: inherit !important;
+}
+
+
+@media (min-width: 981px) and (pointer: fine) {
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base {
+    color: #8f8f8f !important;
+    opacity: 1 !important;
+  }
+
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn.tc-catalog-part-active,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn.tc-catalog-part-active,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher.tc-catalog-part-active,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base.tc-catalog-part-active,
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn.t-active,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn.t-active,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher.t-active,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base.t-active,
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn.active,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn.active,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher.active,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base.active,
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn[class*="_active"],
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn[class*="_active"],
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher[class*="_active"],
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base[class*="_active"],
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn[aria-current="true"],
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn[aria-current="true"],
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher[aria-current="true"],
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base[aria-current="true"],
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn[aria-selected="true"],
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn[aria-selected="true"],
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher[aria-selected="true"],
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base[aria-selected="true"] {
+    color: #fff !important;
+    opacity: 1 !important;
+  }
+
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn:hover,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn:hover,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher:hover,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base:hover {
+    color: #fff !important;
+    opacity: 1 !important;
+  }
+
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn *,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn *,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher *,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base * {
+    color: inherit !important;
+    opacity: 1 !important;
+  }
 }
 
 #allrecords .t-store__parts-switch-btn[data-storepart-uid="FRUITS"],
