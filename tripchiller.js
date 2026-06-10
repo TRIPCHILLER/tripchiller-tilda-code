@@ -3319,8 +3319,33 @@ eyeUnlockTimer = setTimeout(function(){
 (function () {
   if (window.__TC_LOAD_MORE_BUTTON_STYLE_V1__) return;
   window.__TC_LOAD_MORE_BUTTON_STYLE_V1__ = true;
-  var LOAD_MORE_LABEL = 'загрузить ещё';
+  var LOAD_MORE_LABEL = 'ЗАГРУЗИТЬ ЕЩЁ';
+  var LOAD_MORE_SELECTOR = [
+    '#allrecords .t778__showmore',
+    '#allrecords button.t778__showmore',
+    '#allrecords .t-store__load-more-btn',
+    '#allrecords .js-store-load-more-btn',
+    '#allrecords .t-store__loadmore',
+    '#allrecords .t-store__load-more',
+    '#allrecords .js-store-load-more',
+    '#allrecords .t-catalog__loadmore',
+    '#allrecords .t-catalog__load-more',
+    '#allrecords .js-catalog-load-more',
+    '#allrecords .js-catalog-load-more-btn',
+    '#allrecords .loadmore',
+    '#allrecords .load-more',
+    '#allrecords .tc-load-more-btn'
+  ].join(', ');
   var observerRaf = 0;
+
+  function normalizeButtonText(text) {
+    return String(text || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  function isLoadMoreText(text) {
+    var value = normalizeButtonText(text);
+    return value === 'загрузить ещё' || value === 'загрузить еще' || value === 'load more';
+  }
 
   function setTextIfNeeded(node, value) {
     if (!node) return;
@@ -3328,27 +3353,32 @@ eyeUnlockTimer = setTimeout(function(){
     node.textContent = value;
   }
 
-  function normalizeLoadMoreText() {
-    var buttons = document.querySelectorAll(
-      '.t778__showmore, button.t778__showmore, .t-store__load-more-btn, .js-store-load-more-btn'
-    );
+  function normalizeLoadMoreButton(btn) {
+    if (!btn || !isLoadMoreText(btn.textContent)) return;
 
-    buttons.forEach(function (btn) {
-      if (!btn) return;
+    btn.classList.add('tc-load-more-btn');
 
-      var textNodeTarget = btn.querySelector('.t-btntext, span, div');
-      if (textNodeTarget) {
-        setTextIfNeeded(textNodeTarget, LOAD_MORE_LABEL);
-      } else {
-        setTextIfNeeded(btn, LOAD_MORE_LABEL);
-      }
-    });
+    var textNodeTarget = btn.querySelector('.t-btntext, .tn-atom, span, div');
+    if (textNodeTarget && isLoadMoreText(textNodeTarget.textContent)) {
+      setTextIfNeeded(textNodeTarget, LOAD_MORE_LABEL);
+      return;
+    }
+
+    setTextIfNeeded(btn, LOAD_MORE_LABEL);
   }
 
+  function normalizeLoadMoreText(root) {
+    var scope = root || document;
+    var buttons = scope.querySelectorAll(LOAD_MORE_SELECTOR);
+
+    buttons.forEach(normalizeLoadMoreButton);
+  }
+
+  window.__TC_NORMALIZE_LOAD_MORE_BUTTON__ = normalizeLoadMoreButton;
+  window.__TC_NORMALIZE_LOAD_MORE_BUTTONS__ = normalizeLoadMoreText;
+
   function bindLoadMoreButtons() {
-    var buttons = document.querySelectorAll(
-      '.t778__showmore, .t-store__load-more-btn, .js-store-load-more-btn'
-    );
+    var buttons = document.querySelectorAll(LOAD_MORE_SELECTOR);
 
     buttons.forEach(function (btn) {
       if (!btn || btn.__tcLoadMoreReady) return;
@@ -3389,12 +3419,12 @@ eyeUnlockTimer = setTimeout(function(){
 
   function scheduleBind() {
     bindLoadMoreButtons();
-    normalizeLoadMoreText();
+    normalizeLoadMoreText(document);
     setTimeout(bindLoadMoreButtons, 200);
     setTimeout(bindLoadMoreButtons, 800);
     setTimeout(bindLoadMoreButtons, 1600);
-    setTimeout(normalizeLoadMoreText, 300);
-    setTimeout(normalizeLoadMoreText, 1000);
+    setTimeout(function () { normalizeLoadMoreText(document); }, 300);
+    setTimeout(function () { normalizeLoadMoreText(document); }, 1000);
   }
 
 
@@ -5307,7 +5337,9 @@ function setupDesktopAura() {
   window.__TC_UI_ACTION_PRESS_V1__ = true;
 
   var TARGET_SELECTOR =
-    '.tc-action, .tc-ui-btn, .tc-legal-btn, .t778__showmore, .t-store__load-more-btn, .js-store-load-more-btn, ' +
+    '.tc-action, .tc-ui-btn, .tc-legal-btn, .tc-load-more-btn, .t778__showmore, .t-store__load-more-btn, .js-store-load-more-btn, ' +
+    '.t-store__loadmore, .t-store__load-more, .js-store-load-more, .t-catalog__loadmore, .t-catalog__load-more, ' +
+    '.js-catalog-load-more, .js-catalog-load-more-btn, ' +
     '#allrecords .t778__btn-wrapper .t778__btn, .soc1 .tn-atom, .soc2 .tn-atom, .soc3 .tn-atom, .soc4 .tn-atom, ' +
     '.tc-contact-link';
 
@@ -5860,6 +5892,10 @@ function setupDesktopAura() {
     }
 
     records.forEach(function(record){
+      if (window.__TC_NORMALIZE_LOAD_MORE_BUTTONS__) {
+        window.__TC_NORMALIZE_LOAD_MORE_BUTTONS__(record);
+      }
+
       record.querySelectorAll('.t-store__prod-popup .js-store-close-btn, .t-store__prod-popup .t-store__prod-popup__back, .t-store__prod-popup a, .t-store__prod-popup button, .t-store__prod-popup [role="button"], .t-popup .js-store-close-btn, .t-popup .t-store__prod-popup__back, .t-popup a, .t-popup button, .t-popup [role="button"]').forEach(function(back){
         var txt = normalize(back.textContent);
         if (txt.indexOf('more products') !== -1 || txt.indexOf('назад') !== -1 || txt.indexOf('каталог') !== -1) {

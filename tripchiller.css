@@ -3450,3 +3450,111 @@ body.tc-product-page-active .tc-menu-eye-logo {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+/* Scoped load-more button fix for Tilda catalog/gallery. */
+#allrecords .tc-load-more-btn,
+#allrecords .tc-catalog-record .t778__showmore,
+#allrecords .tc-catalog-record button.t778__showmore,
+#allrecords .tc-catalog-record .t-store__load-more-btn,
+#allrecords .tc-catalog-record .js-store-load-more-btn,
+#allrecords .tc-catalog-record .t-store__loadmore,
+#allrecords .tc-catalog-record .t-store__load-more,
+#allrecords .tc-catalog-record .js-store-load-more,
+#allrecords .tc-catalog-record .t-catalog__loadmore,
+#allrecords .tc-catalog-record .t-catalog__load-more,
+#allrecords .tc-catalog-record .js-catalog-load-more,
+#allrecords .tc-catalog-record .js-catalog-load-more-btn,
+#allrecords .tc-catalog-record .loadmore,
+#allrecords .tc-catalog-record .load-more {
+  background: #000 !important;
+  background-color: #000 !important;
+  color: #fff !important;
+  opacity: 1 !important;
+  text-transform: uppercase !important;
+  font-family: var(--tc-font-main), monospace !important;
+  transition:
+    background-color .22s ease,
+    color .22s ease,
+    transform .12s ease,
+    box-shadow .22s ease,
+    filter .22s ease !important;
+  will-change: transform;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+#allrecords .tc-load-more-btn *,
+#allrecords .tc-catalog-record .tc-load-more-btn *,
+#allrecords .tc-catalog-record .t778__showmore *,
+#allrecords .tc-catalog-record .t-store__load-more-btn *,
+#allrecords .tc-catalog-record .js-store-load-more-btn *,
+#allrecords .tc-catalog-record .t-store__loadmore *,
+#allrecords .tc-catalog-record .t-store__load-more *,
+#allrecords .tc-catalog-record .js-store-load-more *,
+#allrecords .tc-catalog-record .t-catalog__loadmore *,
+#allrecords .tc-catalog-record .t-catalog__load-more *,
+#allrecords .tc-catalog-record .js-catalog-load-more *,
+#allrecords .tc-catalog-record .js-catalog-load-more-btn *,
+#allrecords .tc-catalog-record .loadmore *,
+#allrecords .tc-catalog-record .load-more * {
+  color: inherit !important;
+  opacity: 1 !important;
+  text-transform: uppercase !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #allrecords .tc-load-more-btn:hover,
+  #allrecords .tc-catalog-record .t778__showmore:hover,
+  #allrecords .tc-catalog-record button.t778__showmore:hover,
+  #allrecords .tc-catalog-record .t-store__load-more-btn:hover,
+  #allrecords .tc-catalog-record .js-store-load-more-btn:hover,
+  #allrecords .tc-catalog-record .t-store__loadmore:hover,
+  #allrecords .tc-catalog-record .t-store__load-more:hover,
+  #allrecords .tc-catalog-record .js-store-load-more:hover,
+  #allrecords .tc-catalog-record .t-catalog__loadmore:hover,
+  #allrecords .tc-catalog-record .t-catalog__load-more:hover,
+  #allrecords .tc-catalog-record .js-catalog-load-more:hover,
+  #allrecords .tc-catalog-record .js-catalog-load-more-btn:hover,
+  #allrecords .tc-catalog-record .loadmore:hover,
+  #allrecords .tc-catalog-record .load-more:hover {
+    background: #9d191c !important;
+    background-color: #9d191c !important;
+    color: #fff !important;
+  }
+}
+
+#allrecords .tc-load-more-btn:active,
+#allrecords .tc-load-more-btn.tc-action-pressed,
+#allrecords .tc-load-more-btn.tc-ui-pressed,
+#allrecords .tc-load-more-btn.tc-loadmore-pressed,
+#allrecords .tc-load-more-btn.is-pressed,
+#allrecords .tc-catalog-record .t778__showmore:active,
+#allrecords .tc-catalog-record .t778__showmore.tc-action-pressed,
+#allrecords .tc-catalog-record .t778__showmore.tc-ui-pressed,
+#allrecords .tc-catalog-record .t778__showmore.tc-loadmore-pressed,
+#allrecords .tc-catalog-record .t778__showmore.is-pressed,
+#allrecords .tc-catalog-record .t-store__load-more-btn:active,
+#allrecords .tc-catalog-record .t-store__load-more-btn.tc-action-pressed,
+#allrecords .tc-catalog-record .t-store__load-more-btn.tc-ui-pressed,
+#allrecords .tc-catalog-record .t-store__load-more-btn.tc-loadmore-pressed,
+#allrecords .tc-catalog-record .t-store__load-more-btn.is-pressed,
+#allrecords .tc-catalog-record .js-store-load-more-btn:active,
+#allrecords .tc-catalog-record .js-store-load-more-btn.tc-action-pressed,
+#allrecords .tc-catalog-record .js-store-load-more-btn.tc-ui-pressed,
+#allrecords .tc-catalog-record .js-store-load-more-btn.tc-loadmore-pressed,
+#allrecords .tc-catalog-record .js-store-load-more-btn.is-pressed,
+#allrecords .tc-catalog-record .t-store__loadmore:active,
+#allrecords .tc-catalog-record .t-store__load-more:active,
+#allrecords .tc-catalog-record .js-store-load-more:active,
+#allrecords .tc-catalog-record .t-catalog__loadmore:active,
+#allrecords .tc-catalog-record .t-catalog__load-more:active,
+#allrecords .tc-catalog-record .js-catalog-load-more:active,
+#allrecords .tc-catalog-record .js-catalog-load-more-btn:active,
+#allrecords .tc-catalog-record .loadmore:active,
+#allrecords .tc-catalog-record .load-more:active {
+  background: #9d191c !important;
+  background-color: #9d191c !important;
+  color: #fff !important;
+  transform: translateY(2px) scale(.97) !important;
+  filter: brightness(.92) !important;
+}
