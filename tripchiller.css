@@ -3096,6 +3096,7 @@ html.tc-page-contacts .tw-type-1a br {
 #allrecords .tc-catalog-record .t-catalog__parts-button-base {
   color: #8f8f8f !important;
   opacity: 1 !important;
+  text-transform: uppercase !important;
 }
 
 #allrecords .tc-catalog-record .t-catalog__parts-switch-btn:hover,
