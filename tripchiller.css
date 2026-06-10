@@ -54,8 +54,13 @@ body.tc-site-header-visible .tc-site-header {
 }
 
 html.tc-site-header-product-suppressed .tc-site-header,
-body.tc-site-header-product-suppressed .tc-site-header {
+body.tc-site-header-product-suppressed .tc-site-header,
+html.tc-product-page .tc-site-header,
+body.tc-product-page .tc-site-header,
+html.tc-product-page-active .tc-site-header,
+body.tc-product-page-active .tc-site-header {
   opacity: 0 !important;
+  visibility: hidden !important;
   transform: translateY(-100%) !important;
   pointer-events: none !important;
 }
@@ -1458,7 +1463,11 @@ html.tc-product-page body {
   background-color: #fff !important;
 }
 
-html.tc-product-page #rec2312983111 {
+html.tc-product-page #rec2312983111,
+body.tc-product-page #rec2312983111,
+html.tc-product-page-active #rec2312983111,
+body.tc-product-page-active #rec2312983111,
+body.tc-product-popup-open #rec2312983111 {
   background-color: #fff !important;
   background-image:
     linear-gradient(rgba(255,255,255,.50), rgba(255,255,255,.50)),
@@ -1495,6 +1504,9 @@ html.tc-product-page #rec2312983111 .t-catalog__product [data-animate-style] {
 }
 
 html.tc-product-page #allrecords,
+body.tc-product-page #allrecords,
+html.tc-product-page-active #allrecords,
+body.tc-product-page-active #allrecords,
 html.tc-product-page .js-catalog-product,
 html.tc-product-page .t-catalog__product-snippet,
 html.tc-product-page .t-catalog__product {
@@ -3178,6 +3190,35 @@ html.tc-page-contacts .tw-type-1a br {
   }
 }
 
+#allrecords .tc-catalog-filter-btn,
+#allrecords .tc-catalog-filter-btn * {
+  color: #8f8f8f !important;
+  opacity: 1 !important;
+  text-transform: uppercase !important;
+}
+
+#allrecords .tc-catalog-filter-btn.tc-catalog-part-active,
+#allrecords .tc-catalog-filter-btn.tc-catalog-part-active *,
+#allrecords .tc-catalog-filter-btn.t-active,
+#allrecords .tc-catalog-filter-btn.t-active *,
+#allrecords .tc-catalog-filter-btn.active,
+#allrecords .tc-catalog-filter-btn.active *,
+#allrecords .tc-catalog-filter-btn[aria-current="true"],
+#allrecords .tc-catalog-filter-btn[aria-current="true"] *,
+#allrecords .tc-catalog-filter-btn[aria-selected="true"],
+#allrecords .tc-catalog-filter-btn[aria-selected="true"] * {
+  color: #fff !important;
+  opacity: 1 !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #allrecords .tc-catalog-filter-btn:hover,
+  #allrecords .tc-catalog-filter-btn:hover * {
+    color: #fff !important;
+    opacity: 1 !important;
+  }
+}
+
 #allrecords .t-store__parts-switch-btn[data-storepart-uid="FRUITS"],
 #allrecords .t-store__parts-switch-btn[data-storepart-title="FRUITS"],
 #allrecords .t-store__parts-switch-btn[data-part-title="FRUITS"] {
@@ -3476,7 +3517,6 @@ body.tc-product-page-active .tc-menu-eye-logo {
     background-color .22s ease,
     color .22s ease,
     transform .12s ease,
-    box-shadow .22s ease,
     filter .22s ease !important;
   will-change: transform;
   cursor: pointer !important;
