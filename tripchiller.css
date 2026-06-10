@@ -53,6 +53,13 @@ body.tc-site-header-visible .tc-site-header {
   pointer-events: auto;
 }
 
+html.tc-site-header-product-suppressed .tc-site-header,
+body.tc-site-header-product-suppressed .tc-site-header {
+  opacity: 0 !important;
+  transform: translateY(-100%) !important;
+  pointer-events: none !important;
+}
+
 .tc-site-header__inner {
   position: relative;
   display: grid;

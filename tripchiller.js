@@ -49,11 +49,71 @@
       || path === '/data_processing_policy';
   }
 
+  var siteHeaderSyncRaf = 0;
+  var siteHeaderHistoryWrapped = false;
+  var siteHeaderProductObserver = null;
+
+  function isProductPathLike(value) {
+    var text = String(value || '');
+    return /(^|\/)(tproduct|product)(\/|$)/.test(text) ||
+      /#!\/?(tproduct|product)(\/|$)/.test(text);
+  }
+
+  function hasVisibleTildaProductPopup(){
+    if (!document.querySelectorAll) return false;
+
+    var candidates = document.querySelectorAll([
+      '.t-store__prod-popup',
+      '.js-store-prod-popup',
+      '.js-store-prod-popup.t-popup_show',
+      '.t-popup_show',
+      '.t-popup_show .t-store__prod-popup',
+      '.t-store__prod-popup.t-popup_show',
+      '.t-store__prod-popup[style*=\"display: block\"]',
+      '.t-store__prod-popup:not([style*=\"display: none\"])'
+    ].join(','));
+
+    var productMarkers = [
+      '.t-store__prod-popup',
+      '.t-store__prod-popup__info',
+      '.t-store__prod-popup__gallery',
+      '.t-store__prod-popup__close',
+      '.js-store-prod-popup',
+      '.t-slds'
+    ].join(',');
+
+    return Array.prototype.some.call(candidates, function(el){
+      if (!el || !el.getBoundingClientRect) return false;
+
+      var productRoot = el.matches && el.matches(productMarkers) ? el : null;
+      if (!productRoot && el.querySelector) productRoot = el.querySelector(productMarkers);
+      if (!productRoot && el.closest) productRoot = el.closest(productMarkers);
+      if (!productRoot) return false;
+
+      var style = window.getComputedStyle ? window.getComputedStyle(el) : null;
+      if (style && (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0)) return false;
+
+      var rect = el.getBoundingClientRect();
+      return rect.width > 20 && rect.height > 20;
+    });
+  }
+
   function isSiteHeaderProductMode(){
     var html = document.documentElement;
     var body = document.body;
-    return !!((html && (html.classList.contains('tc-product-page') || html.classList.contains('tc-product-page-active'))) ||
-      (body && (body.classList.contains('tc-product-page') || body.classList.contains('tc-product-page-active'))));
+
+    if ((html && (html.classList.contains('tc-product-page') || html.classList.contains('tc-product-page-active'))) ||
+      (body && (body.classList.contains('tc-product-page') || body.classList.contains('tc-product-page-active')))) {
+      return true;
+    }
+
+    if (isProductPathLike(window.location.pathname) ||
+      isProductPathLike(window.location.hash) ||
+      isProductPathLike(window.location.href)) {
+      return true;
+    }
+
+    return hasVisibleTildaProductPopup();
   }
 
   function getActiveHeaderKey(pathname){
@@ -97,14 +157,72 @@
     );
   }
 
+  function closeSiteHeaderMobileMenu(){
+    setHeaderGlobalClass('tc-site-header-menu-open', false);
+
+    var burger = document.querySelector('.tc-site-header__burger');
+    var mobilePanel = document.querySelector('.tc-site-header__mobile-panel');
+
+    if (burger) {
+      burger.setAttribute('aria-expanded', 'false');
+      burger.setAttribute('aria-label', 'Открыть меню');
+    }
+    if (mobilePanel) mobilePanel.setAttribute('aria-hidden', 'true');
+  }
+
   function syncSiteHeaderReveal() {
     if (isSiteHeaderProductMode()) {
+      setHeaderGlobalClass('tc-site-header-product-suppressed', true);
       setHeaderGlobalClass('tc-site-header-visible', false);
+      closeSiteHeaderMobileMenu();
       return;
     }
 
+    setHeaderGlobalClass('tc-site-header-product-suppressed', false);
     var shouldShow = isAlwaysVisibleHeaderPage(window.location.pathname) || getPageScrollY() > 60;
     setHeaderGlobalClass('tc-site-header-visible', shouldShow);
+  }
+
+  function scheduleSiteHeaderSync() {
+    if (siteHeaderSyncRaf) return;
+
+    var raf = window.requestAnimationFrame || function(callback){ return window.setTimeout(callback, 50); };
+    siteHeaderSyncRaf = raf(function(){
+      siteHeaderSyncRaf = 0;
+      syncSiteHeaderReveal();
+    });
+  }
+
+  function initSiteHeaderRouteWatchers(){
+    if (!window.__TC_SITE_HEADER_ROUTE_WATCHERS__) {
+      window.__TC_SITE_HEADER_ROUTE_WATCHERS__ = true;
+      window.addEventListener('hashchange', scheduleSiteHeaderSync);
+      window.addEventListener('popstate', scheduleSiteHeaderSync);
+    }
+
+    if (!siteHeaderHistoryWrapped && window.history) {
+      siteHeaderHistoryWrapped = true;
+      ['pushState', 'replaceState'].forEach(function(name){
+        var original = window.history[name];
+        if (typeof original !== 'function') return;
+
+        window.history[name] = function(){
+          var result = original.apply(this, arguments);
+          scheduleSiteHeaderSync();
+          return result;
+        };
+      });
+    }
+
+    if (!siteHeaderProductObserver && window.MutationObserver && document.documentElement) {
+      siteHeaderProductObserver = new MutationObserver(scheduleSiteHeaderSync);
+      siteHeaderProductObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style'],
+        childList: true,
+        subtree: true
+      });
+    }
   }
 
   function normalizeLegacyHeaderText(value){
@@ -440,6 +558,7 @@
 
     window.addEventListener('scroll', syncSiteHeaderReveal, { passive: true });
     window.addEventListener('resize', syncSiteHeaderReveal, { passive: true });
+    initSiteHeaderRouteWatchers();
 
     if (burger && mobilePanel) {
       burger.addEventListener('click', function(){
