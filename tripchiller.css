@@ -2516,6 +2516,17 @@ body {
   outline: 2px solid rgba(255,255,255,.75);
   outline-offset: 6px;
 }
+.tc-user-photos__photo-link:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+html.tc-user-photos-restoring-scroll .tc-user-photos__photo-link:focus,
+html.tc-user-photos-restoring-scroll .tc-user-photos__photo-link:focus-visible,
+body.tc-user-photos-restoring-scroll .tc-user-photos__photo-link:focus,
+body.tc-user-photos-restoring-scroll .tc-user-photos__photo-link:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
 .tc-user-photos.is-dragging { cursor: grabbing; }
 .tc-user-photos.is-dragging .tc-user-photos__photo-link { cursor: grabbing; }
 .tc-user-photos.is-dragging .tc-user-photos__track {
