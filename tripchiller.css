@@ -3190,35 +3190,6 @@ html.tc-page-contacts .tw-type-1a br {
   }
 }
 
-#allrecords .tc-catalog-filter-btn,
-#allrecords .tc-catalog-filter-btn * {
-  color: #8f8f8f !important;
-  opacity: 1 !important;
-  text-transform: uppercase !important;
-}
-
-#allrecords .tc-catalog-filter-btn.tc-catalog-part-active,
-#allrecords .tc-catalog-filter-btn.tc-catalog-part-active *,
-#allrecords .tc-catalog-filter-btn.t-active,
-#allrecords .tc-catalog-filter-btn.t-active *,
-#allrecords .tc-catalog-filter-btn.active,
-#allrecords .tc-catalog-filter-btn.active *,
-#allrecords .tc-catalog-filter-btn[aria-current="true"],
-#allrecords .tc-catalog-filter-btn[aria-current="true"] *,
-#allrecords .tc-catalog-filter-btn[aria-selected="true"],
-#allrecords .tc-catalog-filter-btn[aria-selected="true"] * {
-  color: #fff !important;
-  opacity: 1 !important;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  #allrecords .tc-catalog-filter-btn:hover,
-  #allrecords .tc-catalog-filter-btn:hover * {
-    color: #fff !important;
-    opacity: 1 !important;
-  }
-}
-
 #allrecords .t-store__parts-switch-btn[data-storepart-uid="FRUITS"],
 #allrecords .t-store__parts-switch-btn[data-storepart-title="FRUITS"],
 #allrecords .t-store__parts-switch-btn[data-part-title="FRUITS"] {
@@ -3492,119 +3463,33 @@ body.tc-product-page-active .tc-menu-eye-logo {
   pointer-events: none !important;
 }
 
-/* Scoped load-more button fix for Tilda catalog/gallery. */
-#allrecords .tc-load-more-btn,
-#allrecords .tc-catalog-record .t778__showmore,
-#allrecords .tc-catalog-record button.t778__showmore,
-#allrecords .tc-catalog-record .t-store__load-more-btn,
-#allrecords .tc-catalog-record .js-store-load-more-btn,
-#allrecords .tc-catalog-record .t-store__loadmore,
-#allrecords .tc-catalog-record .t-store__load-more,
-#allrecords .tc-catalog-record .js-store-load-more,
-#allrecords .tc-catalog-record .t-catalog__loadmore,
-#allrecords .tc-catalog-record .t-catalog__load-more,
-#allrecords .tc-catalog-record .js-catalog-load-more,
-#allrecords .tc-catalog-record .js-catalog-load-more-btn,
-#allrecords .tc-catalog-record .loadmore,
-#allrecords .tc-catalog-record .load-more {
-  background: #000 !important;
-  background-color: #000 !important;
-  color: #fff !important;
+/* Safe scoped shop UI patch: catalog filters and real Tilda load-more button only. */
+#allrecords .tc-safe-filter-item,
+#allrecords .tc-safe-filter-item *,
+#allrecords .tc-safe-filter-text {
+  color: #8f8f8f !important;
   opacity: 1 !important;
   text-transform: uppercase !important;
-  font-family: var(--tc-font-main), monospace !important;
-  transition:
-    background-color .22s ease,
-    color .22s ease,
-    transform .12s ease,
-    filter .22s ease !important;
-  will-change: transform;
-  cursor: pointer !important;
-  -webkit-tap-highlight-color: transparent !important;
 }
 
-#allrecords .tc-load-more-btn *,
-#allrecords .tc-catalog-record .tc-load-more-btn *,
-#allrecords .tc-catalog-record .t778__showmore *,
-#allrecords .tc-catalog-record .t-store__load-more-btn *,
-#allrecords .tc-catalog-record .js-store-load-more-btn *,
-#allrecords .tc-catalog-record .t-store__loadmore *,
-#allrecords .tc-catalog-record .t-store__load-more *,
-#allrecords .tc-catalog-record .js-store-load-more *,
-#allrecords .tc-catalog-record .t-catalog__loadmore *,
-#allrecords .tc-catalog-record .t-catalog__load-more *,
-#allrecords .tc-catalog-record .js-catalog-load-more *,
-#allrecords .tc-catalog-record .js-catalog-load-more-btn *,
-#allrecords .tc-catalog-record .loadmore *,
-#allrecords .tc-catalog-record .load-more * {
-  color: inherit !important;
+#allrecords .tc-safe-filter-item.tc-safe-filter-active,
+#allrecords .tc-safe-filter-item.tc-safe-filter-active *,
+#allrecords .tc-safe-filter-item.tc-safe-filter-active .tc-safe-filter-text {
+  color: #fff !important;
   opacity: 1 !important;
-  text-transform: uppercase !important;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  #allrecords .tc-load-more-btn:hover,
-  #allrecords .tc-catalog-record .t778__showmore:hover,
-  #allrecords .tc-catalog-record button.t778__showmore:hover,
-  #allrecords .tc-catalog-record .t-store__load-more-btn:hover,
-  #allrecords .tc-catalog-record .js-store-load-more-btn:hover,
-  #allrecords .tc-catalog-record .t-store__loadmore:hover,
-  #allrecords .tc-catalog-record .t-store__load-more:hover,
-  #allrecords .tc-catalog-record .js-store-load-more:hover,
-  #allrecords .tc-catalog-record .t-catalog__loadmore:hover,
-  #allrecords .tc-catalog-record .t-catalog__load-more:hover,
-  #allrecords .tc-catalog-record .js-catalog-load-more:hover,
-  #allrecords .tc-catalog-record .js-catalog-load-more-btn:hover,
-  #allrecords .tc-catalog-record .loadmore:hover,
-  #allrecords .tc-catalog-record .load-more:hover {
-    background: #9d191c !important;
-    background-color: #9d191c !important;
+  #allrecords .tc-safe-filter-item:not(.tc-safe-filter-active):hover,
+  #allrecords .tc-safe-filter-item:not(.tc-safe-filter-active):hover * {
     color: #fff !important;
+    opacity: 1 !important;
   }
 }
 
-#allrecords .tc-load-more-btn:active,
-#allrecords .tc-load-more-btn.tc-action-pressed,
-#allrecords .tc-load-more-btn.tc-ui-pressed,
-#allrecords .tc-load-more-btn.tc-loadmore-pressed,
-#allrecords .tc-load-more-btn.is-pressed,
-#allrecords .tc-catalog-record .t778__showmore:active,
-#allrecords .tc-catalog-record .t778__showmore.tc-action-pressed,
-#allrecords .tc-catalog-record .t778__showmore.tc-ui-pressed,
-#allrecords .tc-catalog-record .t778__showmore.tc-loadmore-pressed,
-#allrecords .tc-catalog-record .t778__showmore.is-pressed,
-#allrecords .tc-catalog-record .t-store__load-more-btn:active,
-#allrecords .tc-catalog-record .t-store__load-more-btn.tc-action-pressed,
-#allrecords .tc-catalog-record .t-store__load-more-btn.tc-ui-pressed,
-#allrecords .tc-catalog-record .t-store__load-more-btn.tc-loadmore-pressed,
-#allrecords .tc-catalog-record .t-store__load-more-btn.is-pressed,
-#allrecords .tc-catalog-record .js-store-load-more-btn:active,
-#allrecords .tc-catalog-record .js-store-load-more-btn.tc-action-pressed,
-#allrecords .tc-catalog-record .js-store-load-more-btn.tc-ui-pressed,
-#allrecords .tc-catalog-record .js-store-load-more-btn.tc-loadmore-pressed,
-#allrecords .tc-catalog-record .js-store-load-more-btn.is-pressed,
-#allrecords .tc-catalog-record .t-store__loadmore:active,
-#allrecords .tc-catalog-record .t-store__load-more:active,
-#allrecords .tc-catalog-record .js-store-load-more:active,
-#allrecords .tc-catalog-record .t-catalog__loadmore:active,
-#allrecords .tc-catalog-record .t-catalog__load-more:active,
-#allrecords .tc-catalog-record .js-catalog-load-more:active,
-#allrecords .tc-catalog-record .js-catalog-load-more-btn:active,
-#allrecords .tc-catalog-record .loadmore:active,
-#allrecords .tc-catalog-record .load-more:active {
-  background: #9d191c !important;
-  background-color: #9d191c !important;
-  color: #fff !important;
-  transform: translateY(2px) scale(.97) !important;
-  filter: brightness(.92) !important;
-}
-
-
-/* Real Tilda catalog load-more button: keep hover/pressed on the outer clickable node only. */
-#allrecords button.js-catalog-load-more-btn,
-#allrecords .t-btn.js-catalog-load-more-btn,
-#allrecords button.tc-load-more-btn,
-#allrecords .t-btn.tc-load-more-btn {
+#allrecords button.tc-safe-load-more-btn,
+#allrecords .t-btn.tc-safe-load-more-btn,
+#allrecords button.js-catalog-load-more-btn {
   background: #000 !important;
   background-color: #000 !important;
   color: #fff !important;
@@ -3613,16 +3498,15 @@ body.tc-product-page-active .tc-menu-eye-logo {
   cursor: pointer !important;
   transition:
     background-color .22s ease,
-    color .22s ease,
     transform .12s ease,
     filter .22s ease !important;
   will-change: transform;
 }
 
+#allrecords button.tc-safe-load-more-btn .tc-safe-load-more-text,
+#allrecords .t-btn.tc-safe-load-more-btn .tc-safe-load-more-text,
 #allrecords button.js-catalog-load-more-btn .t-btnflex__text,
-#allrecords .t-btn.js-catalog-load-more-btn .t-btnflex__text,
-#allrecords .tc-load-more-btn .tc-load-more-btn-text,
-#allrecords .tc-load-more-btn .js-catalog-load-more-btn-text {
+#allrecords button.js-catalog-load-more-btn .js-catalog-load-more-btn-text {
   background: transparent !important;
   background-color: transparent !important;
   color: inherit !important;
@@ -3634,77 +3518,24 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  #allrecords button.js-catalog-load-more-btn:hover,
-  #allrecords .t-btn.js-catalog-load-more-btn:hover,
-  #allrecords button.tc-load-more-btn:hover,
-  #allrecords .t-btn.tc-load-more-btn:hover {
+  #allrecords button.tc-safe-load-more-btn:hover,
+  #allrecords .t-btn.tc-safe-load-more-btn:hover,
+  #allrecords button.js-catalog-load-more-btn:hover {
     background: #9d191c !important;
     background-color: #9d191c !important;
     color: #fff !important;
   }
 }
 
+#allrecords button.tc-safe-load-more-btn:active,
+#allrecords button.tc-safe-load-more-btn.tc-safe-pressed,
+#allrecords .t-btn.tc-safe-load-more-btn:active,
+#allrecords .t-btn.tc-safe-load-more-btn.tc-safe-pressed,
 #allrecords button.js-catalog-load-more-btn:active,
-#allrecords button.js-catalog-load-more-btn.tc-loadmore-pressed,
-#allrecords button.js-catalog-load-more-btn.tc-action-pressed,
-#allrecords .t-btn.js-catalog-load-more-btn:active,
-#allrecords .t-btn.js-catalog-load-more-btn.tc-loadmore-pressed,
-#allrecords .t-btn.js-catalog-load-more-btn.tc-action-pressed,
-#allrecords button.tc-load-more-btn:active,
-#allrecords button.tc-load-more-btn.tc-loadmore-pressed,
-#allrecords button.tc-load-more-btn.tc-action-pressed,
-#allrecords .t-btn.tc-load-more-btn:active,
-#allrecords .t-btn.tc-load-more-btn.tc-loadmore-pressed,
-#allrecords .t-btn.tc-load-more-btn.tc-action-pressed {
+#allrecords button.js-catalog-load-more-btn.tc-safe-pressed {
   background: #9d191c !important;
   background-color: #9d191c !important;
   color: #fff !important;
   transform: translateY(2px) scale(.97) !important;
   filter: brightness(.92) !important;
-}
-
-#allrecords .tc-load-more-btn-text:active,
-#allrecords .tc-load-more-btn-text.tc-loadmore-pressed,
-#allrecords .tc-load-more-btn-text.tc-action-pressed,
-#allrecords .js-catalog-load-more-btn-text:active,
-#allrecords .js-catalog-load-more-btn-text.tc-loadmore-pressed,
-#allrecords .js-catalog-load-more-btn-text.tc-action-pressed {
-  transform: none !important;
-  filter: none !important;
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-/* Catalog parts color hardfix V2: target real Tilda filter text spans. */
-#allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn,
-#allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn *,
-#allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn,
-#allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn *,
-#allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-text,
-#allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-text,
-#allrecords .t-catalog__parts-switch-wrapper .t-catalog__parts-text-title,
-#allrecords .t-store__parts-switch-wrapper .t-catalog__parts-text-title {
-  color: #8f8f8f !important;
-  opacity: 1 !important;
-  text-transform: uppercase !important;
-}
-
-#allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn.tc-catalog-part-active,
-#allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn.tc-catalog-part-active *,
-#allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn.tc-catalog-part-active,
-#allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn.tc-catalog-part-active *,
-#allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn.tc-catalog-part-active .tc-catalog-filter-text,
-#allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn.tc-catalog-part-active .tc-catalog-filter-text {
-  color: #fff !important;
-  opacity: 1 !important;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  #allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn:not(.tc-catalog-part-active):hover,
-  #allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn:not(.tc-catalog-part-active):hover *,
-  #allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn:not(.tc-catalog-part-active):hover,
-  #allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn:not(.tc-catalog-part-active):hover * {
-    color: #fff !important;
-    opacity: 1 !important;
-  }
 }

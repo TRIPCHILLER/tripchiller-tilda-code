@@ -50,16 +50,16 @@
       href: location.href,
       htmlClass: document.documentElement.className,
       bodyClass: document.body ? document.body.className : '',
-      loadMore: Array.prototype.map.call(document.querySelectorAll('.tc-load-more-btn'), function(el){
+      loadMore: Array.prototype.map.call(document.querySelectorAll('.tc-safe-load-more-btn'), function(el){
         return { text: el.textContent.trim(), cls: el.className };
       }),
-      filters: Array.prototype.map.call(document.querySelectorAll('.tc-catalog-filter-btn'), function(el){
+      filters: Array.prototype.map.call(document.querySelectorAll('.tc-safe-filter-item'), function(el){
         return { text: el.textContent.trim(), cls: el.className, color: getComputedStyle(el).color };
       }),
       catalogParts: Array.prototype.map.call(
         document.querySelectorAll('#allrecords .t-catalog__parts-switch-wrapper .t-catalog__parts-text-title, #allrecords .t-store__parts-switch-wrapper .t-catalog__parts-text-title'),
         function(el) {
-          var item = el.closest('.tc-catalog-filter-btn, .t-catalog__parts-switch-btn, .t-store__parts-switch-btn, .t-catalog__parts-button-base, .js-catalog-parts-switcher');
+          var item = el.closest('.tc-safe-filter-item, .t-catalog__parts-switch-btn, .t-store__parts-switch-btn, .t-catalog__parts-button-base, .js-catalog-parts-switcher');
           return {
             text: el.textContent.trim(),
             textClass: el.className,
@@ -3402,204 +3402,212 @@ eyeUnlockTimer = setTimeout(function(){
 })();
 
 (function () {
-  if (window.__TC_LOAD_MORE_BUTTON_STYLE_V1__) return;
-  window.__TC_LOAD_MORE_BUTTON_STYLE_V1__ = true;
-  var LOAD_MORE_LABEL = 'ЗАГРУЗИТЬ ЕЩЁ';
-  var LOAD_MORE_OUTER_BUTTON_SELECTOR = [
-    'button.js-catalog-load-more-btn',
-    'button[class*="load-more"]',
-    'button[class*="loadmore"]',
-    'button[class*="showmore"]',
-    'a.js-catalog-load-more-btn',
-    'a[class*="load-more"]',
-    'a[class*="loadmore"]',
-    'a[class*="showmore"]',
-    '[role="button"].js-catalog-load-more-btn',
-    '.t-btn.js-catalog-load-more-btn',
-    '.t-btn[class*="load-more"]',
-    '.t-btn[class*="loadmore"]',
-    '.t-btn[class*="showmore"]'
-  ].join(', ');
-  var LOAD_MORE_TEXT_SELECTOR = [
-    '.js-catalog-load-more-btn-text',
-    '.t-btnflex__text',
-    '.t-btntext',
-    '.tn-atom',
-    'span'
-  ].join(', ');
-  var LOAD_MORE_SELECTOR = [
-    '#allrecords button',
-    '#allrecords a',
-    '#allrecords [role="button"]',
-    '#allrecords .t-btn',
-    '#allrecords [class*="showmore"]',
-    '#allrecords [class*="load"]',
-    '#allrecords [class*="more"]',
-    '#allrecords div',
-    '#allrecords span',
-    '#allrecords .tc-load-more-btn'
-  ].join(', ');
-  var observerRaf = 0;
+  if (window.__TC_SAFE_SHOP_UI_PATCH_V1__) return;
+  window.__TC_SAFE_SHOP_UI_PATCH_V1__ = true;
 
-  function normalizeButtonText(text) {
-    return String(text || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  var ACTIVE_CLASS = 'tc-safe-filter-active';
+  var ITEM_CLASS = 'tc-safe-filter-item';
+  var TEXT_CLASS = 'tc-safe-filter-text';
+  var LOAD_BTN_CLASS = 'tc-safe-load-more-btn';
+  var LOAD_TEXT_CLASS = 'tc-safe-load-more-text';
+  var FILTER_WRAPPER_SELECTOR = '#allrecords .t-catalog__parts-switch-wrapper, #allrecords .t-store__parts-switch-wrapper';
+  var FILTER_TEXT_SELECTOR = '.t-catalog__parts-text-title';
+  var LOAD_MORE_SELECTOR = '#allrecords button.js-catalog-load-more-btn, #allrecords .t-btn.js-catalog-load-more-btn';
+
+  function norm(text) {
+    return String(text || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
   }
 
-  function isLoadMoreText(text) {
-    var value = normalizeButtonText(text);
-    return value === 'загрузить ещё' || value === 'загрузить еще' || value === 'load more';
+  function labelOf(text) {
+    var value = norm(text).replace(/[«»"'`]/g, '');
+    if (value === 'каталог') return 'все';
+    if (value === 'все') return 'все';
+    if (value === 'кепка') return 'кепки';
+    if (value === 'кепки') return 'кепки';
+    if (value === 'футболка') return 'футболки';
+    if (value === 'футболки') return 'футболки';
+    if (value === 'верх') return 'верх';
+    if (value === 'архив') return 'архив';
+    return '';
   }
 
-  function setTextIfNeeded(node, value) {
-    if (!node) return;
-    if ((node.textContent || '').trim() === value) return;
-    node.textContent = value;
+  function closestFilterItem(textEl) {
+    return textEl.closest(
+      '.t-catalog__parts-switch-btn,' +
+      '.t-store__parts-switch-btn,' +
+      '.t-catalog__parts-button-base,' +
+      '.js-catalog-parts-switcher,' +
+      'button,a,[role="button"]'
+    ) || textEl.parentElement;
   }
 
-  function getOuterLoadMoreButton(node) {
-    if (!node || !node.closest) return null;
-    return node.closest(LOAD_MORE_OUTER_BUTTON_SELECTOR);
+  function hasActiveMarker(item) {
+    if (!item) return false;
+    return !!item.closest(
+      '.t-active,.active,.tc-catalog-part-active,' +
+      '[aria-current="true"],[aria-selected="true"],[class*="_active"]'
+    );
   }
 
-  function getLoadMoreTextNode(btn, source) {
-    if (source && source !== btn && source.matches && source.matches(LOAD_MORE_TEXT_SELECTOR) && isLoadMoreText(source.textContent)) {
-      return source;
+  function looksDimmed(el) {
+    if (!el) return false;
+    var node = el;
+    var depth = 0;
+
+    while (node && node !== document.body && depth < 5) {
+      var opacity = parseFloat(getComputedStyle(node).opacity || '1');
+      if (opacity < 0.99) return true;
+      node = node.parentElement;
+      depth += 1;
     }
 
-    if (!btn || !btn.querySelector) return null;
-
-    var directText = btn.querySelector(LOAD_MORE_TEXT_SELECTOR);
-    if (directText && isLoadMoreText(directText.textContent)) return directText;
-
-    return null;
+    return false;
   }
 
-  function setLoadMoreVisualText(btn, source) {
-    var textNodeTarget = getLoadMoreTextNode(btn, source);
+  function patchFilters(forcedLabel) {
+    var wrappers = document.querySelectorAll(FILTER_WRAPPER_SELECTOR);
 
-    if (textNodeTarget) {
-      textNodeTarget.classList.add('tc-load-more-btn-text');
-      textNodeTarget.classList.remove('tc-load-more-btn');
-      setTextIfNeeded(textNodeTarget, LOAD_MORE_LABEL);
+    wrappers.forEach(function (wrapper) {
+      var parts = [];
+      var activeLabel = forcedLabel || '';
+
+      wrapper.querySelectorAll(FILTER_TEXT_SELECTOR).forEach(function (textEl) {
+        var label = labelOf(textEl.textContent);
+        if (!label) return;
+
+        var item = closestFilterItem(textEl);
+        if (!item) return;
+
+        parts.push({ item: item, textEl: textEl, label: label });
+
+        if (!activeLabel && hasActiveMarker(item)) activeLabel = label;
+        if (!activeLabel && looksDimmed(item)) activeLabel = label;
+        if (!activeLabel && looksDimmed(textEl)) activeLabel = label;
+      });
+
+      if (!activeLabel) activeLabel = 'все';
+
+      parts.forEach(function (part) {
+        var active = part.label === activeLabel;
+
+        part.item.classList.add(ITEM_CLASS);
+        part.item.classList.toggle(ACTIVE_CLASS, active);
+        part.item.style.setProperty('color', active ? '#fff' : '#8f8f8f', 'important');
+        part.item.style.setProperty('opacity', '1', 'important');
+
+        part.textEl.classList.add(TEXT_CLASS);
+        part.textEl.style.setProperty('color', active ? '#fff' : '#8f8f8f', 'important');
+        part.textEl.style.setProperty('opacity', '1', 'important');
+
+        if (part.label === 'все') part.textEl.textContent = 'ВСЕ';
+      });
+    });
+  }
+
+  function patchLoadMore() {
+    document.querySelectorAll(LOAD_MORE_SELECTOR).forEach(function (btn) {
+      btn.classList.add(LOAD_BTN_CLASS);
+
+      var text = btn.querySelector(
+        '.js-catalog-load-more-btn-text, .t-btnflex__text, .t-btntext, span'
+      );
+
+      if (text) {
+        text.classList.add(LOAD_TEXT_CLASS);
+        text.classList.remove('tc-load-more-btn');
+        text.textContent = 'ЗАГРУЗИТЬ ЕЩЁ';
+      } else {
+        var current = norm(btn.textContent);
+        if (current === 'загрузить ещё' || current === 'загрузить еще' || current === 'load more') {
+          btn.textContent = 'ЗАГРУЗИТЬ ЕЩЁ';
+        }
+      }
+    });
+  }
+
+  function getLoadMoreButtonFromEvent(e) {
+    return e.target.closest && e.target.closest(LOAD_MORE_SELECTOR);
+  }
+
+  function runSafeShopPatch() {
+    patchFilters();
+    patchLoadMore();
+  }
+
+  document.addEventListener('pointerdown', function (e) {
+    var btn = getLoadMoreButtonFromEvent(e);
+    if (btn) btn.classList.add('tc-safe-pressed');
+  }, true);
+
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (eventName) {
+    document.addEventListener(eventName, function (e) {
+      var btn = getLoadMoreButtonFromEvent(e);
+      if (btn) {
+        setTimeout(function () {
+          btn.classList.remove('tc-safe-pressed');
+        }, 120);
+      }
+    }, true);
+  });
+
+  document.addEventListener('click', function (e) {
+    var btn = getLoadMoreButtonFromEvent(e);
+    if (btn) {
+      btn.classList.add('tc-safe-pressed');
+      setTimeout(function () {
+        btn.classList.remove('tc-safe-pressed');
+        patchLoadMore();
+      }, 160);
       return;
     }
 
-    setTextIfNeeded(btn, LOAD_MORE_LABEL);
-  }
-
-  function normalizeLoadMoreButton(btn, source) {
-    if (!btn || !isLoadMoreText((source || btn).textContent)) return;
-
-    var outerBtn = getOuterLoadMoreButton(source || btn) || getOuterLoadMoreButton(btn) || btn;
-    if (!outerBtn) return;
-
-    if (source && source !== outerBtn && source.classList) {
-      source.classList.remove('tc-load-more-btn');
+    var textEl = e.target.closest && e.target.closest(FILTER_TEXT_SELECTOR);
+    if (textEl && textEl.closest(FILTER_WRAPPER_SELECTOR)) {
+      var label = labelOf(textEl.textContent);
+      if (label) {
+        patchFilters(label);
+        setTimeout(function () { patchFilters(label); }, 80);
+        setTimeout(function () { patchFilters(label); }, 240);
+      }
     }
+  }, true);
 
-    outerBtn.classList.add('tc-load-more-btn');
-    setLoadMoreVisualText(outerBtn, source);
-  }
+  window.__TC_SAFE_SHOP_STATE__ = function () {
+    return {
+      filters: Array.prototype.map.call(document.querySelectorAll('.tc-safe-filter-item'), function (el) {
+        return {
+          text: el.textContent.trim(),
+          cls: el.className,
+          color: getComputedStyle(el).color,
+          opacity: getComputedStyle(el).opacity
+        };
+      }),
+      loadMore: Array.prototype.map.call(document.querySelectorAll('.tc-safe-load-more-btn'), function (el) {
+        return {
+          text: el.textContent.trim(),
+          cls: el.className,
+          bg: getComputedStyle(el).backgroundColor
+        };
+      })
+    };
+  };
 
-  function normalizeLoadMoreText(root) {
-    var scope = root || document;
-    var allrecords = scope.querySelector && scope.querySelector('#allrecords') ? scope.querySelector('#allrecords') : document.querySelector('#allrecords');
-    var searchRoot = allrecords || scope;
-    if (!searchRoot || !searchRoot.querySelectorAll) return;
-
-    var buttons = searchRoot.querySelectorAll(LOAD_MORE_SELECTOR);
-    buttons.forEach(function(candidate){
-      if (!candidate || !isLoadMoreText(candidate.textContent)) return;
-      var clickable = getOuterLoadMoreButton(candidate) || candidate;
-      if (!clickable || !searchRoot.contains(clickable)) return;
-      normalizeLoadMoreButton(clickable, candidate);
-    });
-  }
-
-  window.__TC_NORMALIZE_LOAD_MORE_BUTTON__ = normalizeLoadMoreButton;
-  window.__TC_NORMALIZE_LOAD_MORE_BUTTONS__ = normalizeLoadMoreText;
-
-  function bindLoadMoreButtons() {
-    normalizeLoadMoreText(document);
-    var buttons = document.querySelectorAll('#allrecords .tc-load-more-btn');
-
-    buttons.forEach(function (btn) {
-      if (!btn || btn.__tcLoadMoreReady) return;
-
-      btn.__tcLoadMoreReady = true;
-
-      function press() {
-        btn.classList.add('tc-loadmore-pressed');
-      }
-
-      function releaseSoon() {
-        setTimeout(function () {
-          btn.classList.remove('tc-loadmore-pressed');
-          normalizeLoadMoreText(document);
-        }, 140);
-      }
-
-      btn.addEventListener('pointerdown', press, true);
-      btn.addEventListener('pointerup', releaseSoon, true);
-      btn.addEventListener('pointerleave', releaseSoon, true);
-      btn.addEventListener('pointercancel', releaseSoon, true);
-
-      btn.addEventListener('touchstart', press, {
-        passive: true,
-        capture: true
-      });
-
-      btn.addEventListener('touchend', releaseSoon, {
-        passive: true,
-        capture: true
-      });
-
-      btn.addEventListener('click', function () {
-        press();
-        releaseSoon();
-        setTimeout(function () { normalizeLoadMoreText(document); bindLoadMoreButtons(); }, 100);
-        setTimeout(function () { normalizeLoadMoreText(document); bindLoadMoreButtons(); }, 300);
-      }, true);
-    });
-  }
-
-  function scheduleBind() {
-    normalizeLoadMoreText(document);
-    bindLoadMoreButtons();
-    [100, 300, 800, 1600].forEach(function(delay){
-      setTimeout(function () {
-        normalizeLoadMoreText(document);
-        bindLoadMoreButtons();
-      }, delay);
-    });
-  }
+  runSafeShopPatch();
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', scheduleBind);
+    document.addEventListener('DOMContentLoaded', runSafeShopPatch);
   } else {
-    scheduleBind();
+    runSafeShopPatch();
   }
 
-  window.addEventListener('load', scheduleBind);
+  window.addEventListener('load', runSafeShopPatch);
 
-  function scheduleObserverBind() {
-    if (observerRaf) return;
-    observerRaf = requestAnimationFrame(function () {
-      observerRaf = 0;
-      scheduleBind();
-    });
-  }
-
-  if (window.MutationObserver) {
-    var observer = new MutationObserver(function () {
-      scheduleObserverBind();
-    });
-
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true
-    });
-  }
+  [80, 240, 600].forEach(function (delay) {
+    setTimeout(runSafeShopPatch, delay);
+  });
 })();
 
 (function () {
@@ -6005,319 +6013,10 @@ function setupDesktopAura() {
     });
   }
 
-  var tcCatalogFilterActiveLabel = '';
-  var TC_FILTER_BUTTON_SELECTOR = [
-    'button',
-    'a',
-    '[role="button"]',
-    '.t-store__parts-switch-btn',
-    '.t-catalog__parts-switch-btn',
-    '.js-catalog-parts-switcher',
-    '.t-catalog__parts-button-base'
-  ].join(', ');
-  var TC_FILTER_TEXT_SELECTOR = [
-    'button',
-    'a',
-    '[role="button"]',
-    '.t-store__parts-switch-btn',
-    '.t-catalog__parts-switch-btn',
-    '.js-catalog-parts-switcher',
-    '.t-catalog__parts-button-base',
-    'div',
-    'span'
-  ].join(', ');
-  var TC_FILTER_LABELS = new Set(['все', 'каталог', 'кепки', 'футболки', 'верх', 'архив']);
-
-  function getRawFilterLabel(str){
-    var txt = normalize(str).replace(/[«»"'`]/g, '').trim();
-    if (txt === 'футболка') return 'футболки';
-    if (txt === 'кепка') return 'кепки';
-    return txt;
-  }
-
-  function getFilterStateLabel(str){
-    var txt = getRawFilterLabel(str);
-    return txt === 'каталог' ? 'все' : txt;
-  }
-
-  function isCatalogFilterLabel(str){
-    return TC_FILTER_LABELS.has(getRawFilterLabel(str));
-  }
-
-  function getCatalogFilterButton(node){
-    if (!node || !node.closest) return null;
-    if (node.matches && node.matches(TC_FILTER_BUTTON_SELECTOR)) return node;
-    return node.closest(TC_FILTER_BUTTON_SELECTOR);
-  }
-
-  function isExcludedFilterNode(node){
-    return !!(node && node.closest && node.closest('.t-store__card, .t-catalog__card, .js-store-product, .js-catalog-product, .t-catalog__product-snippet, .t-catalog__product, .t-store__prod-popup, .t-popup, [data-product-lid], [data-product-gen-uid]'));
-  }
-
-  function isFilterButtonActive(btn){
-    return !!(btn && btn.matches && (
-      btn.matches('.tc-catalog-part-active, .t-active, .active, [aria-current="true"], [aria-selected="true"], [class*="_active"]') ||
-      !!btn.closest('.tc-catalog-part-active, .t-active, .active, [aria-current="true"], [aria-selected="true"], [class*="_active"]')
-    ));
-  }
-
-  function setFilterVisualText(btn, source){
-    var raw = getRawFilterLabel((source || btn).textContent);
-    if (raw !== 'все' && raw !== 'каталог') return;
-    var target = source && source !== btn ? source : null;
-    if (!target && btn.querySelector) {
-      target = btn.querySelector('.t-btntext, .tn-atom, span, div');
-    }
-    if (target && getRawFilterLabel(target.textContent) === raw) {
-      target.textContent = 'ВСЕ';
-      return;
-    }
-    if (btn.children.length === 0 || raw === getRawFilterLabel(btn.textContent)) btn.textContent = 'ВСЕ';
-  }
-
-  function setFilterInlineState(btn, isActive){
-    btn.classList.add('tc-catalog-filter-btn');
-    btn.classList.toggle('tc-catalog-part-active', !!isActive);
-    btn.style.setProperty('color', isActive ? '#fff' : '#8f8f8f', 'important');
-    btn.style.setProperty('opacity', '1', 'important');
-    btn.querySelectorAll('*').forEach(function(inner){
-      inner.style.setProperty('color', 'inherit', 'important');
-      inner.style.setProperty('opacity', '1', 'important');
-    });
-  }
-
-  function normalizeCatalogFilterButtons(root, activeLabel){
-    var scope = root || document;
-    var allrecords = scope.querySelector && scope.querySelector('#allrecords') ? scope.querySelector('#allrecords') : document.querySelector('#allrecords');
-    var searchRoot = allrecords || scope;
-    if (!searchRoot || !searchRoot.querySelectorAll) return;
-
-    var found = [];
-    var seen = new Set();
-    var detectedActive = getFilterStateLabel(activeLabel || '') || tcCatalogFilterActiveLabel;
-
-    searchRoot.querySelectorAll(TC_FILTER_TEXT_SELECTOR).forEach(function(candidate){
-      if (!candidate || !isCatalogFilterLabel(candidate.textContent) || isExcludedFilterNode(candidate)) return;
-      var btn = getCatalogFilterButton(candidate);
-      if (!btn || seen.has(btn) || isExcludedFilterNode(btn)) return;
-      var label = getFilterStateLabel(candidate.textContent || btn.textContent);
-      if (!label) return;
-      seen.add(btn);
-      found.push({ btn: btn, source: candidate, label: label });
-      btn.classList.add('tc-catalog-filter-btn');
-      btn.dataset.tcCatalogFilterLabel = label;
-      setFilterVisualText(btn, candidate);
-      if (isFilterButtonActive(btn)) detectedActive = label;
-    });
-
-    if (!detectedActive) detectedActive = 'все';
-    tcCatalogFilterActiveLabel = detectedActive;
-
-    found.forEach(function(item){
-      setFilterInlineState(item.btn, item.label === detectedActive);
-      if (item.btn.dataset.tcFilterBound === '1') return;
-      item.btn.dataset.tcFilterBound = '1';
-      item.btn.addEventListener('click', function(){
-        var picked = getFilterStateLabel(item.btn.dataset.tcCatalogFilterLabel || item.btn.textContent);
-        if (!picked) return;
-        tcCatalogFilterActiveLabel = picked;
-        var container = item.btn.closest('.t-catalog__parts-wrapper, .t-store__parts-switch-wrapper, .t-catalog__parts, .t-store__parts-switch, .t-rec, [id^="rec"], #allrecords');
-        if (container && container.dataset) container.dataset.tcActivePart = picked;
-        normalizeCatalogFilterButtons(document, picked);
-        setTimeout(function(){ normalizeCatalogFilterButtons(document, picked); }, 100);
-        setTimeout(function(){ normalizeCatalogFilterButtons(document, picked); }, 300);
-        setTimeout(function(){ normalizeCatalogFilterButtons(document, picked); }, 800);
-      }, true);
-    });
-  }
-
-  window.__TC_CATALOG_PARTS_COLOR_HARDFIX_V2__ = true;
-
-  var tcCatalogFilterActiveAt = 0;
-  var TC_CATALOG_PARTS_WRAPPER_SELECTOR = '#allrecords .t-catalog__parts-switch-wrapper, #allrecords .t-store__parts-switch-wrapper';
-  var TC_CATALOG_PARTS_TEXT_SELECTOR = '.t-catalog__parts-text-title.t-descr.t-descr_sm, .t-catalog__parts-text-title';
-  var TC_CATALOG_PARTS_ITEM_SELECTOR = [
-    '.t-catalog__parts-switch-btn',
-    '.t-store__parts-switch-btn',
-    '.t-catalog__parts-button-base',
-    '.js-catalog-parts-switcher',
-    'button',
-    'a',
-    '[role="button"]'
-  ].join(', ');
-  var TC_CATALOG_PARTS_ACTIVE_SELECTOR = '.tc-catalog-part-active, .t-active, .active, [aria-current="true"], [aria-selected="true"], [class*="_active"]';
-
-  function normalizeCatalogPartsColorLabel(value){
-    var txt = normalizePartLabel(value);
-    if (txt === 'каталог') return 'все';
-    if (txt === 'кепка') return 'кепки';
-    if (txt === 'футболка') return 'футболки';
-    if (TC_FILTER_LABELS.has(txt)) return txt === 'каталог' ? 'все' : txt;
-    return '';
-  }
-
-  function getCatalogPartsWrapper(node){
-    return node && node.closest ? node.closest(TC_CATALOG_PARTS_WRAPPER_SELECTOR) : null;
-  }
-
-  function getCatalogPartsItem(textEl, wrapper){
-    if (!textEl || !wrapper) return null;
-    var item = textEl.closest(TC_CATALOG_PARTS_ITEM_SELECTOR);
-    if (item && wrapper.contains(item)) return item;
-
-    var direct = textEl;
-    while (direct && direct.parentElement && direct.parentElement !== wrapper) {
-      direct = direct.parentElement;
-    }
-    if (direct && direct.parentElement === wrapper) return direct;
-    return textEl.parentElement || textEl;
-  }
-
-  function catalogPartsItemHasActiveMarker(item, wrapper){
-    var node = item;
-    while (node && node !== wrapper) {
-      if (node.matches && node.matches(TC_CATALOG_PARTS_ACTIVE_SELECTOR)) return true;
-      node = node.parentElement;
-    }
-    return false;
-  }
-
-  function setCatalogPartsColorState(item, textEl, isActive, label){
-    var color = isActive ? '#fff' : '#8f8f8f';
-    item.classList.add('tc-catalog-filter-btn');
-    item.classList.toggle('tc-catalog-part-active', !!isActive);
-    item.dataset.tcCatalogFilterLabel = label;
-    item.style.setProperty('color', color, 'important');
-    item.style.setProperty('opacity', '1', 'important');
-
-    item.querySelectorAll('*').forEach(function(inner){
-      inner.style.setProperty('color', 'inherit', 'important');
-      inner.style.setProperty('opacity', '1', 'important');
-    });
-
-    textEl.classList.add('tc-catalog-filter-text');
-    textEl.style.setProperty('color', color, 'important');
-    textEl.style.setProperty('opacity', '1', 'important');
-    if (label === 'все' && normalizePartLabel(textEl.textContent) === 'все') {
-      textEl.textContent = 'ВСЕ';
-    }
-  }
-
-  function applyCatalogPartsColorHardfixV2(root, forcedActiveLabel){
-    var scope = root && root.querySelectorAll ? root : document;
-    var wrappers = [];
-    var detectedActive = normalizeCatalogPartsColorLabel(forcedActiveLabel || '');
-    var recentClickActive = tcCatalogFilterActiveLabel && Date.now() - tcCatalogFilterActiveAt < 5000;
-    var items = [];
-
-    if (scope.matches && scope.matches(TC_CATALOG_PARTS_WRAPPER_SELECTOR)) wrappers.push(scope);
-    scope.querySelectorAll(TC_CATALOG_PARTS_WRAPPER_SELECTOR).forEach(function(wrapper){
-      if (wrappers.indexOf(wrapper) === -1) wrappers.push(wrapper);
-    });
-
-    wrappers.forEach(function(wrapper){
-      wrapper.querySelectorAll(TC_CATALOG_PARTS_TEXT_SELECTOR).forEach(function(textEl){
-        var label = normalizeCatalogPartsColorLabel(textEl.textContent);
-        if (!label || isExcludedFilterNode(textEl)) return;
-
-        var item = getCatalogPartsItem(textEl, wrapper);
-        if (!item || isExcludedFilterNode(item)) return;
-
-        items.push({ item: item, textEl: textEl, label: label, wrapper: wrapper });
-        item.classList.add('tc-catalog-filter-btn');
-        textEl.classList.add('tc-catalog-filter-text');
-        item.dataset.tcCatalogFilterLabel = label;
-        if (!recentClickActive && !detectedActive && catalogPartsItemHasActiveMarker(item, wrapper)) detectedActive = label;
-      });
-    });
-
-    if (!detectedActive && tcCatalogFilterActiveLabel) detectedActive = normalizeCatalogPartsColorLabel(tcCatalogFilterActiveLabel);
-    if (!detectedActive) detectedActive = 'все';
-    tcCatalogFilterActiveLabel = detectedActive;
-
-    items.forEach(function(part){
-      setCatalogPartsColorState(part.item, part.textEl, part.label === detectedActive, part.label);
-    });
-  }
-
-  function runCatalogPartsColorHardfixV2(root, activeLabel){
-    applyCatalogPartsColorHardfixV2(root || document, activeLabel);
-  }
-
-  function scheduleCatalogPartsColorHardfixV2(root, activeLabel){
-    runCatalogPartsColorHardfixV2(root || document, activeLabel);
-    requestAnimationFrame(function(){ runCatalogPartsColorHardfixV2(root || document, activeLabel); });
-    [50, 150, 300, 800, 1600].forEach(function(delay){
-      setTimeout(function(){ runCatalogPartsColorHardfixV2(root || document, activeLabel); }, delay);
-    });
-  }
-
-  function handleCatalogPartsColorClick(event){
-    var target = event.target;
-    if (!target || !target.closest) return;
-    var wrapper = getCatalogPartsWrapper(target);
-    if (!wrapper) return;
-    var textEl = target.closest(TC_CATALOG_PARTS_TEXT_SELECTOR);
-    if (!textEl && target.querySelector) textEl = target.querySelector(TC_CATALOG_PARTS_TEXT_SELECTOR);
-    if (!textEl) textEl = wrapper.querySelector(TC_CATALOG_PARTS_TEXT_SELECTOR);
-    var item = textEl ? getCatalogPartsItem(textEl, wrapper) : target.closest(TC_CATALOG_PARTS_ITEM_SELECTOR);
-    var label = normalizeCatalogPartsColorLabel((textEl && textEl.textContent) || (item && item.textContent) || target.textContent);
-    if (!label) return;
-    tcCatalogFilterActiveLabel = label;
-    tcCatalogFilterActiveAt = Date.now();
-    if (wrapper.dataset) wrapper.dataset.tcActivePart = label;
-    scheduleCatalogPartsColorHardfixV2(wrapper, label);
-  }
-
-  document.addEventListener('DOMContentLoaded', function(){ scheduleCatalogPartsColorHardfixV2(document); });
-  window.addEventListener('load', function(){ scheduleCatalogPartsColorHardfixV2(document); });
-  window.addEventListener('hashchange', function(){ scheduleCatalogPartsColorHardfixV2(document); });
-  window.addEventListener('popstate', function(){ scheduleCatalogPartsColorHardfixV2(document); });
-  document.addEventListener('pointerdown', handleCatalogPartsColorClick, true);
-  document.addEventListener('click', handleCatalogPartsColorClick, true);
-
-  var catalogPartsColorObserver = new MutationObserver(function(){
-    scheduleCatalogPartsColorHardfixV2(document);
-  });
-  catalogPartsColorObserver.observe(document.documentElement, { childList: true, subtree: true });
-
-  scheduleCatalogPartsColorHardfixV2(document);
-
-  function applyPartsState(record, activeLabel){
-    var storedActive = normalizePartLabel(record.dataset.tcActivePart || '') || tcCatalogFilterActiveLabel;
-    var headerActive = normalizePartLabel(activeLabel);
-    var activeNormalized = storedActive || headerActive;
-    if (!activeNormalized || activeNormalized === 'каталог') activeNormalized = 'все';
-    var hasAll = false;
-    record.querySelectorAll('.t-catalog__parts-switch-btn, .t-store__parts-switch-btn, .js-catalog-parts-switcher, .t-catalog__parts-button-base').forEach(function(btn){
-      var txt = normalizePartLabel(btn.textContent);
-      if (!txt) return;
-      if (txt === 'все') {
-        hasAll = true;
-        setAllPartLabel(btn);
-      }
-      if (txt === 'fruits') {
-        btn.style.setProperty('display', 'none', 'important');
-        return;
-      }
-      var hasActiveClass = isFilterButtonActive(btn);
-      if (!activeNormalized && hasActiveClass) activeNormalized = txt;
-      var isActive = !!activeNormalized && txt === activeNormalized;
-      setFilterInlineState(btn, isActive);
-    });
-    if (!hasAll && activeNormalized === 'все') record.dataset.tcActivePart = '';
-    normalizeCatalogFilterButtons(record, activeNormalized);
-  }
-
   function cleanStoreUi(root){
     var scope = root || document;
     var productMode = syncProductPageMode(scope);
 
-    if (window.__TC_NORMALIZE_LOAD_MORE_BUTTONS__) {
-      window.__TC_NORMALIZE_LOAD_MORE_BUTTONS__(document);
-    }
-    normalizeCatalogFilterButtons(document);
-    runCatalogPartsColorHardfixV2(document);
 
     var records = getCatalogRecords(scope);
     if (productMode) {
@@ -6327,9 +6026,6 @@ function setupDesktopAura() {
     }
 
     records.forEach(function(record){
-      if (window.__TC_NORMALIZE_LOAD_MORE_BUTTONS__) {
-        window.__TC_NORMALIZE_LOAD_MORE_BUTTONS__(record);
-      }
 
       record.querySelectorAll('.t-store__prod-popup .js-store-close-btn, .t-store__prod-popup .t-store__prod-popup__back, .t-store__prod-popup a, .t-store__prod-popup button, .t-store__prod-popup [role="button"], .t-popup .js-store-close-btn, .t-popup .t-store__prod-popup__back, .t-popup a, .t-popup button, .t-popup [role="button"]').forEach(function(back){
         var txt = normalize(back.textContent);
@@ -6383,18 +6079,6 @@ function setupDesktopAura() {
         activeLabel = 'все';
       }
 
-
-      record.querySelectorAll('.t-catalog__parts-switch-btn, .t-store__parts-switch-btn, .js-catalog-parts-switcher, .t-catalog__parts-button-base').forEach(function(btn){
-        if (btn.dataset.tcPartBound === '1') return;
-        btn.dataset.tcPartBound = '1';
-        btn.addEventListener('click', function(){
-          var picked = normalizePartLabel(btn.textContent);
-          if (!picked) return;
-          record.dataset.tcActivePart = picked;
-          applyPartsState(record, picked);
-        });
-      });
-      applyPartsState(record, activeLabel);
     });
 
     if (productMode) {
@@ -6410,11 +6094,6 @@ function setupDesktopAura() {
 
     cleanProductSkuAndBackLink(scope);
     hideCatalogDynamicHeader(scope);
-    if (window.__TC_NORMALIZE_LOAD_MORE_BUTTONS__) {
-      window.__TC_NORMALIZE_LOAD_MORE_BUTTONS__(document);
-    }
-    normalizeCatalogFilterButtons(document);
-    runCatalogPartsColorHardfixV2(document);
   }
 
 
