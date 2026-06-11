@@ -56,6 +56,20 @@
       filters: Array.prototype.map.call(document.querySelectorAll('.tc-catalog-filter-btn'), function(el){
         return { text: el.textContent.trim(), cls: el.className, color: getComputedStyle(el).color };
       }),
+      catalogParts: Array.prototype.map.call(
+        document.querySelectorAll('#allrecords .t-catalog__parts-switch-wrapper .t-catalog__parts-text-title, #allrecords .t-store__parts-switch-wrapper .t-catalog__parts-text-title'),
+        function(el) {
+          var item = el.closest('.tc-catalog-filter-btn, .t-catalog__parts-switch-btn, .t-store__parts-switch-btn, .t-catalog__parts-button-base, .js-catalog-parts-switcher');
+          return {
+            text: el.textContent.trim(),
+            textClass: el.className,
+            itemClass: item ? item.className : '',
+            color: getComputedStyle(el).color,
+            inlineColor: el.style.color,
+            opacity: getComputedStyle(el).opacity
+          };
+        }
+      ),
       hasProductBgRecord: !!document.querySelector('#rec2312983111')
     };
   };
@@ -340,6 +354,18 @@
     });
   }
 
+  window.__TC_HIDE_LEGACY_TILDA_HEADER__ = hideLegacyTildaHeader;
+
+  function safeHideLegacyTildaHeader() {
+    if (typeof window.__TC_HIDE_LEGACY_TILDA_HEADER__ === 'function') {
+      window.__TC_HIDE_LEGACY_TILDA_HEADER__();
+      return;
+    }
+    if (typeof hideLegacyTildaHeader === 'function') {
+      hideLegacyTildaHeader();
+    }
+  }
+
   function removeLegacyMenuEyeLogo(){
     document.querySelectorAll('.tc-menu-eye-logo').forEach(function(node){
       if (node && node.parentNode) node.parentNode.removeChild(node);
@@ -609,7 +635,7 @@
 
     document.body.classList.add('tc-custom-header-enabled');
     removeLegacyMenuEyeLogo();
-    hideLegacyTildaHeader();
+    safeHideLegacyTildaHeader();
     syncSiteHeaderReveal();
     requestAnimationFrame(syncSiteHeaderReveal);
     setTimeout(syncSiteHeaderReveal, 100);
@@ -5822,6 +5848,16 @@ function setupDesktopAura() {
   if (window.__TC_STORE_ST340C_CLEANUP__) return;
   window.__TC_STORE_ST340C_CLEANUP__ = true;
 
+  function safeHideLegacyTildaHeader() {
+    if (typeof window.__TC_HIDE_LEGACY_TILDA_HEADER__ === 'function') {
+      window.__TC_HIDE_LEGACY_TILDA_HEADER__();
+      return;
+    }
+    if (typeof hideLegacyTildaHeader === 'function') {
+      hideLegacyTildaHeader();
+    }
+  }
+
   function normalize(str){
     return String(str || "").replace(/\s+/g, " ").trim().toLowerCase();
   }
@@ -6066,6 +6102,158 @@ function setupDesktopAura() {
     });
   }
 
+  window.__TC_CATALOG_PARTS_COLOR_HARDFIX_V2__ = true;
+
+  var tcCatalogFilterActiveAt = 0;
+  var TC_CATALOG_PARTS_WRAPPER_SELECTOR = '#allrecords .t-catalog__parts-switch-wrapper, #allrecords .t-store__parts-switch-wrapper';
+  var TC_CATALOG_PARTS_TEXT_SELECTOR = '.t-catalog__parts-text-title.t-descr.t-descr_sm, .t-catalog__parts-text-title';
+  var TC_CATALOG_PARTS_ITEM_SELECTOR = [
+    '.t-catalog__parts-switch-btn',
+    '.t-store__parts-switch-btn',
+    '.t-catalog__parts-button-base',
+    '.js-catalog-parts-switcher',
+    'button',
+    'a',
+    '[role="button"]'
+  ].join(', ');
+  var TC_CATALOG_PARTS_ACTIVE_SELECTOR = '.tc-catalog-part-active, .t-active, .active, [aria-current="true"], [aria-selected="true"], [class*="_active"]';
+
+  function normalizeCatalogPartsColorLabel(value){
+    var txt = normalizePartLabel(value);
+    if (txt === 'каталог') return 'все';
+    if (txt === 'кепка') return 'кепки';
+    if (txt === 'футболка') return 'футболки';
+    if (TC_FILTER_LABELS.has(txt)) return txt === 'каталог' ? 'все' : txt;
+    return '';
+  }
+
+  function getCatalogPartsWrapper(node){
+    return node && node.closest ? node.closest(TC_CATALOG_PARTS_WRAPPER_SELECTOR) : null;
+  }
+
+  function getCatalogPartsItem(textEl, wrapper){
+    if (!textEl || !wrapper) return null;
+    var item = textEl.closest(TC_CATALOG_PARTS_ITEM_SELECTOR);
+    if (item && wrapper.contains(item)) return item;
+
+    var direct = textEl;
+    while (direct && direct.parentElement && direct.parentElement !== wrapper) {
+      direct = direct.parentElement;
+    }
+    if (direct && direct.parentElement === wrapper) return direct;
+    return textEl.parentElement || textEl;
+  }
+
+  function catalogPartsItemHasActiveMarker(item, wrapper){
+    var node = item;
+    while (node && node !== wrapper) {
+      if (node.matches && node.matches(TC_CATALOG_PARTS_ACTIVE_SELECTOR)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function setCatalogPartsColorState(item, textEl, isActive, label){
+    var color = isActive ? '#fff' : '#8f8f8f';
+    item.classList.add('tc-catalog-filter-btn');
+    item.classList.toggle('tc-catalog-part-active', !!isActive);
+    item.dataset.tcCatalogFilterLabel = label;
+    item.style.setProperty('color', color, 'important');
+    item.style.setProperty('opacity', '1', 'important');
+
+    item.querySelectorAll('*').forEach(function(inner){
+      inner.style.setProperty('color', 'inherit', 'important');
+      inner.style.setProperty('opacity', '1', 'important');
+    });
+
+    textEl.classList.add('tc-catalog-filter-text');
+    textEl.style.setProperty('color', color, 'important');
+    textEl.style.setProperty('opacity', '1', 'important');
+    if (label === 'все' && normalizePartLabel(textEl.textContent) === 'все') {
+      textEl.textContent = 'ВСЕ';
+    }
+  }
+
+  function applyCatalogPartsColorHardfixV2(root, forcedActiveLabel){
+    var scope = root && root.querySelectorAll ? root : document;
+    var wrappers = [];
+    var detectedActive = normalizeCatalogPartsColorLabel(forcedActiveLabel || '');
+    var recentClickActive = tcCatalogFilterActiveLabel && Date.now() - tcCatalogFilterActiveAt < 5000;
+    var items = [];
+
+    if (scope.matches && scope.matches(TC_CATALOG_PARTS_WRAPPER_SELECTOR)) wrappers.push(scope);
+    scope.querySelectorAll(TC_CATALOG_PARTS_WRAPPER_SELECTOR).forEach(function(wrapper){
+      if (wrappers.indexOf(wrapper) === -1) wrappers.push(wrapper);
+    });
+
+    wrappers.forEach(function(wrapper){
+      wrapper.querySelectorAll(TC_CATALOG_PARTS_TEXT_SELECTOR).forEach(function(textEl){
+        var label = normalizeCatalogPartsColorLabel(textEl.textContent);
+        if (!label || isExcludedFilterNode(textEl)) return;
+
+        var item = getCatalogPartsItem(textEl, wrapper);
+        if (!item || isExcludedFilterNode(item)) return;
+
+        items.push({ item: item, textEl: textEl, label: label, wrapper: wrapper });
+        item.classList.add('tc-catalog-filter-btn');
+        textEl.classList.add('tc-catalog-filter-text');
+        item.dataset.tcCatalogFilterLabel = label;
+        if (!recentClickActive && !detectedActive && catalogPartsItemHasActiveMarker(item, wrapper)) detectedActive = label;
+      });
+    });
+
+    if (!detectedActive && tcCatalogFilterActiveLabel) detectedActive = normalizeCatalogPartsColorLabel(tcCatalogFilterActiveLabel);
+    if (!detectedActive) detectedActive = 'все';
+    tcCatalogFilterActiveLabel = detectedActive;
+
+    items.forEach(function(part){
+      setCatalogPartsColorState(part.item, part.textEl, part.label === detectedActive, part.label);
+    });
+  }
+
+  function runCatalogPartsColorHardfixV2(root, activeLabel){
+    applyCatalogPartsColorHardfixV2(root || document, activeLabel);
+  }
+
+  function scheduleCatalogPartsColorHardfixV2(root, activeLabel){
+    runCatalogPartsColorHardfixV2(root || document, activeLabel);
+    requestAnimationFrame(function(){ runCatalogPartsColorHardfixV2(root || document, activeLabel); });
+    [50, 150, 300, 800, 1600].forEach(function(delay){
+      setTimeout(function(){ runCatalogPartsColorHardfixV2(root || document, activeLabel); }, delay);
+    });
+  }
+
+  function handleCatalogPartsColorClick(event){
+    var target = event.target;
+    if (!target || !target.closest) return;
+    var wrapper = getCatalogPartsWrapper(target);
+    if (!wrapper) return;
+    var textEl = target.closest(TC_CATALOG_PARTS_TEXT_SELECTOR);
+    if (!textEl && target.querySelector) textEl = target.querySelector(TC_CATALOG_PARTS_TEXT_SELECTOR);
+    if (!textEl) textEl = wrapper.querySelector(TC_CATALOG_PARTS_TEXT_SELECTOR);
+    var item = textEl ? getCatalogPartsItem(textEl, wrapper) : target.closest(TC_CATALOG_PARTS_ITEM_SELECTOR);
+    var label = normalizeCatalogPartsColorLabel((textEl && textEl.textContent) || (item && item.textContent) || target.textContent);
+    if (!label) return;
+    tcCatalogFilterActiveLabel = label;
+    tcCatalogFilterActiveAt = Date.now();
+    if (wrapper.dataset) wrapper.dataset.tcActivePart = label;
+    scheduleCatalogPartsColorHardfixV2(wrapper, label);
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){ scheduleCatalogPartsColorHardfixV2(document); });
+  window.addEventListener('load', function(){ scheduleCatalogPartsColorHardfixV2(document); });
+  window.addEventListener('hashchange', function(){ scheduleCatalogPartsColorHardfixV2(document); });
+  window.addEventListener('popstate', function(){ scheduleCatalogPartsColorHardfixV2(document); });
+  document.addEventListener('pointerdown', handleCatalogPartsColorClick, true);
+  document.addEventListener('click', handleCatalogPartsColorClick, true);
+
+  var catalogPartsColorObserver = new MutationObserver(function(){
+    scheduleCatalogPartsColorHardfixV2(document);
+  });
+  catalogPartsColorObserver.observe(document.documentElement, { childList: true, subtree: true });
+
+  scheduleCatalogPartsColorHardfixV2(document);
+
   function applyPartsState(record, activeLabel){
     var storedActive = normalizePartLabel(record.dataset.tcActivePart || '') || tcCatalogFilterActiveLabel;
     var headerActive = normalizePartLabel(activeLabel);
@@ -6100,6 +6288,7 @@ function setupDesktopAura() {
       window.__TC_NORMALIZE_LOAD_MORE_BUTTONS__(document);
     }
     normalizeCatalogFilterButtons(document);
+    runCatalogPartsColorHardfixV2(document);
 
     var records = getCatalogRecords(scope);
     if (productMode) {
@@ -6196,6 +6385,7 @@ function setupDesktopAura() {
       window.__TC_NORMALIZE_LOAD_MORE_BUTTONS__(document);
     }
     normalizeCatalogFilterButtons(document);
+    runCatalogPartsColorHardfixV2(document);
   }
 
 
@@ -6413,17 +6603,17 @@ function setupDesktopAura() {
   function scheduleClean(){
     ensureMenuEyeLogo();
     initMenuEyeParallax();
-    hideLegacyTildaHeader();
+    safeHideLegacyTildaHeader();
     syncSiteHeaderReveal();
     cleanStoreUi(document);
     requestAnimationFrame(function(){
-      hideLegacyTildaHeader();
+      safeHideLegacyTildaHeader();
       syncSiteHeaderReveal();
       cleanStoreUi(document);
     });
     [100, 300, 800, 1600].forEach(function(delay){
       setTimeout(function(){
-        hideLegacyTildaHeader();
+        safeHideLegacyTildaHeader();
         syncSiteHeaderReveal();
         cleanStoreUi(document);
       }, delay);
@@ -6456,7 +6646,7 @@ function setupDesktopAura() {
 
   var observer = new MutationObserver(function(){
     ensureMenuEyeLogo();
-    hideLegacyTildaHeader();
+    safeHideLegacyTildaHeader();
     syncSiteHeaderReveal();
     cleanStoreUi(document);
   });

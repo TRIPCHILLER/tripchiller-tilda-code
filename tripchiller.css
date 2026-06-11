@@ -3598,3 +3598,37 @@ body.tc-product-page-active .tc-menu-eye-logo {
   transform: translateY(2px) scale(.97) !important;
   filter: brightness(.92) !important;
 }
+
+/* Catalog parts color hardfix V2: target real Tilda filter text spans. */
+#allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn,
+#allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn *,
+#allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn,
+#allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn *,
+#allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-text,
+#allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-text,
+#allrecords .t-catalog__parts-switch-wrapper .t-catalog__parts-text-title,
+#allrecords .t-store__parts-switch-wrapper .t-catalog__parts-text-title {
+  color: #8f8f8f !important;
+  opacity: 1 !important;
+  text-transform: uppercase !important;
+}
+
+#allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn.tc-catalog-part-active,
+#allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn.tc-catalog-part-active *,
+#allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn.tc-catalog-part-active,
+#allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn.tc-catalog-part-active *,
+#allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn.tc-catalog-part-active .tc-catalog-filter-text,
+#allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn.tc-catalog-part-active .tc-catalog-filter-text {
+  color: #fff !important;
+  opacity: 1 !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn:not(.tc-catalog-part-active):hover,
+  #allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn:not(.tc-catalog-part-active):hover *,
+  #allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn:not(.tc-catalog-part-active):hover,
+  #allrecords .t-store__parts-switch-wrapper .tc-catalog-filter-btn:not(.tc-catalog-part-active):hover * {
+    color: #fff !important;
+    opacity: 1 !important;
+  }
+}
