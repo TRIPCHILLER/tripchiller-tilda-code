@@ -4789,142 +4789,79 @@ function setupDesktopAura() {
 (function () {
   "use strict";
 
-  if (window.__TC_PRODUCT_TRANSITION_CURTAIN_V1__) return;
-  window.__TC_PRODUCT_TRANSITION_CURTAIN_V1__ = true;
+  if (window.__TC_PRODUCT_TRANSITION_VEIL_V1__) return;
+  window.__TC_PRODUCT_TRANSITION_VEIL_V1__ = true;
 
-  var CURTAIN_KEY = 'tc:productTransitionCurtain:v1';
-  var CURTAIN_TTL_MS = 20 * 1000;
+  var VEIL_CLASS = 'tc-product-transition-veil';
+  var VEIL_LEAVING_CLASS = 'tc-product-transition-veil-leaving';
   var hideTimer = 0;
+  var failSafeTimer = 0;
+  var lastReason = '';
 
-  function now() {
-    return Date.now();
-  }
-
-  function isProductRoute() {
-    var path = location.pathname || '';
-    return /^\/product\//.test(path) || /^\/tproduct\//.test(path);
-  }
-
-  function writeCurtainState(reason) {
-    try {
-      sessionStorage.setItem(CURTAIN_KEY, JSON.stringify({
-        ts: now(),
-        expiresAt: now() + CURTAIN_TTL_MS,
-        reason: reason || '',
-        path: location.pathname || ''
-      }));
-    } catch (_) {}
-  }
-
-  function readCurtainState() {
-    var raw = '';
-    try { raw = sessionStorage.getItem(CURTAIN_KEY) || ''; } catch (_) {}
-    if (!raw) return null;
-
-    try { return JSON.parse(raw); } catch (_) {
-      return null;
-    }
-  }
-
-  function clearCurtainState() {
-    try { sessionStorage.removeItem(CURTAIN_KEY); } catch (_) {}
-  }
-
-  function showProductTransitionCurtain(reason) {
+  function clearVeilTimers() {
     clearTimeout(hideTimer);
-
-    document.documentElement.classList.remove('tc-product-transition-curtain-leaving');
-    document.documentElement.classList.add('tc-product-transition-curtain');
-
-    if (document.body) {
-      document.body.classList.remove('tc-product-transition-curtain-leaving');
-      document.body.classList.add('tc-product-transition-curtain');
-    }
-
-    writeCurtainState(reason || '');
+    clearTimeout(failSafeTimer);
+    hideTimer = 0;
+    failSafeTimer = 0;
   }
 
-  function hideProductTransitionCurtain(delay) {
+  function removeVeilClasses() {
+    document.documentElement.classList.remove(VEIL_CLASS);
+    document.documentElement.classList.remove(VEIL_LEAVING_CLASS);
+    document.documentElement.removeAttribute('data-tc-product-transition-veil');
+  }
+
+  function getAutoHideDelay(reason) {
+    if (reason === 'exit' || reason === 'fallback-home' || reason === 'return') return 1200;
+    if (reason === 'opening') return 820;
+    return 900;
+  }
+
+  function showProductTransitionVeil(reason) {
+    clearVeilTimers();
+
+    lastReason = reason || '';
+    document.documentElement.classList.remove(VEIL_LEAVING_CLASS);
+    document.documentElement.classList.add(VEIL_CLASS);
+    document.documentElement.setAttribute('data-tc-product-transition-veil', lastReason || 'transition');
+
+    hideTimer = setTimeout(function () {
+      hideProductTransitionVeil(0);
+    }, getAutoHideDelay(lastReason));
+
+    failSafeTimer = setTimeout(function () {
+      removeVeilClasses();
+    }, 1800);
+  }
+
+  function hideProductTransitionVeil(delay) {
     clearTimeout(hideTimer);
 
     hideTimer = setTimeout(function () {
-      document.documentElement.classList.add('tc-product-transition-curtain-leaving');
-      if (document.body) document.body.classList.add('tc-product-transition-curtain-leaving');
+      if (!document.documentElement.classList.contains(VEIL_CLASS)) {
+        clearTimeout(failSafeTimer);
+        return;
+      }
+
+      document.documentElement.classList.add(VEIL_LEAVING_CLASS);
 
       setTimeout(function () {
-        document.documentElement.classList.remove('tc-product-transition-curtain');
-        document.documentElement.classList.remove('tc-product-transition-curtain-leaving');
-
-        if (document.body) {
-          document.body.classList.remove('tc-product-transition-curtain');
-          document.body.classList.remove('tc-product-transition-curtain-leaving');
-        }
-
-        clearCurtainState();
-      }, 460);
+        removeVeilClasses();
+        clearTimeout(failSafeTimer);
+      }, 440);
     }, Number(delay || 0));
   }
 
-  function shouldResumeCurtain() {
-    var state = readCurtainState();
-    if (!state) return false;
+  window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__ = showProductTransitionVeil;
+  window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__ = hideProductTransitionVeil;
 
-    var expiresAt = Number(state.expiresAt || 0);
-    if (expiresAt && now() > expiresAt) {
-      clearCurtainState();
-      return false;
-    }
-
-    return true;
-  }
-
-  function scheduleStableHide(reason) {
-    var delay = isProductRoute() ? 700 : 900;
-
-    if (reason === 'return') delay = 1100;
-    if (reason === 'opening') delay = 800;
-    if (reason === 'manual') delay = 800;
-
-    hideProductTransitionCurtain(delay);
-  }
-
-  function resumeCurtainIfNeeded(reason) {
-    if (!shouldResumeCurtain()) return;
-
-    showProductTransitionCurtain(reason || 'resume');
-    scheduleStableHide(reason || 'resume');
-  }
-
-  window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__ = showProductTransitionCurtain;
-  window.__TC_HIDE_PRODUCT_TRANSITION_CURTAIN__ = hideProductTransitionCurtain;
-
-  window.__TC_PRODUCT_TRANSITION_CURTAIN_STATE__ = function () {
+  window.__TC_PRODUCT_TRANSITION_VEIL_STATE__ = function () {
     return {
       className: document.documentElement.className,
-      state: readCurtainState(),
-      isProductRoute: isProductRoute()
+      reason: lastReason,
+      visible: document.documentElement.classList.contains(VEIL_CLASS)
     };
   };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      resumeCurtainIfNeeded('dom-ready');
-    });
-  } else {
-    resumeCurtainIfNeeded('dom-ready');
-  }
-
-  window.addEventListener('pageshow', function () {
-    resumeCurtainIfNeeded('return');
-  });
-
-  window.addEventListener('popstate', function () {
-    resumeCurtainIfNeeded('return');
-  });
-
-  window.addEventListener('load', function () {
-    resumeCurtainIfNeeded('load');
-  });
 })();
 
 (function () {
@@ -5041,8 +4978,16 @@ function setupDesktopAura() {
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     } catch (_) {}
 
-    if (window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__) {
-      window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__('opening');
+    if (window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__) {
+      var showOpeningVeil = function () {
+        window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__('opening');
+      };
+
+      if (window.requestAnimationFrame) {
+        window.requestAnimationFrame(showOpeningVeil);
+      } else {
+        setTimeout(showOpeningVeil, 0);
+      }
     }
 
     blurProductSourceFocus();
@@ -5240,6 +5185,10 @@ function setupDesktopAura() {
     document.documentElement.classList.add('tc-product-return-restoring-scroll');
     if (document.body) document.body.classList.add('tc-product-return-restoring-scroll');
 
+    if (window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__) {
+      window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__('return');
+    }
+
     try {
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     } catch (_) {}
@@ -5273,6 +5222,9 @@ function setupDesktopAura() {
       var latestState = readState();
       if (!shouldRestore(latestState)) {
         endRestoreUi(stateKey);
+        if (window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__) {
+          window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__(0);
+        }
         return;
       }
 
@@ -5310,16 +5262,16 @@ function setupDesktopAura() {
         if (successCount >= 2) {
           endRestoreUi(stateKey);
           clearState();
-          if (window.__TC_HIDE_PRODUCT_TRANSITION_CURTAIN__) {
-            window.__TC_HIDE_PRODUCT_TRANSITION_CURTAIN__(180);
+          if (window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__) {
+            window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__(180);
           }
           return;
         }
 
         if (completedChecks >= delays.length) {
           endRestoreUi(stateKey);
-          if (window.__TC_HIDE_PRODUCT_TRANSITION_CURTAIN__) {
-            window.__TC_HIDE_PRODUCT_TRANSITION_CURTAIN__(0);
+          if (window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__) {
+            window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__(0);
           }
         }
       }, 120);
@@ -5416,8 +5368,8 @@ function setupDesktopAura() {
   }
 
   function fallbackToHome() {
-    if (window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__) {
-      window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__('fallback-home');
+    if (window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__) {
+      window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__('fallback-home');
     }
 
     window.location.href = '/';
@@ -5426,8 +5378,8 @@ function setupDesktopAura() {
   function goBackToPreviousPage() {
     if (canUseHistoryBack()) {
       try {
-        if (window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__) {
-          window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__('exit');
+        if (window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__) {
+          window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__('exit');
         }
 
         history.back();
