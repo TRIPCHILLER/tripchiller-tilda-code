@@ -4797,6 +4797,11 @@ function setupDesktopAura() {
   var BACKUP_RETURN_KEY = 'tc:productReturnScrollBackup:v1';
   var OPENED_KEY = 'tc:productOpenedFromSite:v1';
   var LEGACY_USER_PHOTOS_RETURN_KEY = 'tc:userPhotosReturn:v1';
+  var LOAD_MORE_STATE_PREFIX = 'tc:catalogLoadMore:v1:';
+  var LOAD_MORE_SELECTOR = '#allrecords button.js-catalog-load-more-btn, #allrecords .t-btn.js-catalog-load-more-btn';
+  var CATALOG_CARD_SELECTOR = '#allrecords .t-store__card, #allrecords .js-product, #allrecords .t-catalog__product';
+  var PRODUCT_LINK_SELECTOR = 'a[href*="/tproduct/"], a[href*="#!/tproduct/"], .js-product-url[href]';
+  var LOAD_MORE_TTL_MS = 6 * 60 * 60 * 1000;
   var RETURN_TTL_MS = 5 * 60 * 1000;
   var RESTORE_CLOSE_ENOUGH_PX = 80;
   var RETURN_CARD_SUPPRESS_CLASS = 'tc-product-return-suppress-cards';
@@ -4808,6 +4813,7 @@ function setupDesktopAura() {
   var activeRestoreToken = 0;
   var returnCardFailSafeTimer = 0;
   var returnCardRevealTimer = 0;
+  var suppressLoadMoreRememberUntil = 0;
 
   function updateReturnCardClass(className, shouldAdd) {
     document.documentElement.classList[shouldAdd ? 'add' : 'remove'](className);
@@ -4859,6 +4865,250 @@ function setupDesktopAura() {
       0;
   }
 
+  function isElementVisible(el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    var style = getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || 1) === 0) return false;
+    var rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }
+
+  function getActiveCatalogFilterKey() {
+    var active = document.querySelector(
+      '#allrecords .tc-safe-filter-item.tc-safe-filter-active, ' +
+      '#allrecords .t-catalog__parts-switch-btn.t-active, ' +
+      '#allrecords .t-store__parts-switch-btn.t-active, ' +
+      '#allrecords .js-catalog-parts-switcher.t-active, ' +
+      '#allrecords [aria-current="true"], ' +
+      '#allrecords [aria-selected="true"]'
+    );
+
+    return active ? String(active.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase() : '';
+  }
+
+  function getLoadMoreStorageKey(pageKey) {
+    return LOAD_MORE_STATE_PREFIX + (pageKey || getPageKey());
+  }
+
+  function readLoadMoreState(pageKey) {
+    var raw = '';
+    var state = null;
+
+    try {
+      raw = sessionStorage.getItem(getLoadMoreStorageKey(pageKey)) || '';
+    } catch (_) {
+      raw = '';
+    }
+
+    if (!raw) return null;
+
+    try {
+      state = JSON.parse(raw);
+    } catch (_) {
+      return null;
+    }
+
+    if (!state || state.from !== 'catalog-load-more') return null;
+    if (Number(state.expiresAt || 0) && Date.now() > Number(state.expiresAt || 0)) {
+      try { sessionStorage.removeItem(getLoadMoreStorageKey(pageKey)); } catch (_) {}
+      return null;
+    }
+
+    var currentFilterKey = getActiveCatalogFilterKey();
+    if (state.filterKey && currentFilterKey && state.filterKey !== currentFilterKey) return null;
+    return state;
+  }
+
+  function countVisibleCatalogCards() {
+    var seen = [];
+    var count = 0;
+
+    document.querySelectorAll(CATALOG_CARD_SELECTOR).forEach(function (card) {
+      if (seen.indexOf(card) !== -1 || !isElementVisible(card)) return;
+      seen.push(card);
+      count += 1;
+    });
+
+    return count;
+  }
+
+  function writeLoadMoreState(nextState) {
+    if (!nextState || isProductRoute()) return;
+
+    var now = Date.now();
+    var pageKey = nextState.pageKey || getPageKey();
+    var previous = readLoadMoreState(pageKey) || {};
+    var state = {
+      from: 'catalog-load-more',
+      ts: previous.ts || now,
+      updatedAt: now,
+      expiresAt: now + LOAD_MORE_TTL_MS,
+      pageKey: pageKey,
+      pathname: location.pathname,
+      search: location.search,
+      hash: location.hash,
+      filterKey: nextState.filterKey || getActiveCatalogFilterKey(),
+      clickCount: Math.max(Number(previous.clickCount || 0), Number(nextState.clickCount || 0)),
+      maxVisibleCards: Math.max(Number(previous.maxVisibleCards || 0), Number(nextState.maxVisibleCards || 0), countVisibleCatalogCards())
+    };
+
+    try {
+      sessionStorage.setItem(getLoadMoreStorageKey(pageKey), JSON.stringify(state));
+    } catch (_) {}
+  }
+
+  function rememberLoadMoreClick() {
+    if (isProductRoute()) return;
+
+    var pageKey = getPageKey();
+    var previous = readLoadMoreState(pageKey) || {};
+    var clickCount = Number(previous.clickCount || 0) + 1;
+
+    writeLoadMoreState({
+      pageKey: pageKey,
+      filterKey: getActiveCatalogFilterKey(),
+      clickCount: clickCount,
+      maxVisibleCards: countVisibleCatalogCards()
+    });
+
+    [220, 600, 1100].forEach(function (delay) {
+      setTimeout(function () {
+        writeLoadMoreState({
+          pageKey: pageKey,
+          filterKey: getActiveCatalogFilterKey(),
+          clickCount: clickCount,
+          maxVisibleCards: countVisibleCatalogCards()
+        });
+      }, delay);
+    });
+  }
+
+  function resetLoadMoreStateForCurrentPage() {
+    try {
+      sessionStorage.removeItem(getLoadMoreStorageKey(getPageKey()));
+    } catch (_) {}
+  }
+
+  function getVisibleLoadMoreButton() {
+    var buttons = document.querySelectorAll(LOAD_MORE_SELECTOR);
+    for (var i = 0; i < buttons.length; i += 1) {
+      if (!buttons[i].disabled && isElementVisible(buttons[i])) return buttons[i];
+    }
+    return null;
+  }
+
+  function findProductElementByHref(productHref) {
+    var targetHref = normalizeHref(productHref);
+    if (!targetHref) return null;
+
+    var links = document.querySelectorAll(PRODUCT_LINK_SELECTOR);
+    for (var i = 0; i < links.length; i += 1) {
+      var href = links[i].getAttribute('href') || '';
+      if (normalizeHref(href) === targetHref) {
+        return links[i].closest(CATALOG_CARD_SELECTOR) || links[i];
+      }
+    }
+
+    return null;
+  }
+
+  function collectReturnCatalogSnapshot(productHref) {
+    var card = findProductElementByHref(productHref);
+    var rect = card && card.getBoundingClientRect ? card.getBoundingClientRect() : null;
+    var loadMoreState = readLoadMoreState(getPageKey());
+
+    return {
+      sourceCardViewportTop: rect ? rect.top : null,
+      visibleCatalogCardCount: countVisibleCatalogCards(),
+      loadMoreState: loadMoreState ? {
+        clickCount: Number(loadMoreState.clickCount || 0),
+        maxVisibleCards: Number(loadMoreState.maxVisibleCards || 0),
+        filterKey: loadMoreState.filterKey || ''
+      } : null
+    };
+  }
+
+  function clickLoadMoreForRestore() {
+    var button = getVisibleLoadMoreButton();
+    if (!button) return false;
+
+    suppressLoadMoreRememberUntil = Date.now() + 500;
+    button.click();
+
+    setTimeout(function () {
+      writeLoadMoreState({
+        pageKey: getPageKey(),
+        filterKey: getActiveCatalogFilterKey(),
+        clickCount: Number((readLoadMoreState(getPageKey()) || {}).clickCount || 0),
+        maxVisibleCards: countVisibleCatalogCards()
+      });
+    }, 320);
+
+    return true;
+  }
+
+  function ensureCatalogExpandedForReturn(state, done) {
+    var productHref = state && state.productHref;
+    var desiredVisibleCount = Math.max(
+      Number(state && state.visibleCatalogCardCount || 0),
+      Number(state && state.loadMoreState && state.loadMoreState.maxVisibleCards || 0),
+      Number(readLoadMoreState(state && state.pageKey) && readLoadMoreState(state && state.pageKey).maxVisibleCards || 0)
+    );
+    var savedClicks = Math.max(
+      Number(state && state.loadMoreState && state.loadMoreState.clickCount || 0),
+      Number(readLoadMoreState(state && state.pageKey) && readLoadMoreState(state && state.pageKey).clickCount || 0)
+    );
+    var maxAttempts = Math.min(12, Math.max(8, savedClicks + 3));
+    var attempts = 0;
+
+    function finish() {
+      done();
+    }
+
+    function step() {
+      if (productHref && findProductElementByHref(productHref)) {
+        finish();
+        return;
+      }
+
+      if (desiredVisibleCount > 0 && countVisibleCatalogCards() >= desiredVisibleCount) {
+        finish();
+        return;
+      }
+
+      if (attempts >= maxAttempts || !clickLoadMoreForRestore()) {
+        finish();
+        return;
+      }
+
+      attempts += 1;
+      setTimeout(step, 240);
+    }
+
+    step();
+  }
+
+  function autoExpandCatalogFromSavedState() {
+    if (isProductRoute()) return;
+
+    var state = readLoadMoreState(getPageKey());
+    if (!state) return;
+
+    var desiredVisibleCount = Number(state.maxVisibleCards || 0);
+    var maxAttempts = Math.min(12, Math.max(1, Number(state.clickCount || 0) + 2));
+    var attempts = 0;
+
+    function step() {
+      if (desiredVisibleCount > 0 && countVisibleCatalogCards() >= desiredVisibleCount) return;
+      if (attempts >= maxAttempts || !clickLoadMoreForRestore()) return;
+
+      attempts += 1;
+      setTimeout(step, 260);
+    }
+
+    step();
+  }
+
   function getMaxScrollY() {
     return Math.max(
       0,
@@ -4907,6 +5157,7 @@ function setupDesktopAura() {
     if (!productHref || !isTProductHref(productHref)) return;
 
     var now = Date.now();
+    var snapshot = collectReturnCatalogSnapshot(productHref);
     var state = {
       ts: now,
       expiresAt: now + RETURN_TTL_MS,
@@ -4917,7 +5168,10 @@ function setupDesktopAura() {
       pathname: location.pathname,
       search: location.search,
       hash: location.hash,
-      scrollY: getScrollY()
+      scrollY: getScrollY(),
+      sourceCardViewportTop: snapshot.sourceCardViewportTop,
+      visibleCatalogCardCount: snapshot.visibleCatalogCardCount,
+      loadMoreState: snapshot.loadMoreState
     };
 
     try {
@@ -4929,7 +5183,8 @@ function setupDesktopAura() {
         from: source || '',
         pageKey: getPageKey(),
         scrollY: getScrollY(),
-        productHref: normalizeHref(productHref)
+        productHref: normalizeHref(productHref),
+        visibleCatalogCardCount: snapshot.visibleCatalogCardCount
       }));
       sessionStorage.removeItem(LEGACY_USER_PHOTOS_RETURN_KEY);
     } catch (_) {}
@@ -5163,6 +5418,18 @@ function setupDesktopAura() {
       30000
     ];
 
+    function getCurrentRestoreTarget(latestState) {
+      var card = latestState && latestState.productHref ? findProductElementByHref(latestState.productHref) : null;
+      var hasSavedTop = latestState && latestState.sourceCardViewportTop !== null && latestState.sourceCardViewportTop !== undefined;
+      var savedTop = Number(latestState && latestState.sourceCardViewportTop);
+
+      if (card && card.getBoundingClientRect && hasSavedTop && Number.isFinite(savedTop)) {
+        return Math.max(0, getScrollY() + card.getBoundingClientRect().top - savedTop);
+      }
+
+      return targetY;
+    }
+
     function attemptRestore() {
       if (token !== activeRestoreToken) return;
 
@@ -5175,8 +5442,9 @@ function setupDesktopAura() {
       attempts += 1;
       blurProductSourceFocus();
 
+      var currentTargetY = getCurrentRestoreTarget(latestState);
       var maxY = getMaxScrollY();
-      var y = maxY > 0 ? Math.min(targetY, maxY) : targetY;
+      var y = maxY > 0 ? Math.min(currentTargetY, maxY) : currentTargetY;
 
       window.scrollTo(0, y);
 
@@ -5187,7 +5455,7 @@ function setupDesktopAura() {
 
         var currentY = getScrollY();
 
-        if (isCloseEnough(currentY, targetY) || (maxY >= targetY - RESTORE_CLOSE_ENOUGH_PX && isCloseEnough(currentY, y))) {
+        if (isCloseEnough(currentY, currentTargetY) || (maxY >= currentTargetY - RESTORE_CLOSE_ENOUGH_PX && isCloseEnough(currentY, y))) {
           successCount += 1;
         } else {
           successCount = 0;
@@ -5195,7 +5463,8 @@ function setupDesktopAura() {
 
         window.__TC_PRODUCT_RETURN_SCROLL_LAST_ATTEMPT__ = {
           attempts: attempts,
-          targetY: targetY,
+          targetY: currentTargetY,
+          savedScrollY: targetY,
           appliedY: y,
           currentY: currentY,
           maxY: maxY,
@@ -5215,22 +5484,49 @@ function setupDesktopAura() {
       }, 120);
     }
 
-    delays.forEach(function (delay) {
-      setTimeout(attemptRestore, delay);
+    ensureCatalogExpandedForReturn(state, function () {
+      if (token !== activeRestoreToken) return;
+
+      delays.forEach(function (delay) {
+        setTimeout(attemptRestore, delay);
+      });
     });
   }
 
   document.addEventListener('pointerdown', saveFromEvent, true);
   document.addEventListener('click', saveFromEvent, true);
 
+  document.addEventListener('click', function (e) {
+    if (!e || !e.target || !e.target.closest) return;
+
+    if (e.target.closest(LOAD_MORE_SELECTOR)) {
+      if (Date.now() > suppressLoadMoreRememberUntil) rememberLoadMoreClick();
+      return;
+    }
+
+    if (e.target.closest('#allrecords .t-catalog__parts-switch-wrapper, #allrecords .t-store__parts-switch-wrapper')) {
+      resetLoadMoreStateForCurrentPage();
+    }
+  }, true);
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', restoreReturnScroll);
+    document.addEventListener('DOMContentLoaded', function () {
+      autoExpandCatalogFromSavedState();
+      restoreReturnScroll();
+    });
   } else {
+    autoExpandCatalogFromSavedState();
     restoreReturnScroll();
   }
 
-  window.addEventListener('load', restoreReturnScroll);
-  window.addEventListener('pageshow', restoreReturnScroll);
+  window.addEventListener('load', function () {
+    autoExpandCatalogFromSavedState();
+    restoreReturnScroll();
+  });
+  window.addEventListener('pageshow', function () {
+    autoExpandCatalogFromSavedState();
+    restoreReturnScroll();
+  });
   window.addEventListener('popstate', restoreReturnScroll);
   window.addEventListener('hashchange', restoreReturnScroll);
 
@@ -5376,10 +5672,12 @@ function setupDesktopAura() {
 
   document.addEventListener('keydown', function (e) {
     if (!isProductRoute()) return;
-    if (!e || e.key !== 'Escape') return;
+    if (!e || (e.key !== 'Escape' && e.key !== 'Esc')) return;
 
-    var tag = document.activeElement && document.activeElement.tagName;
+    var active = document.activeElement;
+    var tag = active && active.tagName;
     if (tag && /^(INPUT|TEXTAREA|SELECT)$/.test(tag)) return;
+    if (active && active.closest && active.closest('[contenteditable="true"]')) return;
 
     e.preventDefault();
     e.stopPropagation();
