@@ -344,7 +344,11 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
     justify-content: center;
     gap: 28px;
     min-height: 100vh;
-    padding: 80px 24px 48px;
+    min-height: 100svh;
+    height: 100dvh;
+    padding: 0 24px;
+    box-sizing: border-box;
+    overflow-x: hidden;
     background: #000;
     opacity: 0;
     visibility: hidden;
@@ -3428,6 +3432,46 @@ html.tc-page-contacts .tw-type-1a br {
 #allrecords .t-store__parts-switch-btn[data-storepart-title="FRUITS"],
 #allrecords .t-store__parts-switch-btn[data-part-title="FRUITS"] {
   display: none !important;
+}
+
+
+@media (max-width: 959px) {
+  #allrecords .tc-catalog-record .t-store__parts-switch-wrapper,
+  #allrecords .tc-catalog-record .t-store__parts-switch,
+  #allrecords .tc-catalog-record .t-catalog__parts,
+  #allrecords .tc-catalog-record .t-catalog__parts-wrapper,
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-wrapper,
+  #rec2312983111 .t-store__parts-switch-wrapper,
+  #rec2312983111 .t-store__parts-switch,
+  #rec2312983111 .t-catalog__parts,
+  #rec2312983111 .t-catalog__parts-wrapper,
+  #rec2312983111 .t-catalog__parts-switch-wrapper {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    gap: 8px !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base,
+  #rec2312983111 .t-catalog__parts-switch-btn,
+  #rec2312983111 .t-store__parts-switch-btn,
+  #rec2312983111 .js-catalog-parts-switcher,
+  #rec2312983111 .t-catalog__parts-button-base {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+  }
 }
 
 /* 3) скрываем SKU/Артикул, но не удаляем из данных */
