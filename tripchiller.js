@@ -4789,6 +4789,147 @@ function setupDesktopAura() {
 (function () {
   "use strict";
 
+  if (window.__TC_PRODUCT_TRANSITION_CURTAIN_V1__) return;
+  window.__TC_PRODUCT_TRANSITION_CURTAIN_V1__ = true;
+
+  var CURTAIN_KEY = 'tc:productTransitionCurtain:v1';
+  var CURTAIN_TTL_MS = 20 * 1000;
+  var hideTimer = 0;
+
+  function now() {
+    return Date.now();
+  }
+
+  function isProductRoute() {
+    var path = location.pathname || '';
+    return /^\/product\//.test(path) || /^\/tproduct\//.test(path);
+  }
+
+  function writeCurtainState(reason) {
+    try {
+      sessionStorage.setItem(CURTAIN_KEY, JSON.stringify({
+        ts: now(),
+        expiresAt: now() + CURTAIN_TTL_MS,
+        reason: reason || '',
+        path: location.pathname || ''
+      }));
+    } catch (_) {}
+  }
+
+  function readCurtainState() {
+    var raw = '';
+    try { raw = sessionStorage.getItem(CURTAIN_KEY) || ''; } catch (_) {}
+    if (!raw) return null;
+
+    try { return JSON.parse(raw); } catch (_) {
+      return null;
+    }
+  }
+
+  function clearCurtainState() {
+    try { sessionStorage.removeItem(CURTAIN_KEY); } catch (_) {}
+  }
+
+  function showProductTransitionCurtain(reason) {
+    clearTimeout(hideTimer);
+
+    document.documentElement.classList.remove('tc-product-transition-curtain-leaving');
+    document.documentElement.classList.add('tc-product-transition-curtain');
+
+    if (document.body) {
+      document.body.classList.remove('tc-product-transition-curtain-leaving');
+      document.body.classList.add('tc-product-transition-curtain');
+    }
+
+    writeCurtainState(reason || '');
+  }
+
+  function hideProductTransitionCurtain(delay) {
+    clearTimeout(hideTimer);
+
+    hideTimer = setTimeout(function () {
+      document.documentElement.classList.add('tc-product-transition-curtain-leaving');
+      if (document.body) document.body.classList.add('tc-product-transition-curtain-leaving');
+
+      setTimeout(function () {
+        document.documentElement.classList.remove('tc-product-transition-curtain');
+        document.documentElement.classList.remove('tc-product-transition-curtain-leaving');
+
+        if (document.body) {
+          document.body.classList.remove('tc-product-transition-curtain');
+          document.body.classList.remove('tc-product-transition-curtain-leaving');
+        }
+
+        clearCurtainState();
+      }, 460);
+    }, Number(delay || 0));
+  }
+
+  function shouldResumeCurtain() {
+    var state = readCurtainState();
+    if (!state) return false;
+
+    var expiresAt = Number(state.expiresAt || 0);
+    if (expiresAt && now() > expiresAt) {
+      clearCurtainState();
+      return false;
+    }
+
+    return true;
+  }
+
+  function scheduleStableHide(reason) {
+    var delay = isProductRoute() ? 700 : 900;
+
+    if (reason === 'return') delay = 1100;
+    if (reason === 'opening') delay = 800;
+    if (reason === 'manual') delay = 800;
+
+    hideProductTransitionCurtain(delay);
+  }
+
+  function resumeCurtainIfNeeded(reason) {
+    if (!shouldResumeCurtain()) return;
+
+    showProductTransitionCurtain(reason || 'resume');
+    scheduleStableHide(reason || 'resume');
+  }
+
+  window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__ = showProductTransitionCurtain;
+  window.__TC_HIDE_PRODUCT_TRANSITION_CURTAIN__ = hideProductTransitionCurtain;
+
+  window.__TC_PRODUCT_TRANSITION_CURTAIN_STATE__ = function () {
+    return {
+      className: document.documentElement.className,
+      state: readCurtainState(),
+      isProductRoute: isProductRoute()
+    };
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      resumeCurtainIfNeeded('dom-ready');
+    });
+  } else {
+    resumeCurtainIfNeeded('dom-ready');
+  }
+
+  window.addEventListener('pageshow', function () {
+    resumeCurtainIfNeeded('return');
+  });
+
+  window.addEventListener('popstate', function () {
+    resumeCurtainIfNeeded('return');
+  });
+
+  window.addEventListener('load', function () {
+    resumeCurtainIfNeeded('load');
+  });
+})();
+
+(function () {
+  "use strict";
+
   if (window.__TC_PRODUCT_RETURN_SCROLL_V1__) return;
   window.__TC_PRODUCT_RETURN_SCROLL_V1__ = true;
 
@@ -4899,6 +5040,10 @@ function setupDesktopAura() {
     try {
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     } catch (_) {}
+
+    if (window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__) {
+      window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__('opening');
+    }
 
     blurProductSourceFocus();
   }
@@ -5165,11 +5310,17 @@ function setupDesktopAura() {
         if (successCount >= 2) {
           endRestoreUi(stateKey);
           clearState();
+          if (window.__TC_HIDE_PRODUCT_TRANSITION_CURTAIN__) {
+            window.__TC_HIDE_PRODUCT_TRANSITION_CURTAIN__(180);
+          }
           return;
         }
 
         if (completedChecks >= delays.length) {
           endRestoreUi(stateKey);
+          if (window.__TC_HIDE_PRODUCT_TRANSITION_CURTAIN__) {
+            window.__TC_HIDE_PRODUCT_TRANSITION_CURTAIN__(0);
+          }
         }
       }, 120);
     }
@@ -5265,12 +5416,20 @@ function setupDesktopAura() {
   }
 
   function fallbackToHome() {
+    if (window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__) {
+      window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__('fallback-home');
+    }
+
     window.location.href = '/';
   }
 
   function goBackToPreviousPage() {
     if (canUseHistoryBack()) {
       try {
+        if (window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__) {
+          window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__('exit');
+        }
+
         history.back();
         return true;
       } catch (_) {}
