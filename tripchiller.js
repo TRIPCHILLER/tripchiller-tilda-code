@@ -4786,83 +4786,6 @@ function setupDesktopAura() {
   }
 })();
 
-(function () {
-  "use strict";
-
-  if (window.__TC_PRODUCT_TRANSITION_VEIL_V1__) return;
-  window.__TC_PRODUCT_TRANSITION_VEIL_V1__ = true;
-
-  var VEIL_CLASS = 'tc-product-transition-veil';
-  var VEIL_LEAVING_CLASS = 'tc-product-transition-veil-leaving';
-  var hideTimer = 0;
-  var failSafeTimer = 0;
-  var lastReason = '';
-
-  function clearVeilTimers() {
-    clearTimeout(hideTimer);
-    clearTimeout(failSafeTimer);
-    hideTimer = 0;
-    failSafeTimer = 0;
-  }
-
-  function removeVeilClasses() {
-    document.documentElement.classList.remove(VEIL_CLASS);
-    document.documentElement.classList.remove(VEIL_LEAVING_CLASS);
-    document.documentElement.removeAttribute('data-tc-product-transition-veil');
-  }
-
-  function getAutoHideDelay(reason) {
-    if (reason === 'exit' || reason === 'fallback-home' || reason === 'return') return 1200;
-    if (reason === 'opening') return 820;
-    return 900;
-  }
-
-  function showProductTransitionVeil(reason) {
-    clearVeilTimers();
-
-    lastReason = reason || '';
-    document.documentElement.classList.remove(VEIL_LEAVING_CLASS);
-    document.documentElement.classList.add(VEIL_CLASS);
-    document.documentElement.setAttribute('data-tc-product-transition-veil', lastReason || 'transition');
-
-    hideTimer = setTimeout(function () {
-      hideProductTransitionVeil(0);
-    }, getAutoHideDelay(lastReason));
-
-    failSafeTimer = setTimeout(function () {
-      removeVeilClasses();
-    }, 1800);
-  }
-
-  function hideProductTransitionVeil(delay) {
-    clearTimeout(hideTimer);
-
-    hideTimer = setTimeout(function () {
-      if (!document.documentElement.classList.contains(VEIL_CLASS)) {
-        clearTimeout(failSafeTimer);
-        return;
-      }
-
-      document.documentElement.classList.add(VEIL_LEAVING_CLASS);
-
-      setTimeout(function () {
-        removeVeilClasses();
-        clearTimeout(failSafeTimer);
-      }, 440);
-    }, Number(delay || 0));
-  }
-
-  window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__ = showProductTransitionVeil;
-  window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__ = hideProductTransitionVeil;
-
-  window.__TC_PRODUCT_TRANSITION_VEIL_STATE__ = function () {
-    return {
-      className: document.documentElement.className,
-      reason: lastReason,
-      visible: document.documentElement.classList.contains(VEIL_CLASS)
-    };
-  };
-})();
 
 (function () {
   "use strict";
@@ -4876,8 +4799,49 @@ function setupDesktopAura() {
   var LEGACY_USER_PHOTOS_RETURN_KEY = 'tc:userPhotosReturn:v1';
   var RETURN_TTL_MS = 5 * 60 * 1000;
   var RESTORE_CLOSE_ENOUGH_PX = 80;
+  var RETURN_CARD_SUPPRESS_CLASS = 'tc-product-return-suppress-cards';
+  var RETURN_CARD_REVEAL_CLASS = 'tc-product-return-cards-revealing';
+  var RETURN_RESTORING_CLASS = 'tc-product-return-restoring-scroll';
+  var RETURN_CARD_REVEAL_MS = 240;
+  var RETURN_CARD_FAILSAFE_MS = 2000;
   var activeRestoreKey = '';
   var activeRestoreToken = 0;
+  var returnCardFailSafeTimer = 0;
+  var returnCardRevealTimer = 0;
+
+  function updateReturnCardClass(className, shouldAdd) {
+    document.documentElement.classList[shouldAdd ? 'add' : 'remove'](className);
+    if (document.body) document.body.classList[shouldAdd ? 'add' : 'remove'](className);
+  }
+
+  function clearReturnCardTimers() {
+    clearTimeout(returnCardFailSafeTimer);
+    clearTimeout(returnCardRevealTimer);
+    returnCardFailSafeTimer = 0;
+    returnCardRevealTimer = 0;
+  }
+
+  function revealReturnCards() {
+    clearReturnCardTimers();
+    updateReturnCardClass(RETURN_CARD_SUPPRESS_CLASS, false);
+    updateReturnCardClass(RETURN_RESTORING_CLASS, false);
+    updateReturnCardClass(RETURN_CARD_REVEAL_CLASS, true);
+
+    returnCardRevealTimer = setTimeout(function () {
+      updateReturnCardClass(RETURN_CARD_REVEAL_CLASS, false);
+      returnCardRevealTimer = 0;
+    }, RETURN_CARD_REVEAL_MS);
+  }
+
+  function suppressReturnCards() {
+    clearReturnCardTimers();
+    updateReturnCardClass(RETURN_CARD_REVEAL_CLASS, false);
+    updateReturnCardClass(RETURN_CARD_SUPPRESS_CLASS, true);
+
+    returnCardFailSafeTimer = setTimeout(function () {
+      revealReturnCards();
+    }, RETURN_CARD_FAILSAFE_MS);
+  }
 
   function isProductRoute(pathname) {
     var path = pathname || location.pathname || '';
@@ -4977,18 +4941,6 @@ function setupDesktopAura() {
     try {
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     } catch (_) {}
-
-    if (window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__) {
-      var showOpeningVeil = function () {
-        window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__('opening');
-      };
-
-      if (window.requestAnimationFrame) {
-        window.requestAnimationFrame(showOpeningVeil);
-      } else {
-        setTimeout(showOpeningVeil, 0);
-      }
-    }
 
     blurProductSourceFocus();
   }
@@ -5167,8 +5119,7 @@ function setupDesktopAura() {
 
   function endRestoreUi(stateKey) {
     if (activeRestoreKey === stateKey) activeRestoreKey = '';
-    document.documentElement.classList.remove('tc-product-return-restoring-scroll');
-    if (document.body) document.body.classList.remove('tc-product-return-restoring-scroll');
+    revealReturnCards();
   }
 
   function restoreReturnScroll() {
@@ -5182,12 +5133,8 @@ function setupDesktopAura() {
     var targetY = Number(state.scrollY || 0);
     if (!Number.isFinite(targetY) || targetY < 0) targetY = 0;
 
-    document.documentElement.classList.add('tc-product-return-restoring-scroll');
-    if (document.body) document.body.classList.add('tc-product-return-restoring-scroll');
-
-    if (window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__) {
-      window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__('return');
-    }
+    suppressReturnCards();
+    updateReturnCardClass(RETURN_RESTORING_CLASS, true);
 
     try {
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -5222,9 +5169,6 @@ function setupDesktopAura() {
       var latestState = readState();
       if (!shouldRestore(latestState)) {
         endRestoreUi(stateKey);
-        if (window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__) {
-          window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__(0);
-        }
         return;
       }
 
@@ -5262,17 +5206,11 @@ function setupDesktopAura() {
         if (successCount >= 2) {
           endRestoreUi(stateKey);
           clearState();
-          if (window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__) {
-            window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__(180);
-          }
           return;
         }
 
         if (completedChecks >= delays.length) {
           endRestoreUi(stateKey);
-          if (window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__) {
-            window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__(0);
-          }
         }
       }, 120);
     }
@@ -5300,6 +5238,8 @@ function setupDesktopAura() {
     setTimeout(restoreReturnScroll, delay);
   });
 
+  window.__TC_SUPPRESS_PRODUCT_RETURN_CARDS__ = suppressReturnCards;
+  window.__TC_REVEAL_PRODUCT_RETURN_CARDS__ = revealReturnCards;
   window.__TC_SAVE_PRODUCT_RETURN_SCROLL__ = saveReturnScroll;
   window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__ = restoreReturnScroll;
   window.__TC_FORCE_PRODUCT_RETURN_RESTORE__ = restoreReturnScroll;
@@ -5367,21 +5307,34 @@ function setupDesktopAura() {
     return window.history && window.history.length > 1;
   }
 
-  function fallbackToHome() {
-    if (window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__) {
-      window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__('fallback-home');
+  function suppressReturnCardsBeforeExit() {
+    if (window.__TC_SUPPRESS_PRODUCT_RETURN_CARDS__) {
+      window.__TC_SUPPRESS_PRODUCT_RETURN_CARDS__();
+      return;
     }
 
+    document.documentElement.classList.add('tc-product-return-suppress-cards');
+    if (document.body) document.body.classList.add('tc-product-return-suppress-cards');
+
+    setTimeout(function () {
+      document.documentElement.classList.remove('tc-product-return-suppress-cards');
+      document.documentElement.classList.remove('tc-product-return-cards-revealing');
+      if (document.body) {
+        document.body.classList.remove('tc-product-return-suppress-cards');
+        document.body.classList.remove('tc-product-return-cards-revealing');
+      }
+    }, 2000);
+  }
+
+  function fallbackToHome() {
+    suppressReturnCardsBeforeExit();
     window.location.href = '/';
   }
 
   function goBackToPreviousPage() {
     if (canUseHistoryBack()) {
       try {
-        if (window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__) {
-          window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__('exit');
-        }
-
+        suppressReturnCardsBeforeExit();
         history.back();
         return true;
       } catch (_) {}
