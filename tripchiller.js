@@ -4934,6 +4934,10 @@ function setupDesktopAura() {
   var RETURN_SCROLL_SPACER_ID = 'tc-product-return-scroll-spacer';
   var returnSpacerFailSafeTimer = 0;
   var lastOpenGuardY = 0;
+  var lastCatalogStateKey = '';
+  var lastLoadMoreState = null;
+  var lastAutoExpandAttempt = null;
+  var lastRestoreReason = '';
 
   function updateReturnCardClass(className, shouldAdd) {
     document.documentElement.classList[shouldAdd ? 'add' : 'remove'](className);
@@ -5042,6 +5046,10 @@ function setupDesktopAura() {
     return location.pathname + location.search + location.hash;
   }
 
+  function getCatalogStateKey() {
+    return location.pathname + location.search;
+  }
+
   function getScrollY() {
     return window.pageYOffset ||
       document.documentElement.scrollTop ||
@@ -5132,16 +5140,16 @@ function setupDesktopAura() {
     return active ? String(active.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase() : '';
   }
 
-  function getLoadMoreStorageKey(pageKey) {
-    return LOAD_MORE_STATE_PREFIX + (pageKey || getPageKey());
+  function getLoadMoreStorageKey(catalogStateKey) {
+    return LOAD_MORE_STATE_PREFIX + (catalogStateKey || getCatalogStateKey());
   }
 
-  function readLoadMoreState(pageKey) {
+  function readLoadMoreState(catalogStateKey) {
     var raw = '';
     var state = null;
 
     try {
-      raw = sessionStorage.getItem(getLoadMoreStorageKey(pageKey)) || '';
+      raw = sessionStorage.getItem(getLoadMoreStorageKey(catalogStateKey)) || '';
     } catch (_) {
       raw = '';
     }
@@ -5156,12 +5164,14 @@ function setupDesktopAura() {
 
     if (!state || state.from !== 'catalog-load-more') return null;
     if (Number(state.expiresAt || 0) && Date.now() > Number(state.expiresAt || 0)) {
-      try { sessionStorage.removeItem(getLoadMoreStorageKey(pageKey)); } catch (_) {}
+      try { sessionStorage.removeItem(getLoadMoreStorageKey(catalogStateKey)); } catch (_) {}
       return null;
     }
 
     var currentFilterKey = getActiveCatalogFilterKey();
     if (state.filterKey && currentFilterKey && state.filterKey !== currentFilterKey) return null;
+    lastCatalogStateKey = catalogStateKey || getCatalogStateKey();
+    lastLoadMoreState = state;
     return state;
   }
 
@@ -5182,36 +5192,38 @@ function setupDesktopAura() {
     if (!nextState || isProductRoute()) return;
 
     var now = Date.now();
-    var pageKey = nextState.pageKey || getPageKey();
-    var previous = readLoadMoreState(pageKey) || {};
+    var catalogStateKey = nextState.catalogStateKey || getCatalogStateKey();
+    var previous = readLoadMoreState(catalogStateKey) || {};
     var state = {
       from: 'catalog-load-more',
       ts: previous.ts || now,
       updatedAt: now,
       expiresAt: now + LOAD_MORE_TTL_MS,
-      pageKey: pageKey,
+      catalogStateKey: catalogStateKey,
+      pageKey: catalogStateKey,
       pathname: location.pathname,
       search: location.search,
-      hash: location.hash,
       filterKey: nextState.filterKey || getActiveCatalogFilterKey(),
       clickCount: Math.max(Number(previous.clickCount || 0), Number(nextState.clickCount || 0)),
       maxVisibleCards: Math.max(Number(previous.maxVisibleCards || 0), Number(nextState.maxVisibleCards || 0), countVisibleCatalogCards())
     };
 
     try {
-      sessionStorage.setItem(getLoadMoreStorageKey(pageKey), JSON.stringify(state));
+      sessionStorage.setItem(getLoadMoreStorageKey(catalogStateKey), JSON.stringify(state));
+      lastCatalogStateKey = catalogStateKey;
+      lastLoadMoreState = state;
     } catch (_) {}
   }
 
   function rememberLoadMoreClick() {
     if (isProductRoute()) return;
 
-    var pageKey = getPageKey();
-    var previous = readLoadMoreState(pageKey) || {};
+    var catalogStateKey = getCatalogStateKey();
+    var previous = readLoadMoreState(catalogStateKey) || {};
     var clickCount = Number(previous.clickCount || 0) + 1;
 
     writeLoadMoreState({
-      pageKey: pageKey,
+      catalogStateKey: catalogStateKey,
       filterKey: getActiveCatalogFilterKey(),
       clickCount: clickCount,
       maxVisibleCards: countVisibleCatalogCards()
@@ -5220,7 +5232,7 @@ function setupDesktopAura() {
     [220, 600, 1100].forEach(function (delay) {
       setTimeout(function () {
         writeLoadMoreState({
-          pageKey: pageKey,
+          catalogStateKey: catalogStateKey,
           filterKey: getActiveCatalogFilterKey(),
           clickCount: clickCount,
           maxVisibleCards: countVisibleCatalogCards()
@@ -5231,7 +5243,7 @@ function setupDesktopAura() {
 
   function resetLoadMoreStateForCurrentPage() {
     try {
-      sessionStorage.removeItem(getLoadMoreStorageKey(getPageKey()));
+      sessionStorage.removeItem(getLoadMoreStorageKey(getCatalogStateKey()));
     } catch (_) {}
   }
 
@@ -5261,10 +5273,12 @@ function setupDesktopAura() {
   function collectReturnCatalogSnapshot(productHref) {
     var card = findProductElementByHref(productHref);
     var rect = card && card.getBoundingClientRect ? card.getBoundingClientRect() : null;
-    var loadMoreState = readLoadMoreState(getPageKey());
+    var catalogStateKey = getCatalogStateKey();
+    var loadMoreState = readLoadMoreState(catalogStateKey);
 
     return {
       sourceCardViewportTop: rect ? rect.top : null,
+      catalogStateKey: catalogStateKey,
       visibleCatalogCardCount: countVisibleCatalogCards(),
       loadMoreState: loadMoreState ? {
         clickCount: Number(loadMoreState.clickCount || 0),
@@ -5274,7 +5288,7 @@ function setupDesktopAura() {
     };
   }
 
-  function clickLoadMoreForRestore() {
+  function clickLoadMoreForRestore(catalogStateKey) {
     var button = getVisibleLoadMoreButton();
     if (!button) return false;
 
@@ -5283,9 +5297,9 @@ function setupDesktopAura() {
 
     setTimeout(function () {
       writeLoadMoreState({
-        pageKey: getPageKey(),
+        catalogStateKey: catalogStateKey || getCatalogStateKey(),
         filterKey: getActiveCatalogFilterKey(),
-        clickCount: Number((readLoadMoreState(getPageKey()) || {}).clickCount || 0),
+        clickCount: Number((readLoadMoreState(catalogStateKey || getCatalogStateKey()) || {}).clickCount || 0),
         maxVisibleCards: countVisibleCatalogCards()
       });
     }, 320);
@@ -5295,14 +5309,17 @@ function setupDesktopAura() {
 
   function ensureCatalogExpandedForReturn(state, done) {
     var productHref = state && state.productHref;
+    var catalogStateKey = state && (state.catalogStateKey || ((state.pathname || location.pathname || '') + (state.search || ''))) || getCatalogStateKey();
+    var savedLoadMoreState = readLoadMoreState(catalogStateKey);
+    var effectiveLoadMoreState = state && state.loadMoreState || savedLoadMoreState;
     var desiredVisibleCount = Math.max(
       Number(state && state.visibleCatalogCardCount || 0),
-      Number(state && state.loadMoreState && state.loadMoreState.maxVisibleCards || 0),
-      Number(readLoadMoreState(state && state.pageKey) && readLoadMoreState(state && state.pageKey).maxVisibleCards || 0)
+      Number(effectiveLoadMoreState && effectiveLoadMoreState.maxVisibleCards || 0),
+      Number(savedLoadMoreState && savedLoadMoreState.maxVisibleCards || 0)
     );
     var savedClicks = Math.max(
-      Number(state && state.loadMoreState && state.loadMoreState.clickCount || 0),
-      Number(readLoadMoreState(state && state.pageKey) && readLoadMoreState(state && state.pageKey).clickCount || 0)
+      Number(effectiveLoadMoreState && effectiveLoadMoreState.clickCount || 0),
+      Number(savedLoadMoreState && savedLoadMoreState.clickCount || 0)
     );
     var maxAttempts = Math.min(12, Math.max(8, savedClicks + 3));
     var attempts = 0;
@@ -5322,7 +5339,9 @@ function setupDesktopAura() {
         return;
       }
 
-      if (attempts >= maxAttempts || !clickLoadMoreForRestore()) {
+      lastAutoExpandAttempt = { reason: 'return', catalogStateKey: catalogStateKey, attempts: attempts, desiredVisibleCount: desiredVisibleCount, visibleCatalogCardCount: countVisibleCatalogCards() };
+
+      if (attempts >= maxAttempts || !clickLoadMoreForRestore(catalogStateKey)) {
         finish();
         return;
       }
@@ -5337,7 +5356,8 @@ function setupDesktopAura() {
   function autoExpandCatalogFromSavedState() {
     if (isProductRoute()) return;
 
-    var state = readLoadMoreState(getPageKey());
+    var catalogStateKey = getCatalogStateKey();
+    var state = readLoadMoreState(catalogStateKey);
     if (!state) return;
 
     var desiredVisibleCount = Number(state.maxVisibleCards || 0);
@@ -5345,8 +5365,9 @@ function setupDesktopAura() {
     var attempts = 0;
 
     function step() {
+      lastAutoExpandAttempt = { reason: 'saved-state', catalogStateKey: catalogStateKey, attempts: attempts, desiredVisibleCount: desiredVisibleCount, visibleCatalogCardCount: countVisibleCatalogCards() };
       if (desiredVisibleCount > 0 && countVisibleCatalogCards() >= desiredVisibleCount) return;
-      if (attempts >= maxAttempts || !clickLoadMoreForRestore()) return;
+      if (attempts >= maxAttempts || !clickLoadMoreForRestore(catalogStateKey)) return;
 
       attempts += 1;
       setTimeout(step, 260);
@@ -5404,6 +5425,7 @@ function setupDesktopAura() {
       source: source || '',
       productHref: normalizeHref(productHref),
       pageKey: getPageKey(),
+      catalogStateKey: snapshot.catalogStateKey,
       pathname: location.pathname,
       search: location.search,
       hash: location.hash,
@@ -5421,6 +5443,7 @@ function setupDesktopAura() {
         expiresAt: now + RETURN_TTL_MS,
         from: source || '',
         pageKey: getPageKey(),
+        catalogStateKey: snapshot.catalogStateKey,
         scrollY: getScrollY(),
         productHref: normalizeHref(productHref),
         visibleCatalogCardCount: snapshot.visibleCatalogCardCount
@@ -5514,6 +5537,7 @@ function setupDesktopAura() {
       source: 'user-photos-legacy',
       productHref: normalizeHref(legacy.productHref || ''),
       pageKey: pageKey,
+      catalogStateKey: pathname + search,
       pathname: pathname,
       search: search,
       hash: hash,
@@ -5604,6 +5628,22 @@ function setupDesktopAura() {
     return currentPath === savedPath;
   }
 
+
+  function applyCatalogStateToReturnState(state) {
+    if (!state) return state;
+
+    var catalogStateKey = state.catalogStateKey || ((state.pathname || location.pathname || '') + (state.search || '')) || getCatalogStateKey();
+    var loadMoreState = readLoadMoreState(catalogStateKey);
+    state.catalogStateKey = catalogStateKey;
+    if (!state.loadMoreState && loadMoreState) state.loadMoreState = loadMoreState;
+    if (!state.visibleCatalogCardCount && loadMoreState && loadMoreState.maxVisibleCards) {
+      state.visibleCatalogCardCount = Number(loadMoreState.maxVisibleCards || 0);
+    }
+    lastCatalogStateKey = catalogStateKey;
+    lastLoadMoreState = state.loadMoreState || loadMoreState || null;
+    return state;
+  }
+
   function getRestoreStateKey(state) {
     return [
       state.ts || '',
@@ -5620,8 +5660,9 @@ function setupDesktopAura() {
     revealReturnCards();
   }
 
-  function restoreReturnScroll() {
-    var state = readState();
+  function restoreReturnScroll(reason) {
+    var state = applyCatalogStateToReturnState(readState());
+    lastRestoreReason = typeof reason === 'string' && reason ? reason : (window.__TC_PRODUCT_LAST_EXIT_REASON__ || 'auto');
     if (!shouldRestore(state)) return;
 
     var stateKey = getRestoreStateKey(state);
@@ -5678,7 +5719,7 @@ function setupDesktopAura() {
     function attemptRestore() {
       if (token !== activeRestoreToken) return;
 
-      var latestState = readState();
+      var latestState = applyCatalogStateToReturnState(readState());
       if (!shouldRestore(latestState)) {
         endRestoreUi(stateKey);
         return;
@@ -5791,7 +5832,7 @@ function setupDesktopAura() {
   window.__TC_HAS_VISIBLE_PRODUCT_POPUP__ = hasVisibleProductPopup;
 
   window.__TC_PRODUCT_RETURN_SCROLL_STATE__ = function () {
-    var state = readState();
+    var state = applyCatalogStateToReturnState(readState());
     var expiresAt = state ? Number(state.expiresAt || 0) : 0;
     return {
       raw: (function () {
@@ -5802,7 +5843,13 @@ function setupDesktopAura() {
       })(),
       parsed: state,
       returnState: state,
-      loadMoreState: readLoadMoreState(getPageKey()),
+      catalogStateKey: state && (state.catalogStateKey || ((state.pathname || location.pathname || '') + (state.search || ''))) || getCatalogStateKey(),
+      loadMoreState: readLoadMoreState(state && (state.catalogStateKey || ((state.pathname || location.pathname || '') + (state.search || ''))) || getCatalogStateKey()),
+      lastCatalogStateKey: lastCatalogStateKey,
+      lastLoadMoreState: lastLoadMoreState,
+      visibleCatalogCardCount: countVisibleCatalogCards(),
+      lastRestoreReason: lastRestoreReason,
+      lastAutoExpandAttempt: lastAutoExpandAttempt,
       expiresAt: expiresAt,
       ttlLeftMs: expiresAt ? Math.max(0, expiresAt - Date.now()) : 0,
       shouldRestore: shouldRestore(state),
@@ -5816,6 +5863,7 @@ function setupDesktopAura() {
       hasProductPopupElement: hasProductPopupElement(),
       hasVisibleProductPopup: hasVisibleProductPopup(),
       currentPageKey: getPageKey(),
+      currentCatalogStateKey: getCatalogStateKey(),
       currentScrollY: getScrollY(),
       maxScrollY: getMaxScrollY(),
       lastExitReason: window.__TC_PRODUCT_LAST_EXIT_REASON__ || '',
@@ -5994,19 +6042,22 @@ function setupDesktopAura() {
     });
   }
 
+  function forceReturnRestoreBurst(reason) {
+    [0, 50, 120, 240, 500, 900, 1400, 2200].forEach(function (delay) {
+      setTimeout(function () {
+        if (window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__) window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__();
+        if (!isProductBlockingRestore() && window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__) {
+          window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__(reason || lastExitReason || 'exit');
+        }
+      }, delay);
+    });
+  }
+
   function scheduleRestoreAfterProductExit(reason) {
     lastExitReason = reason || '';
     window.__TC_PRODUCT_LAST_EXIT_REASON__ = lastExitReason;
     clearTripchillerProductClassesSoon();
-
-    [0, 50, 100, 180, 320, 600, 1000, 1600, 2400].forEach(function (delay) {
-      setTimeout(function () {
-        if (window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__) window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__();
-        if (!isProductBlockingRestore() && window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__) {
-          window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__();
-        }
-      }, delay);
-    });
+    forceReturnRestoreBurst(lastExitReason || 'exit');
   }
 
   function fallbackToHome(reason) {
@@ -6096,8 +6147,18 @@ function setupDesktopAura() {
 
   window.__TC_EXIT_PRODUCT_VIA_TRIPCHILLER_FLOW__ = exitProductViaTripchillerFlow;
   window.__TC_SCHEDULE_PRODUCT_RESTORE_AFTER_EXIT__ = scheduleRestoreAfterProductExit;
+  window.__TC_FORCE_PRODUCT_RETURN_RESTORE_BURST__ = forceReturnRestoreBurst;
+
+  window.__TC_PRODUCT_FLOW_DEBUG__ = function () {
+    return {
+      exit: window.__TC_PRODUCT_EXIT_STATE__ ? window.__TC_PRODUCT_EXIT_STATE__() : null,
+      restore: window.__TC_PRODUCT_RETURN_SCROLL_STATE__ ? window.__TC_PRODUCT_RETURN_SCROLL_STATE__() : null
+    };
+  };
 
   window.__TC_PRODUCT_EXIT_STATE__ = function () {
+    var restoreState = window.__TC_PRODUCT_RETURN_SCROLL_STATE__ ? window.__TC_PRODUCT_RETURN_SCROLL_STATE__() : null;
+
     return {
       path: location.pathname || '',
       hash: location.hash || '',
@@ -6111,10 +6172,15 @@ function setupDesktopAura() {
       currentScrollY: getScrollY(),
       maxScrollY: getMaxScrollY(),
       lastExitReason: lastExitReason,
+      lastCatalogStateKey: restoreState ? (restoreState.lastCatalogStateKey || '') : '',
+      lastLoadMoreState: restoreState ? (restoreState.lastLoadMoreState || null) : null,
+      visibleCatalogCardCount: restoreState ? restoreState.visibleCatalogCardCount : 0,
+      lastRestoreReason: restoreState ? (restoreState.lastRestoreReason || '') : '',
+      lastAutoExpandAttempt: restoreState ? (restoreState.lastAutoExpandAttempt || null) : null,
       lastEscExitAt: lastEscExitAt,
       openedState: readOpenedState(),
-      returnState: window.__TC_PRODUCT_RETURN_SCROLL_STATE__ ? window.__TC_PRODUCT_RETURN_SCROLL_STATE__() : null,
-      loadMoreState: window.__TC_PRODUCT_RETURN_SCROLL_STATE__ ? (window.__TC_PRODUCT_RETURN_SCROLL_STATE__().loadMoreState || null) : null,
+      returnState: restoreState,
+      loadMoreState: restoreState ? (restoreState.loadMoreState || null) : null,
       lastAttempt: window.__TC_PRODUCT_RETURN_SCROLL_LAST_ATTEMPT__ || null,
       hasReturnSpacer: !!document.getElementById('tc-product-return-scroll-spacer'),
       hasLegacyCurtainClass: document.documentElement.classList.contains('tc-product-transition-curtain') || document.documentElement.classList.contains('tc-product-transition-veil') || (document.body && (document.body.classList.contains('tc-product-transition-curtain') || document.body.classList.contains('tc-product-transition-veil'))),
