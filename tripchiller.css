@@ -1584,6 +1584,145 @@ body.tc-product-page .eye-mobile {
   pointer-events: none !important;
 }
 
+/* Product page isolation: product detail must be above every decorative/site layer. */
+html.tc-product-page,
+body.tc-product-page,
+html.tc-product-page-active,
+body.tc-product-page-active {
+  overflow-x: hidden !important;
+}
+
+html.tc-product-page #allrecords,
+body.tc-product-page #allrecords,
+html.tc-product-page-active #allrecords,
+body.tc-product-page-active #allrecords {
+  position: relative !important;
+  isolation: isolate !important;
+  z-index: 0 !important;
+}
+
+html.tc-product-page #rec2312983111,
+body.tc-product-page #rec2312983111,
+html.tc-product-page-active #rec2312983111,
+body.tc-product-page-active #rec2312983111,
+html.tc-product-page .tc-product-record,
+body.tc-product-page .tc-product-record,
+html.tc-product-page-active .tc-product-record,
+body.tc-product-page-active .tc-product-record,
+html.tc-product-page .t-store__prod-popup,
+body.tc-product-page .t-store__prod-popup,
+html.tc-product-page-active .t-store__prod-popup,
+body.tc-product-page-active .t-store__prod-popup,
+html.tc-product-page .t-popup,
+body.tc-product-page .t-popup,
+html.tc-product-page-active .t-popup,
+body.tc-product-page-active .t-popup {
+  position: relative !important;
+  z-index: 2147483000 !important;
+  isolation: isolate !important;
+}
+
+html.tc-product-page .t-store__prod-popup__container,
+body.tc-product-page .t-store__prod-popup__container,
+html.tc-product-page-active .t-store__prod-popup__container,
+body.tc-product-page-active .t-store__prod-popup__container,
+html.tc-product-page .t-popup__container,
+body.tc-product-page .t-popup__container,
+html.tc-product-page-active .t-popup__container,
+body.tc-product-page-active .t-popup__container,
+html.tc-product-page .js-product,
+body.tc-product-page .js-product,
+html.tc-product-page-active .js-product,
+body.tc-product-page-active .js-product,
+html.tc-product-page .t-catalog__product,
+body.tc-product-page .t-catalog__product,
+html.tc-product-page-active .t-catalog__product,
+body.tc-product-page-active .t-catalog__product,
+html.tc-product-page .t-catalog__product-snippet,
+body.tc-product-page .t-catalog__product-snippet,
+html.tc-product-page-active .t-catalog__product-snippet,
+body.tc-product-page-active .t-catalog__product-snippet {
+  position: relative !important;
+  z-index: 2147483001 !important;
+}
+
+html.tc-product-page .tc-site-header,
+body.tc-product-page .tc-site-header,
+html.tc-product-page-active .tc-site-header,
+body.tc-product-page-active .tc-site-header,
+html.tc-product-page .tc-menu-eye-logo,
+body.tc-product-page .tc-menu-eye-logo,
+html.tc-product-page-active .tc-menu-eye-logo,
+body.tc-product-page-active .tc-menu-eye-logo,
+html.tc-product-page .tc-menu-eye-logo *,
+body.tc-product-page .tc-menu-eye-logo *,
+html.tc-product-page-active .tc-menu-eye-logo *,
+body.tc-product-page-active .tc-menu-eye-logo *,
+html.tc-product-page #tc-disk-switcher-root,
+body.tc-product-page #tc-disk-switcher-root,
+html.tc-product-page-active #tc-disk-switcher-root,
+body.tc-product-page-active #tc-disk-switcher-root,
+html.tc-product-page .tc-disk-switcher,
+body.tc-product-page .tc-disk-switcher,
+html.tc-product-page-active .tc-disk-switcher,
+body.tc-product-page-active .tc-disk-switcher,
+html.tc-product-page .tc-path-row,
+body.tc-product-page .tc-path-row,
+html.tc-product-page-active .tc-path-row,
+body.tc-product-page-active .tc-path-row,
+html.tc-product-page .flower,
+body.tc-product-page .flower,
+html.tc-product-page-active .flower,
+body.tc-product-page-active .flower,
+html.tc-product-page .eye-desktop,
+body.tc-product-page .eye-desktop,
+html.tc-product-page-active .eye-desktop,
+body.tc-product-page-active .eye-desktop,
+html.tc-product-page .eye-mobile,
+body.tc-product-page .eye-mobile,
+html.tc-product-page-active .eye-mobile,
+body.tc-product-page-active .eye-mobile,
+html.tc-product-page #tc-egg-fall-overlay,
+body.tc-product-page #tc-egg-fall-overlay,
+html.tc-product-page-active #tc-egg-fall-overlay,
+body.tc-product-page-active #tc-egg-fall-overlay {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(-100%) !important;
+}
+
+html.tc-product-page #allrecords > .r:not(.tc-product-record),
+body.tc-product-page #allrecords > .r:not(.tc-product-record),
+html.tc-product-page-active #allrecords > .r:not(.tc-product-record),
+body.tc-product-page-active #allrecords > .r:not(.tc-product-record) {
+  position: relative !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+html.tc-product-page .t-popup__close,
+body.tc-product-page .t-popup__close,
+html.tc-product-page-active .t-popup__close,
+body.tc-product-page-active .t-popup__close,
+html.tc-product-page .t-popup__close-icon,
+body.tc-product-page .t-popup__close-icon,
+html.tc-product-page-active .t-popup__close-icon,
+body.tc-product-page-active .t-popup__close-icon,
+html.tc-product-page svg.t-popup__close-icon.t-popup__close-icon_cross,
+body.tc-product-page svg.t-popup__close-icon.t-popup__close-icon_cross,
+html.tc-product-page-active svg.t-popup__close-icon.t-popup__close-icon_cross,
+body.tc-product-page-active svg.t-popup__close-icon.t-popup__close-icon_cross,
+html.tc-product-page .t-store__prod-popup__close,
+body.tc-product-page .t-store__prod-popup__close,
+html.tc-product-page-active .t-store__prod-popup__close,
+body.tc-product-page-active .t-store__prod-popup__close {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 html,
 body {
   background: #000 !important;
