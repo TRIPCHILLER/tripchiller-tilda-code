@@ -2520,10 +2520,12 @@ body {
   outline: none !important;
   box-shadow: none !important;
 }
-html.tc-user-photos-restoring-scroll .tc-user-photos__photo-link:focus,
-html.tc-user-photos-restoring-scroll .tc-user-photos__photo-link:focus-visible,
-body.tc-user-photos-restoring-scroll .tc-user-photos__photo-link:focus,
-body.tc-user-photos-restoring-scroll .tc-user-photos__photo-link:focus-visible {
+html.tc-product-return-restoring-scroll .tc-user-photos__photo-link:focus,
+html.tc-product-return-restoring-scroll .tc-user-photos__photo-link:focus-visible,
+body.tc-product-return-restoring-scroll .tc-user-photos__photo-link:focus,
+body.tc-product-return-restoring-scroll .tc-user-photos__photo-link:focus-visible,
+html.tc-product-return-restoring-scroll a:focus,
+body.tc-product-return-restoring-scroll a:focus {
   outline: none !important;
   box-shadow: none !important;
 }

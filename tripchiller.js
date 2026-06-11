@@ -1,7 +1,7 @@
 (function(){
   "use strict";
 
-  window.__TC_EXTERNAL_CODE_VERSION__ = 'shop-hardfix-2026-06-11-v1';
+  window.__TC_EXTERNAL_CODE_VERSION__ = 'shop-hardfix-2026-06-11-v2';
   if (window.__TC_DEBUG_CORE__) {
     console.log('[TRIPCHILLER_CORE]', window.__TC_EXTERNAL_CODE_VERSION__);
   }
@@ -4789,12 +4789,305 @@ function setupDesktopAura() {
 (function () {
   "use strict";
 
+  if (window.__TC_PRODUCT_RETURN_SCROLL_V1__) return;
+  window.__TC_PRODUCT_RETURN_SCROLL_V1__ = true;
+
+  var RETURN_KEY = 'tc:productReturnScroll:v1';
+  var LEGACY_USER_PHOTOS_RETURN_KEY = 'tc:userPhotosReturn:v1';
+
+  function isProductRoute(pathname) {
+    var path = pathname || location.pathname || '';
+    return /^\/product\//.test(path) || /^\/tproduct\//.test(path);
+  }
+
+  function getPageKey() {
+    return location.pathname + location.search + location.hash;
+  }
+
+  function getScrollY() {
+    return window.pageYOffset ||
+      document.documentElement.scrollTop ||
+      document.body.scrollTop ||
+      0;
+  }
+
+  function normalizeHref(href) {
+    if (!href) return '';
+    try {
+      return new URL(href, location.origin).href;
+    } catch (_) {
+      return String(href || '');
+    }
+  }
+
+  function isTProductHref(href) {
+    return /\/tproduct\//.test(String(href || '')) ||
+      /#!\/tproduct\//.test(String(href || ''));
+  }
+
+  function blurProductSourceFocus() {
+    var active = document.activeElement;
+    if (!active || typeof active.blur !== 'function') return;
+
+    if (
+      active.closest &&
+      (
+        active.closest('#tc-user-photos-root') ||
+        active.closest('.js-store-grid-cont') ||
+        active.closest('.t-store') ||
+        active.closest('.t-catalog')
+      )
+    ) {
+      active.blur();
+    }
+  }
+
+  function saveReturnScroll(productHref, source) {
+    if (isProductRoute()) return;
+    if (!productHref || !isTProductHref(productHref)) return;
+
+    var state = {
+      ts: Date.now(),
+      from: 'product-return-scroll',
+      source: source || '',
+      productHref: normalizeHref(productHref),
+      pageKey: getPageKey(),
+      pathname: location.pathname,
+      search: location.search,
+      hash: location.hash,
+      scrollY: getScrollY()
+    };
+
+    try {
+      sessionStorage.setItem(RETURN_KEY, JSON.stringify(state));
+      sessionStorage.removeItem(LEGACY_USER_PHOTOS_RETURN_KEY);
+    } catch (_) {}
+
+    try {
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    } catch (_) {}
+
+    blurProductSourceFocus();
+  }
+
+  function getProductHrefFromEventTarget(target) {
+    if (!target || !target.closest) return '';
+
+    var userPhoto = target.closest('.tc-user-photos__photo-link');
+    if (userPhoto && userPhoto.dataset && userPhoto.dataset.productHref) {
+      return userPhoto.dataset.productHref;
+    }
+
+    var link = target.closest('a[href]');
+    if (link && isTProductHref(link.getAttribute('href'))) {
+      return link.getAttribute('href');
+    }
+
+    var productLink = target.closest(
+      'a[href*="/tproduct/"],' +
+      'a[href*="#!/tproduct/"],' +
+      '.js-product-url[href],' +
+      '.t-store__card a[href*="/tproduct/"],' +
+      '.t-store__card a[href*="#!/tproduct/"],' +
+      '.t-catalog__product a[href*="/tproduct/"],' +
+      '.t-catalog__product a[href*="#!/tproduct/"]'
+    );
+
+    if (productLink && productLink.getAttribute) {
+      return productLink.getAttribute('href') || '';
+    }
+
+    return '';
+  }
+
+  function saveFromEvent(e) {
+    if (!e || !e.target) return;
+    var href = getProductHrefFromEventTarget(e.target);
+    if (!href) return;
+
+    var source = e.target.closest && e.target.closest('#tc-user-photos-root')
+      ? 'user-photos'
+      : 'catalog';
+
+    saveReturnScroll(href, source);
+  }
+
+  function migrateLegacyState(raw) {
+    var legacy = null;
+    try {
+      legacy = JSON.parse(raw || '');
+    } catch (_) {
+      legacy = null;
+    }
+
+    if (!legacy || legacy.from !== 'user-photos') return null;
+
+    var pageKey = legacy.path || getPageKey();
+    var pathname = location.pathname;
+    var search = location.search;
+    var hash = location.hash;
+
+    try {
+      var url = new URL(pageKey, location.origin);
+      pathname = url.pathname;
+      search = url.search;
+      hash = url.hash;
+    } catch (_) {}
+
+    var state = {
+      ts: Number(legacy.ts || 0) || Date.now(),
+      from: 'product-return-scroll',
+      source: 'user-photos-legacy',
+      productHref: normalizeHref(legacy.productHref || ''),
+      pageKey: pageKey,
+      pathname: pathname,
+      search: search,
+      hash: hash,
+      scrollY: Number(legacy.scrollY || 0) || 0
+    };
+
+    try {
+      sessionStorage.setItem(RETURN_KEY, JSON.stringify(state));
+      sessionStorage.removeItem(LEGACY_USER_PHOTOS_RETURN_KEY);
+    } catch (_) {}
+
+    return state;
+  }
+
+  function readState() {
+    var raw = '';
+    try {
+      raw = sessionStorage.getItem(RETURN_KEY) || '';
+    } catch (_) {
+      raw = '';
+    }
+
+    if (raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (_) {
+        return null;
+      }
+    }
+
+    try {
+      raw = sessionStorage.getItem(LEGACY_USER_PHOTOS_RETURN_KEY) || '';
+    } catch (_) {
+      raw = '';
+    }
+
+    if (!raw) return null;
+    return migrateLegacyState(raw);
+  }
+
+  function clearState() {
+    try {
+      sessionStorage.removeItem(RETURN_KEY);
+      sessionStorage.removeItem(LEGACY_USER_PHOTOS_RETURN_KEY);
+    } catch (_) {}
+  }
+
+  function shouldRestore(state) {
+    if (!state || state.from !== 'product-return-scroll') return false;
+    if (isProductRoute()) return false;
+
+    var age = Date.now() - Number(state.ts || 0);
+    if (age > 15 * 60 * 1000) {
+      clearState();
+      return false;
+    }
+
+    var currentPath = location.pathname || '/';
+    var savedPath = state.pathname || '/';
+
+    return currentPath === savedPath;
+  }
+
+  function restoreReturnScroll() {
+    var state = readState();
+    if (!shouldRestore(state)) return;
+
+    var y = Number(state.scrollY || 0);
+    if (!Number.isFinite(y) || y < 0) y = 0;
+
+    document.documentElement.classList.add('tc-product-return-restoring-scroll');
+    if (document.body) document.body.classList.add('tc-product-return-restoring-scroll');
+
+    try {
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    } catch (_) {}
+
+    function restore() {
+      blurProductSourceFocus();
+
+      var maxY = Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight,
+        document.body ? document.body.scrollHeight - window.innerHeight : 0
+      );
+
+      window.scrollTo(0, Math.min(y, maxY || y));
+    }
+
+    [0, 50, 120, 240, 500, 900, 1400, 2200].forEach(function (delay) {
+      setTimeout(restore, delay);
+    });
+
+    setTimeout(function () {
+      document.documentElement.classList.remove('tc-product-return-restoring-scroll');
+      if (document.body) document.body.classList.remove('tc-product-return-restoring-scroll');
+      clearState();
+    }, 2600);
+  }
+
+  document.addEventListener('pointerdown', saveFromEvent, true);
+  document.addEventListener('click', saveFromEvent, true);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', restoreReturnScroll);
+  } else {
+    restoreReturnScroll();
+  }
+
+  window.addEventListener('load', restoreReturnScroll);
+  window.addEventListener('pageshow', restoreReturnScroll);
+  window.addEventListener('popstate', restoreReturnScroll);
+  window.addEventListener('hashchange', restoreReturnScroll);
+
+  [50, 150, 400, 900, 1600, 2400].forEach(function (delay) {
+    setTimeout(restoreReturnScroll, delay);
+  });
+
+  window.__TC_SAVE_PRODUCT_RETURN_SCROLL__ = saveReturnScroll;
+  window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__ = restoreReturnScroll;
+
+  window.__TC_PRODUCT_RETURN_SCROLL_STATE__ = function () {
+    var state = readState();
+    return {
+      raw: (function () {
+        try { return sessionStorage.getItem(RETURN_KEY) || ''; } catch (_) { return ''; }
+      })(),
+      parsed: state,
+      shouldRestore: shouldRestore(state),
+      isProductRoute: isProductRoute(),
+      currentPageKey: getPageKey(),
+      currentScrollY: getScrollY(),
+      activeElement: document.activeElement ? {
+        tag: document.activeElement.tagName,
+        cls: document.activeElement.className
+      } : null
+    };
+  };
+})();
+
+(function () {
+  "use strict";
+
   var GUARD_KEY = '__TC_USER_PHOTOS_T123_V2__';
   var prevInstance = window[GUARD_KEY];
   if (prevInstance && typeof prevInstance.destroy === 'function') prevInstance.destroy();
 
   var USER_PHOTOS_REV = '20260521';
-  var USER_PHOTOS_RETURN_KEY = 'tc:userPhotosReturn:v1';
 
   var USER_PHOTOS = [
     { src: "https://static.tildacdn.com/tild3866-3134-4235-b739-386236373939/20250209_152049_IMG_.jpg", href: "https://tripchiller.com/tproduct/737223104992-camo-trauma", alt: "Camo Trauma" },
@@ -4829,110 +5122,23 @@ function setupDesktopAura() {
   }
 
   function saveUserPhotosReturnState(productHref) {
-    try {
-      var root = document.getElementById('tc-user-photos-root');
-      var active = root ? root.querySelector('.tc-user-photos__slide--active .tc-user-photos__photo-link') : null;
-
-      var state = {
-        ts: Date.now(),
-        from: 'user-photos',
-        productHref: productHref || '',
-        path: location.pathname + location.search + location.hash,
-        scrollY: window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0,
-        rootId: 'tc-user-photos-root'
-      };
-
-      sessionStorage.setItem(USER_PHOTOS_RETURN_KEY, JSON.stringify(state));
-
-      if (active && typeof active.blur === 'function') {
-        active.blur();
-      }
-
-      if (document.activeElement && root && root.contains(document.activeElement) && typeof document.activeElement.blur === 'function') {
-        document.activeElement.blur();
-      }
-    } catch (_) {}
-  }
-
-  function isProductRouteForUserPhotosRestore() {
-    var path = location.pathname || '';
-    return /^\/product\//.test(path) || /^\/tproduct\//.test(path);
-  }
-
-  function restoreUserPhotosReturnScroll() {
-    if (isProductRouteForUserPhotosRestore()) return;
-
-    var raw = '';
-    try {
-      raw = sessionStorage.getItem(USER_PHOTOS_RETURN_KEY) || '';
-    } catch (_) {
-      raw = '';
+    if (window.__TC_SAVE_PRODUCT_RETURN_SCROLL__) {
+      window.__TC_SAVE_PRODUCT_RETURN_SCROLL__(productHref, 'user-photos');
     }
-
-    if (!raw) return;
-
-    var state = null;
-    try {
-      state = JSON.parse(raw);
-    } catch (_) {
-      state = null;
-    }
-
-    if (!state || state.from !== 'user-photos') return;
-
-    var age = Date.now() - Number(state.ts || 0);
-    if (age > 15 * 60 * 1000) {
-      try { sessionStorage.removeItem(USER_PHOTOS_RETURN_KEY); } catch (_) {}
-      return;
-    }
-
-    try { sessionStorage.removeItem(USER_PHOTOS_RETURN_KEY); } catch (_) {}
-
-    var y = Number(state.scrollY || 0);
-    var root = document.getElementById(state.rootId || 'tc-user-photos-root');
-
-    document.documentElement.classList.add('tc-user-photos-restoring-scroll');
-    if (document.body) document.body.classList.add('tc-user-photos-restoring-scroll');
-
-    function blurUserPhotoFocus() {
-      var active = document.activeElement;
-      if (active && root && root.contains(active) && typeof active.blur === 'function') {
-        active.blur();
-      }
-    }
-
-    function restore() {
-      blurUserPhotoFocus();
-
-      if (root && (!y || y < 10)) {
-        var rect = root.getBoundingClientRect();
-        y = Math.max(0, rect.top + (window.pageYOffset || document.documentElement.scrollTop || 0) - 80);
-      }
-
-      window.scrollTo(0, Math.max(0, y));
-    }
-
-    [0, 80, 240, 600, 1200].forEach(function (delay) {
-      setTimeout(restore, delay);
-    });
-
-    setTimeout(function () {
-      document.documentElement.classList.remove('tc-user-photos-restoring-scroll');
-      if (document.body) document.body.classList.remove('tc-user-photos-restoring-scroll');
-    }, 1600);
   }
 
   window.__TC_USER_PHOTOS_RETURN_STATE__ = function () {
-    var raw = '';
-    var parsed = null;
-    try { raw = sessionStorage.getItem(USER_PHOTOS_RETURN_KEY) || ''; } catch (_) {}
-    if (raw) {
-      try { parsed = JSON.parse(raw); } catch (_) { parsed = null; }
+    if (window.__TC_PRODUCT_RETURN_SCROLL_STATE__) {
+      return window.__TC_PRODUCT_RETURN_SCROLL_STATE__();
     }
+
     return {
-      raw: raw,
-      parsed: parsed,
-      scrollY: window.pageYOffset || document.documentElement.scrollTop || 0,
+      raw: '',
+      parsed: null,
+      shouldRestore: false,
+      isProductRoute: false,
+      currentPageKey: location.pathname + location.search + location.hash,
+      currentScrollY: window.pageYOffset || document.documentElement.scrollTop || 0,
       activeElement: document.activeElement ? {
         tag: document.activeElement.tagName,
         cls: document.activeElement.className
@@ -5556,7 +5762,6 @@ function setupDesktopAura() {
       render();
     }
 
-    restoreUserPhotosReturnScroll();
 
     requestAnimationFrame(syncTickerSpeeds);
     window.addEventListener('load', syncTickerSpeeds);
@@ -5573,9 +5778,7 @@ function setupDesktopAura() {
         }
         window.removeEventListener('load', syncTickerSpeeds);
         window.removeEventListener('resize', scheduleTickerSpeedSync);
-        window.removeEventListener('load', restoreUserPhotosReturnScroll);
-        window.removeEventListener('pageshow', restoreUserPhotosReturnScroll);
-        document.removeEventListener('DOMContentLoaded', restoreUserPhotosReturnScroll);
+
         document.removeEventListener('visibilitychange', onVisibilityChange);
         prevBtn.removeEventListener('click', onPrev);
         nextBtn.removeEventListener('click', onNext);
@@ -5596,9 +5799,6 @@ function setupDesktopAura() {
     };
   });
 
-  document.addEventListener('DOMContentLoaded', restoreUserPhotosReturnScroll);
-  window.addEventListener('load', restoreUserPhotosReturnScroll);
-  window.addEventListener('pageshow', restoreUserPhotosReturnScroll);
 })();
 
 
