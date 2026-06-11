@@ -4793,7 +4793,12 @@ function setupDesktopAura() {
   window.__TC_PRODUCT_RETURN_SCROLL_V1__ = true;
 
   var RETURN_KEY = 'tc:productReturnScroll:v1';
+  var BACKUP_RETURN_KEY = 'tc:productReturnScrollBackup:v1';
   var LEGACY_USER_PHOTOS_RETURN_KEY = 'tc:userPhotosReturn:v1';
+  var RETURN_TTL_MS = 5 * 60 * 1000;
+  var RESTORE_CLOSE_ENOUGH_PX = 80;
+  var activeRestoreKey = '';
+  var activeRestoreToken = 0;
 
   function isProductRoute(pathname) {
     var path = pathname || location.pathname || '';
@@ -4809,6 +4814,18 @@ function setupDesktopAura() {
       document.documentElement.scrollTop ||
       document.body.scrollTop ||
       0;
+  }
+
+  function getMaxScrollY() {
+    return Math.max(
+      0,
+      document.documentElement.scrollHeight - window.innerHeight,
+      document.body ? document.body.scrollHeight - window.innerHeight : 0
+    );
+  }
+
+  function isCloseEnough(a, b) {
+    return Math.abs(Number(a || 0) - Number(b || 0)) < RESTORE_CLOSE_ENOUGH_PX;
   }
 
   function normalizeHref(href) {
@@ -4846,8 +4863,10 @@ function setupDesktopAura() {
     if (isProductRoute()) return;
     if (!productHref || !isTProductHref(productHref)) return;
 
+    var now = Date.now();
     var state = {
-      ts: Date.now(),
+      ts: now,
+      expiresAt: now + RETURN_TTL_MS,
       from: 'product-return-scroll',
       source: source || '',
       productHref: normalizeHref(productHref),
@@ -4860,8 +4879,13 @@ function setupDesktopAura() {
 
     try {
       sessionStorage.setItem(RETURN_KEY, JSON.stringify(state));
+      sessionStorage.setItem(BACKUP_RETURN_KEY, JSON.stringify(state));
       sessionStorage.removeItem(LEGACY_USER_PHOTOS_RETURN_KEY);
     } catch (_) {}
+
+    if (window.__TC_DEBUG_PRODUCT_RETURN_SCROLL__) {
+      console.log('[TC_PRODUCT_RETURN_SAVE]', state);
+    }
 
     try {
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -4934,8 +4958,10 @@ function setupDesktopAura() {
       hash = url.hash;
     } catch (_) {}
 
+    var ts = Number(legacy.ts || 0) || Date.now();
     var state = {
-      ts: Number(legacy.ts || 0) || Date.now(),
+      ts: ts,
+      expiresAt: ts + RETURN_TTL_MS,
       from: 'product-return-scroll',
       source: 'user-photos-legacy',
       productHref: normalizeHref(legacy.productHref || ''),
@@ -4948,26 +4974,47 @@ function setupDesktopAura() {
 
     try {
       sessionStorage.setItem(RETURN_KEY, JSON.stringify(state));
+      sessionStorage.setItem(BACKUP_RETURN_KEY, JSON.stringify(state));
       sessionStorage.removeItem(LEGACY_USER_PHOTOS_RETURN_KEY);
     } catch (_) {}
 
     return state;
   }
 
+  function parseStateRaw(raw) {
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
   function readState() {
     var raw = '';
+    var state = null;
+
     try {
       raw = sessionStorage.getItem(RETURN_KEY) || '';
     } catch (_) {
       raw = '';
     }
 
-    if (raw) {
+    state = parseStateRaw(raw);
+    if (state) return state;
+
+    try {
+      raw = sessionStorage.getItem(BACKUP_RETURN_KEY) || '';
+    } catch (_) {
+      raw = '';
+    }
+
+    state = parseStateRaw(raw);
+    if (state) {
       try {
-        return JSON.parse(raw);
-      } catch (_) {
-        return null;
-      }
+        sessionStorage.setItem(RETURN_KEY, JSON.stringify(state));
+      } catch (_) {}
+      return state;
     }
 
     try {
@@ -4981,8 +5028,10 @@ function setupDesktopAura() {
   }
 
   function clearState() {
+    activeRestoreKey = '';
     try {
       sessionStorage.removeItem(RETURN_KEY);
+      sessionStorage.removeItem(BACKUP_RETURN_KEY);
       sessionStorage.removeItem(LEGACY_USER_PHOTOS_RETURN_KEY);
     } catch (_) {}
   }
@@ -4991,8 +5040,12 @@ function setupDesktopAura() {
     if (!state || state.from !== 'product-return-scroll') return false;
     if (isProductRoute()) return false;
 
-    var age = Date.now() - Number(state.ts || 0);
-    if (age > 15 * 60 * 1000) {
+    var expiresAt = Number(state.expiresAt || 0);
+    if (!expiresAt) {
+      expiresAt = (Number(state.ts || 0) || Date.now()) + RETURN_TTL_MS;
+    }
+
+    if (Date.now() > expiresAt) {
       clearState();
       return false;
     }
@@ -5003,12 +5056,32 @@ function setupDesktopAura() {
     return currentPath === savedPath;
   }
 
+  function getRestoreStateKey(state) {
+    return [
+      state.ts || '',
+      state.expiresAt || '',
+      state.pathname || '',
+      state.scrollY || '',
+      state.productHref || ''
+    ].join('|');
+  }
+
+  function endRestoreUi(stateKey) {
+    if (activeRestoreKey === stateKey) activeRestoreKey = '';
+    document.documentElement.classList.remove('tc-product-return-restoring-scroll');
+    if (document.body) document.body.classList.remove('tc-product-return-restoring-scroll');
+  }
+
   function restoreReturnScroll() {
     var state = readState();
     if (!shouldRestore(state)) return;
 
-    var y = Number(state.scrollY || 0);
-    if (!Number.isFinite(y) || y < 0) y = 0;
+    var stateKey = getRestoreStateKey(state);
+    if (activeRestoreKey === stateKey) return;
+    activeRestoreKey = stateKey;
+
+    var targetY = Number(state.scrollY || 0);
+    if (!Number.isFinite(targetY) || targetY < 0) targetY = 0;
 
     document.documentElement.classList.add('tc-product-return-restoring-scroll');
     if (document.body) document.body.classList.add('tc-product-return-restoring-scroll');
@@ -5017,27 +5090,84 @@ function setupDesktopAura() {
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     } catch (_) {}
 
-    function restore() {
+    var successCount = 0;
+    var attempts = 0;
+    var completedChecks = 0;
+    var token = ++activeRestoreToken;
+    var delays = [
+      0,
+      50,
+      120,
+      240,
+      500,
+      900,
+      1400,
+      2200,
+      3200,
+      4500,
+      6000,
+      8000,
+      10000,
+      15000,
+      22000,
+      30000
+    ];
+
+    function attemptRestore() {
+      if (token !== activeRestoreToken) return;
+
+      var latestState = readState();
+      if (!shouldRestore(latestState)) {
+        endRestoreUi(stateKey);
+        return;
+      }
+
+      attempts += 1;
       blurProductSourceFocus();
 
-      var maxY = Math.max(
-        0,
-        document.documentElement.scrollHeight - window.innerHeight,
-        document.body ? document.body.scrollHeight - window.innerHeight : 0
-      );
+      var maxY = getMaxScrollY();
+      var y = maxY > 0 ? Math.min(targetY, maxY) : targetY;
 
-      window.scrollTo(0, Math.min(y, maxY || y));
+      window.scrollTo(0, y);
+
+      setTimeout(function () {
+        if (token !== activeRestoreToken) return;
+
+        completedChecks += 1;
+
+        var currentY = getScrollY();
+
+        if (isCloseEnough(currentY, targetY) || (maxY >= targetY - RESTORE_CLOSE_ENOUGH_PX && isCloseEnough(currentY, y))) {
+          successCount += 1;
+        } else {
+          successCount = 0;
+        }
+
+        window.__TC_PRODUCT_RETURN_SCROLL_LAST_ATTEMPT__ = {
+          attempts: attempts,
+          targetY: targetY,
+          appliedY: y,
+          currentY: currentY,
+          maxY: maxY,
+          successCount: successCount,
+          state: latestState
+        };
+
+        if (successCount >= 2) {
+          endRestoreUi(stateKey);
+          clearState();
+          return;
+        }
+
+        if (completedChecks >= delays.length) {
+          endRestoreUi(stateKey);
+        }
+      }, 120);
     }
 
-    [0, 50, 120, 240, 500, 900, 1400, 2200].forEach(function (delay) {
-      setTimeout(restore, delay);
+    delays.forEach(function (delay) {
+      setTimeout(attemptRestore, delay);
     });
-
-    setTimeout(function () {
-      document.documentElement.classList.remove('tc-product-return-restoring-scroll');
-      if (document.body) document.body.classList.remove('tc-product-return-restoring-scroll');
-      clearState();
-    }, 2600);
   }
 
   document.addEventListener('pointerdown', saveFromEvent, true);
@@ -5060,18 +5190,26 @@ function setupDesktopAura() {
 
   window.__TC_SAVE_PRODUCT_RETURN_SCROLL__ = saveReturnScroll;
   window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__ = restoreReturnScroll;
+  window.__TC_FORCE_PRODUCT_RETURN_RESTORE__ = restoreReturnScroll;
 
   window.__TC_PRODUCT_RETURN_SCROLL_STATE__ = function () {
     var state = readState();
+    var expiresAt = state ? Number(state.expiresAt || 0) : 0;
     return {
       raw: (function () {
         try { return sessionStorage.getItem(RETURN_KEY) || ''; } catch (_) { return ''; }
       })(),
+      backupRaw: (function () {
+        try { return sessionStorage.getItem(BACKUP_RETURN_KEY) || ''; } catch (_) { return ''; }
+      })(),
       parsed: state,
+      expiresAt: expiresAt,
+      ttlLeftMs: expiresAt ? Math.max(0, expiresAt - Date.now()) : 0,
       shouldRestore: shouldRestore(state),
       isProductRoute: isProductRoute(),
       currentPageKey: getPageKey(),
       currentScrollY: getScrollY(),
+      lastAttempt: window.__TC_PRODUCT_RETURN_SCROLL_LAST_ATTEMPT__ || null,
       activeElement: document.activeElement ? {
         tag: document.activeElement.tagName,
         cls: document.activeElement.className
