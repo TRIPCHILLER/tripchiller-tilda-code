@@ -4796,23 +4796,23 @@ function setupDesktopAura() {
   var USER_PHOTOS_REV = '20260521';
 
   var USER_PHOTOS = [
-    { src: "https://static.tildacdn.com/tild3866-3134-4235-b739-386236373939/20250209_152049_IMG_.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754849678317", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild3866-3134-4235-b739-386236373939/20250209_152049_IMG_.jpg", href: "https://tripchiller.com/tproduct/737223104992-camo-trauma", alt: "Camo Trauma" },
     { src: "https://static.tildacdn.com/tild3165-6233-4966-b365-306534343730/jT-rqCPef8n7kAtP79Dv.jpg", href: "", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild3239-3630-4538-b363-333364323737/IMG_4749__2.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754578987399", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild3234-3538-4661-b436-346663663433/photo_2025-12-07_17-.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344171469", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild6632-6531-4062-b932-326661346366/IMG_8909.JPG", href: "https://tripchiller.com/#!/tproduct/1202483551-1756816115084", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild3138-3131-4030-b235-343662656564/IMG_4749__3.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1756815870388", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild3934-6435-4062-b035-623934333265/photo_2024-08-29_14-.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1778901069550", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild3462-3738-4665-a163-663163373862/photo_2026-01-07_05-.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344170359", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild6438-3732-4131-a662-316337343765/IMG_47102_.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344171469", alt: "Фото адепта TRIPCHILLER" },
+    { src: "https://static.tildacdn.com/tild3239-3630-4538-b363-333364323737/IMG_4749__2.jpg", href: "https://static.tildacdn.com/tild3239-3630-4538-b363-333364323737/IMG_4749__2.jpg", alt: "SERAPHIM T-SHIRT" },
+    { src: "https://static.tildacdn.com/tild3234-3538-4661-b436-346663663433/photo_2025-12-07_17-.jpg", href: "https://tripchiller.com/tproduct/872098106042-dfmb", alt: "DFMB Distressed black cap" },
+    { src: "https://static.tildacdn.com/tild6632-6531-4062-b932-326661346366/IMG_8909.JPG", href: "https://tripchiller.com/tproduct/878341104272-dfmb", alt: "DFMB washed cap" },
+    { src: "https://static.tildacdn.com/tild3138-3131-4030-b235-343662656564/IMG_4749__3.jpg", href: "https://tripchiller.com/tproduct/872098106042-dfmb", alt: "Distressed DFM Sand Cap" },
+    { src: "https://static.tildacdn.com/tild3934-6435-4062-b035-623934333265/photo_2024-08-29_14-.jpg", href: "https://tripchiller.com/tproduct/516945778212-bloodie", alt: "BLOOD TANK TOP" },
+    { src: "https://static.tildacdn.com/tild3462-3738-4665-a163-663163373862/photo_2026-01-07_05-.jpg", href: "https://tripchiller.com/tproduct/878341104272-dfmb", alt: "DFMB WASHED" },
+    { src: "https://static.tildacdn.com/tild6438-3732-4131-a662-316337343765/IMG_47102_.jpg", href: "https://tripchiller.com/tproduct/872098106042-dfmb", alt: "Distressed DFMB Black Cap" },
     { src: "https://static.tildacdn.com/tild3331-3461-4235-b136-336637336333/6yu6j06OMVuTiTq3_83Q.jpg", href: "", alt: "BLACK STAR T-SHIRT" },
-    { src: "https://static.tildacdn.com/tild6335-3432-4565-b636-306436343532/photo_2026-05-21_14-.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593190734", alt: "FOG MOOD CUSTOM CAP" },
-    { src: "https://static.tildacdn.com/tild6263-3933-4631-b765-343764386231/IMG_4749__33.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593191131", alt: "GLAMOUR EMO CAP" },
-    { src: "https://static.tildacdn.com/tild6661-3232-4464-a231-623165643665/IMG_4749__34.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754593191131", alt: "GLAMOUR EMO CAP" },
-    { src: "https://static.tildacdn.com/tild6232-6665-4532-b732-363561623133/IMG_4749__5.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1754344170359", alt: "DFMB WASHED CAP" },
-    { src: "https://static.tildacdn.com/tild3461-3739-4230-b437-356534376461/IMG_47102__2.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-3569261809201", alt: "DFMB T-SHIRT" },
-    { src: "https://static.tildacdn.com/tild3263-6663-4261-b862-303232613766/IMG_4242__2.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1778902617934", alt: "FROZEN VITEK FLAME T-SHIRT" },
-    { src: "https://static.tildacdn.com/tild3237-3265-4434-b361-353639366137/_.jpg", href: "https://tripchiller.com/#!/tproduct/1202483551-1778902327100", alt: "HAND-PRINTED POLO SHIRT" }
+    { src: "https://static.tildacdn.com/tild6335-3432-4565-b636-306436343532/photo_2026-05-21_14-.jpg", href: "https://tripchiller.com/tproduct/657386204082-fog-mood", alt: "FOG MOOD CUSTOM CAP" },
+    { src: "https://static.tildacdn.com/tild6263-3933-4631-b765-343764386231/IMG_4749__33.jpg", href: "https://tripchiller.com/tproduct/502715167942-glamour-emo", alt: "GLAMOUR EMO CAP" },
+    { src: "https://static.tildacdn.com/tild6661-3232-4464-a231-623165643665/IMG_4749__34.jpg", href: "https://tripchiller.com/tproduct/502715167942-glamour-emo", alt: "GLAMOUR EMO CAP" },
+    { src: "https://static.tildacdn.com/tild6232-6665-4532-b732-363561623133/IMG_4749__5.jpg", href: "https://tripchiller.com/tproduct/878341104272-dfmb", alt: "DFMB WASHED CAP" },
+    { src: "https://static.tildacdn.com/tild3461-3739-4230-b437-356534376461/IMG_47102__2.jpg", href: "https://tripchiller.com/tproduct/709803209462-dfmb", alt: "DFMB T-SHIRT" },
+    { src: "https://static.tildacdn.com/tild3263-6663-4261-b862-303232613766/IMG_4242__2.jpg", href: "https://tripchiller.com/tproduct/460014246552-frozen-flame", alt: "FROZEN VITEK FLAME T-SHIRT" },
+    { src: "https://static.tildacdn.com/tild3237-3265-4434-b361-353639366137/_.jpg", href: "https://tripchiller.com/tproduct/658421571912-hand-printed", alt: "HAND-PRINTED POLO SHIRT" }
   ];
 
   function ready(fn) {
