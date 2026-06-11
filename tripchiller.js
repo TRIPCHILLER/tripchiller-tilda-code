@@ -5458,6 +5458,224 @@ function setupDesktopAura() {
 (function () {
   "use strict";
 
+  if (window.__TC_CATALOG_INTRO_V1__) return;
+  window.__TC_CATALOG_INTRO_V1__ = true;
+
+  var INTRO_CLASS = 'tc-catalog-intro-playing';
+  var RETURN_RESTORE_CLASS = 'tc-product-return-restoring-scroll';
+  var INTRO_KEY_PREFIX = 'tc:catalogIntroPlayed:v1:';
+  var RETURN_KEY = 'tc:productReturnScroll:v1';
+  var BACKUP_RETURN_KEY = 'tc:productReturnScrollBackup:v1';
+  var INTRO_DURATION_MS = 1180;
+  var CATALOG_CARD_SELECTOR = [
+    '#allrecords .tc-catalog-record .t-store__card',
+    '#allrecords .tc-catalog-record .t-catalog__card',
+    '#allrecords .tc-catalog-record .t-catalog__product',
+    '#allrecords .tc-catalog-record .js-store-product',
+    '#rec2312983111 .t-store__card',
+    '#rec2312983111 .t-catalog__card',
+    '#rec2312983111 .t-catalog__product',
+    '#rec2312983111 .js-store-product'
+  ].join(',');
+  var introStarted = false;
+  var suppressedByNavigation = false;
+  var returnFlowSuppressed = false;
+  var cleanupTimer = 0;
+
+  function getCatalogKey() {
+    return (location.pathname || '/') + (location.search || '');
+  }
+
+  function getIntroKey() {
+    return INTRO_KEY_PREFIX + getCatalogKey();
+  }
+
+  function isProductRoute() {
+    var path = location.pathname || '';
+    var hash = location.hash || '';
+    return /^\/product\//.test(path) || /^\/tproduct\//.test(path) || /#!\/?(?:product|tproduct)(\/|$)/.test(hash);
+  }
+
+  function parseState(raw) {
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch (_) { return null; }
+  }
+
+  function readProductReturnState() {
+    var raw = '';
+    var state = null;
+
+    try { raw = sessionStorage.getItem(RETURN_KEY) || ''; } catch (_) { raw = ''; }
+    state = parseState(raw);
+    if (state && state.from === 'product-return-scroll') return state;
+
+    try { raw = sessionStorage.getItem(BACKUP_RETURN_KEY) || ''; } catch (_) { raw = ''; }
+    state = parseState(raw);
+    if (state && state.from === 'product-return-scroll') return state;
+
+    return null;
+  }
+
+  function hasLiveProductReturnState() {
+    var state = readProductReturnState();
+    if (!state) return false;
+
+    var expiresAt = Number(state.expiresAt || 0);
+    if (expiresAt && Date.now() > expiresAt) return false;
+
+    return state;
+  }
+
+  function setReturnRestoreClass(enabled) {
+    document.documentElement.classList.toggle(RETURN_RESTORE_CLASS, !!enabled);
+    if (document.body) document.body.classList.toggle(RETURN_RESTORE_CLASS, !!enabled);
+  }
+
+  function armReturnStabilization() {
+    if (hasLiveProductReturnState()) setReturnRestoreClass(true);
+  }
+
+  function hasProductReturnState() {
+    var state = hasLiveProductReturnState();
+    if (!state) return false;
+
+    if (!isProductRoute() && (state.pathname || '/') === (location.pathname || '/')) {
+      returnFlowSuppressed = true;
+      setReturnRestoreClass(true);
+      return true;
+    }
+
+    return false;
+  }
+
+  function markCatalogRecord() {
+    var rec = document.querySelector('#rec2312983111');
+    if (rec) rec.classList.add('tc-catalog-record');
+  }
+
+  function getCatalogCardCount() {
+    markCatalogRecord();
+    return document.querySelectorAll(CATALOG_CARD_SELECTOR).length;
+  }
+
+  function isIntroPlayed() {
+    try { return sessionStorage.getItem(getIntroKey()) === '1'; } catch (_) { return false; }
+  }
+
+  function markIntroPlayed() {
+    try { sessionStorage.setItem(getIntroKey(), '1'); } catch (_) {}
+  }
+
+  function stopIntro() {
+    document.documentElement.classList.remove(INTRO_CLASS);
+    if (cleanupTimer) {
+      clearTimeout(cleanupTimer);
+      cleanupTimer = 0;
+    }
+    hasProductReturnState();
+  }
+
+  function isBackForwardNavigation() {
+    var nav = null;
+    try {
+      nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    } catch (_) {
+      nav = null;
+    }
+    return !!(nav && nav.type === 'back_forward');
+  }
+
+  function shouldStartIntro() {
+    if (introStarted) return false;
+    if (suppressedByNavigation) return false;
+    if (isProductRoute()) return false;
+    if (returnFlowSuppressed || hasProductReturnState()) {
+      suppressedByNavigation = true;
+      return false;
+    }
+    if (isIntroPlayed()) return false;
+    if (isBackForwardNavigation()) return false;
+    return getCatalogCardCount() > 0;
+  }
+
+  function startIntro() {
+    if (!shouldStartIntro()) {
+      hasProductReturnState();
+      return false;
+    }
+
+    introStarted = true;
+    markIntroPlayed();
+    document.documentElement.classList.add(INTRO_CLASS);
+
+    cleanupTimer = setTimeout(stopIntro, INTRO_DURATION_MS);
+    return true;
+  }
+
+  function scheduleInitialIntro() {
+    if (startIntro()) return;
+    [80, 220, 520, 900].forEach(function (delay) {
+      setTimeout(function () {
+        if (!introStarted) startIntro();
+      }, delay);
+    });
+  }
+
+  function suppressAfterNavigation() {
+    suppressedByNavigation = true;
+    armReturnStabilization();
+    stopIntro();
+    hasProductReturnState();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scheduleInitialIntro);
+  } else {
+    scheduleInitialIntro();
+  }
+
+  window.addEventListener('pageshow', function (event) {
+    if (event && event.persisted) suppressAfterNavigation();
+    else hasProductReturnState();
+  });
+  window.addEventListener('popstate', suppressAfterNavigation);
+  window.addEventListener('hashchange', suppressAfterNavigation);
+
+  document.addEventListener('keydown', function (event) {
+    if (event && event.key === 'Escape') armReturnStabilization();
+  }, true);
+
+  document.addEventListener('pointerdown', function (event) {
+    if (!event || !event.target || !event.target.closest) return;
+    if (event.target.closest('.tc-store-back-link, .js-store-close-btn, .t-store__prod-popup__close, .t-popup__close, .t-popup__close-wrapper')) {
+      armReturnStabilization();
+    }
+  }, true);
+
+  document.addEventListener('click', function (event) {
+    if (!event || !event.target || !event.target.closest) return;
+    if (event.target.closest('.tc-store-back-link, .js-store-close-btn, .t-store__prod-popup__close, .t-popup__close, .t-popup__close-wrapper')) {
+      armReturnStabilization();
+    }
+  }, true);
+
+  window.addEventListener('pagehide', armReturnStabilization);
+
+  window.__TC_CATALOG_INTRO_STATE__ = function () {
+    return {
+      path: location.pathname,
+      hash: location.hash,
+      introPlayed: isIntroPlayed(),
+      introPlaying: document.documentElement.classList.contains(INTRO_CLASS),
+      hasProductReturnState: hasProductReturnState(),
+      visibleCatalogCardCount: window.__TC_VISIBLE_CATALOG_CARD_COUNT__ ? window.__TC_VISIBLE_CATALOG_CARD_COUNT__() : null
+    };
+  };
+})();
+
+(function () {
+  "use strict";
+
   if (window.__TC_PRODUCT_EXIT_CONTROLLER_V1__) return;
   window.__TC_PRODUCT_EXIT_CONTROLLER_V1__ = true;
 
