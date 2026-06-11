@@ -3599,6 +3599,82 @@ body.tc-product-page-active .tc-menu-eye-logo {
   filter: brightness(.92) !important;
 }
 
+
+/* Real Tilda catalog load-more button: keep hover/pressed on the outer clickable node only. */
+#allrecords button.js-catalog-load-more-btn,
+#allrecords .t-btn.js-catalog-load-more-btn,
+#allrecords button.tc-load-more-btn,
+#allrecords .t-btn.tc-load-more-btn {
+  background: #000 !important;
+  background-color: #000 !important;
+  color: #fff !important;
+  opacity: 1 !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition:
+    background-color .22s ease,
+    color .22s ease,
+    transform .12s ease,
+    filter .22s ease !important;
+  will-change: transform;
+}
+
+#allrecords button.js-catalog-load-more-btn .t-btnflex__text,
+#allrecords .t-btn.js-catalog-load-more-btn .t-btnflex__text,
+#allrecords .tc-load-more-btn .tc-load-more-btn-text,
+#allrecords .tc-load-more-btn .js-catalog-load-more-btn-text {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: inherit !important;
+  opacity: 1 !important;
+  text-transform: uppercase !important;
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #allrecords button.js-catalog-load-more-btn:hover,
+  #allrecords .t-btn.js-catalog-load-more-btn:hover,
+  #allrecords button.tc-load-more-btn:hover,
+  #allrecords .t-btn.tc-load-more-btn:hover {
+    background: #9d191c !important;
+    background-color: #9d191c !important;
+    color: #fff !important;
+  }
+}
+
+#allrecords button.js-catalog-load-more-btn:active,
+#allrecords button.js-catalog-load-more-btn.tc-loadmore-pressed,
+#allrecords button.js-catalog-load-more-btn.tc-action-pressed,
+#allrecords .t-btn.js-catalog-load-more-btn:active,
+#allrecords .t-btn.js-catalog-load-more-btn.tc-loadmore-pressed,
+#allrecords .t-btn.js-catalog-load-more-btn.tc-action-pressed,
+#allrecords button.tc-load-more-btn:active,
+#allrecords button.tc-load-more-btn.tc-loadmore-pressed,
+#allrecords button.tc-load-more-btn.tc-action-pressed,
+#allrecords .t-btn.tc-load-more-btn:active,
+#allrecords .t-btn.tc-load-more-btn.tc-loadmore-pressed,
+#allrecords .t-btn.tc-load-more-btn.tc-action-pressed {
+  background: #9d191c !important;
+  background-color: #9d191c !important;
+  color: #fff !important;
+  transform: translateY(2px) scale(.97) !important;
+  filter: brightness(.92) !important;
+}
+
+#allrecords .tc-load-more-btn-text:active,
+#allrecords .tc-load-more-btn-text.tc-loadmore-pressed,
+#allrecords .tc-load-more-btn-text.tc-action-pressed,
+#allrecords .js-catalog-load-more-btn-text:active,
+#allrecords .js-catalog-load-more-btn-text.tc-loadmore-pressed,
+#allrecords .js-catalog-load-more-btn-text.tc-action-pressed {
+  transform: none !important;
+  filter: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 /* Catalog parts color hardfix V2: target real Tilda filter text spans. */
 #allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn,
 #allrecords .t-catalog__parts-switch-wrapper .tc-catalog-filter-btn *,

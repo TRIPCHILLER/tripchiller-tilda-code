@@ -3405,14 +3405,27 @@ eyeUnlockTimer = setTimeout(function(){
   if (window.__TC_LOAD_MORE_BUTTON_STYLE_V1__) return;
   window.__TC_LOAD_MORE_BUTTON_STYLE_V1__ = true;
   var LOAD_MORE_LABEL = 'ЗАГРУЗИТЬ ЕЩЁ';
-  var LOAD_MORE_CLICKABLE_SELECTOR = [
-    'button',
-    'a',
-    '[role="button"]',
-    '.t-btn',
-    '[class*="showmore"]',
-    '[class*="load"]',
-    '[class*="more"]'
+  var LOAD_MORE_OUTER_BUTTON_SELECTOR = [
+    'button.js-catalog-load-more-btn',
+    'button[class*="load-more"]',
+    'button[class*="loadmore"]',
+    'button[class*="showmore"]',
+    'a.js-catalog-load-more-btn',
+    'a[class*="load-more"]',
+    'a[class*="loadmore"]',
+    'a[class*="showmore"]',
+    '[role="button"].js-catalog-load-more-btn',
+    '.t-btn.js-catalog-load-more-btn',
+    '.t-btn[class*="load-more"]',
+    '.t-btn[class*="loadmore"]',
+    '.t-btn[class*="showmore"]'
+  ].join(', ');
+  var LOAD_MORE_TEXT_SELECTOR = [
+    '.js-catalog-load-more-btn-text',
+    '.t-btnflex__text',
+    '.t-btntext',
+    '.tn-atom',
+    'span'
   ].join(', ');
   var LOAD_MORE_SELECTOR = [
     '#allrecords button',
@@ -3443,21 +3456,30 @@ eyeUnlockTimer = setTimeout(function(){
     node.textContent = value;
   }
 
-  function getLoadMoreClickable(node) {
+  function getOuterLoadMoreButton(node) {
     if (!node || !node.closest) return null;
-    if (node.matches && node.matches(LOAD_MORE_CLICKABLE_SELECTOR)) return node;
-    return node.closest(LOAD_MORE_CLICKABLE_SELECTOR);
+    return node.closest(LOAD_MORE_OUTER_BUTTON_SELECTOR);
+  }
+
+  function getLoadMoreTextNode(btn, source) {
+    if (source && source !== btn && source.matches && source.matches(LOAD_MORE_TEXT_SELECTOR) && isLoadMoreText(source.textContent)) {
+      return source;
+    }
+
+    if (!btn || !btn.querySelector) return null;
+
+    var directText = btn.querySelector(LOAD_MORE_TEXT_SELECTOR);
+    if (directText && isLoadMoreText(directText.textContent)) return directText;
+
+    return null;
   }
 
   function setLoadMoreVisualText(btn, source) {
-    var textNodeTarget = null;
-    if (source && source !== btn && isLoadMoreText(source.textContent)) {
-      textNodeTarget = source;
-    } else if (btn && btn.querySelector) {
-      textNodeTarget = btn.querySelector('.t-btntext, .tn-atom, span, div');
-    }
+    var textNodeTarget = getLoadMoreTextNode(btn, source);
 
-    if (textNodeTarget && isLoadMoreText(textNodeTarget.textContent)) {
+    if (textNodeTarget) {
+      textNodeTarget.classList.add('tc-load-more-btn-text');
+      textNodeTarget.classList.remove('tc-load-more-btn');
       setTextIfNeeded(textNodeTarget, LOAD_MORE_LABEL);
       return;
     }
@@ -3468,8 +3490,15 @@ eyeUnlockTimer = setTimeout(function(){
   function normalizeLoadMoreButton(btn, source) {
     if (!btn || !isLoadMoreText((source || btn).textContent)) return;
 
-    btn.classList.add('tc-load-more-btn');
-    setLoadMoreVisualText(btn, source);
+    var outerBtn = getOuterLoadMoreButton(source || btn) || getOuterLoadMoreButton(btn) || btn;
+    if (!outerBtn) return;
+
+    if (source && source !== outerBtn && source.classList) {
+      source.classList.remove('tc-load-more-btn');
+    }
+
+    outerBtn.classList.add('tc-load-more-btn');
+    setLoadMoreVisualText(outerBtn, source);
   }
 
   function normalizeLoadMoreText(root) {
@@ -3481,7 +3510,7 @@ eyeUnlockTimer = setTimeout(function(){
     var buttons = searchRoot.querySelectorAll(LOAD_MORE_SELECTOR);
     buttons.forEach(function(candidate){
       if (!candidate || !isLoadMoreText(candidate.textContent)) return;
-      var clickable = getLoadMoreClickable(candidate) || candidate;
+      var clickable = getOuterLoadMoreButton(candidate) || candidate;
       if (!clickable || !searchRoot.contains(clickable)) return;
       normalizeLoadMoreButton(clickable, candidate);
     });
