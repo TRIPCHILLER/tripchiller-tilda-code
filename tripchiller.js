@@ -4794,6 +4794,7 @@ function setupDesktopAura() {
 
   var RETURN_KEY = 'tc:productReturnScroll:v1';
   var BACKUP_RETURN_KEY = 'tc:productReturnScrollBackup:v1';
+  var OPENED_KEY = 'tc:productOpenedFromSite:v1';
   var LEGACY_USER_PHOTOS_RETURN_KEY = 'tc:userPhotosReturn:v1';
   var RETURN_TTL_MS = 5 * 60 * 1000;
   var RESTORE_CLOSE_ENOUGH_PX = 80;
@@ -4880,6 +4881,14 @@ function setupDesktopAura() {
     try {
       sessionStorage.setItem(RETURN_KEY, JSON.stringify(state));
       sessionStorage.setItem(BACKUP_RETURN_KEY, JSON.stringify(state));
+      sessionStorage.setItem(OPENED_KEY, JSON.stringify({
+        ts: now,
+        expiresAt: now + RETURN_TTL_MS,
+        from: source || '',
+        pageKey: getPageKey(),
+        scrollY: getScrollY(),
+        productHref: normalizeHref(productHref)
+      }));
       sessionStorage.removeItem(LEGACY_USER_PHOTOS_RETURN_KEY);
     } catch (_) {}
 
@@ -5214,6 +5223,114 @@ function setupDesktopAura() {
         tag: document.activeElement.tagName,
         cls: document.activeElement.className
       } : null
+    };
+  };
+})();
+
+(function () {
+  "use strict";
+
+  if (window.__TC_PRODUCT_EXIT_CONTROLLER_V1__) return;
+  window.__TC_PRODUCT_EXIT_CONTROLLER_V1__ = true;
+
+  var OPENED_KEY = 'tc:productOpenedFromSite:v1';
+
+  function isProductRoute() {
+    var path = location.pathname || '';
+    return /^\/product\//.test(path) || /^\/tproduct\//.test(path);
+  }
+
+  function readOpenedState() {
+    var raw = '';
+    try { raw = sessionStorage.getItem(OPENED_KEY) || ''; } catch (_) {}
+    if (!raw) return null;
+
+    try { return JSON.parse(raw); } catch (_) {
+      return null;
+    }
+  }
+
+  function canUseHistoryBack() {
+    if (!isProductRoute()) return false;
+
+    var state = readOpenedState();
+    if (!state) return false;
+
+    var expiresAt = Number(state.expiresAt || 0);
+    if (expiresAt && Date.now() > expiresAt) return false;
+
+    // history.length is not perfect, but if we have our own marker,
+    // it is safe enough to try history.back().
+    return window.history && window.history.length > 1;
+  }
+
+  function fallbackToHome() {
+    window.location.href = '/';
+  }
+
+  function goBackToPreviousPage() {
+    if (canUseHistoryBack()) {
+      try {
+        history.back();
+        return true;
+      } catch (_) {}
+    }
+
+    fallbackToHome();
+    return false;
+  }
+
+  function isProductBackLink(node) {
+    if (!node || !node.closest) return false;
+
+    var link = node.closest('a, button, [role="button"]');
+    if (!link) return false;
+
+    var text = String(link.textContent || '').toLowerCase();
+    var href = link.getAttribute && String(link.getAttribute('href') || '');
+
+    return (
+      text.indexOf('назад') !== -1 ||
+      text.indexOf('галере') !== -1 ||
+      text.indexOf('more products') !== -1 ||
+      href === '/' ||
+      href === 'https://tripchiller.com/' ||
+      href === 'http://tripchiller.com/'
+    );
+  }
+
+  document.addEventListener('click', function (e) {
+    if (!isProductRoute()) return;
+    if (!isProductBackLink(e.target)) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    goBackToPreviousPage();
+  }, true);
+
+  document.addEventListener('keydown', function (e) {
+    if (!isProductRoute()) return;
+    if (!e || e.key !== 'Escape') return;
+
+    var tag = document.activeElement && document.activeElement.tagName;
+    if (tag && /^(INPUT|TEXTAREA|SELECT)$/.test(tag)) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    goBackToPreviousPage();
+  }, true);
+
+  window.__TC_PRODUCT_EXIT_STATE__ = function () {
+    return {
+      isProductRoute: isProductRoute(),
+      openedState: readOpenedState(),
+      canUseHistoryBack: canUseHistoryBack(),
+      historyLength: history.length,
+      referrer: document.referrer || ''
     };
   };
 })();
