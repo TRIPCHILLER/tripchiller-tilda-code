@@ -4999,15 +4999,43 @@ function setupDesktopAura() {
       (body && (body.classList.contains('tc-product-page') || body.classList.contains('tc-product-page-active')));
   }
 
-  function isProductRoute(pathname) {
+  function isProductUrlLike(pathname) {
     var path = pathname || location.pathname || '';
-    var hash = location.hash || '';
-    var href = location.href || '';
     return isProductPathLike(path) ||
-      isProductPathLike(hash) ||
-      isProductPathLike(href) ||
+      isProductPathLike(location.hash || '') ||
+      isProductPathLike(location.href || '');
+  }
+
+  function hasVisibleProductPopup() {
+    var selectors = [
+      '.t-store__prod-popup.t-popup_show',
+      '.t-store__product-popup.t-popup_show',
+      '.js-store-prod-popup.t-popup_show',
+      '.t-popup_show .t-store__prod-popup',
+      '.t-popup_show .t-store__product-popup',
+      '.t-popup_show .js-store-prod-popup'
+    ];
+    var nodes = document.querySelectorAll(selectors.join(','));
+
+    for (var i = 0; i < nodes.length; i += 1) {
+      if (isElementVisible(nodes[i])) return true;
+    }
+
+    return false;
+  }
+
+  function isProductRouteBroad(pathname) {
+    return isProductUrlLike(pathname) ||
       hasProductPopupElement() ||
       hasProductPageClass();
+  }
+
+  function isProductRoute(pathname) {
+    return isProductRouteBroad(pathname);
+  }
+
+  function isProductBlockingRestore(pathname) {
+    return isProductUrlLike(pathname) || hasVisibleProductPopup();
   }
 
   function getPageKey() {
@@ -5076,7 +5104,7 @@ function setupDesktopAura() {
         if (window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__) window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__();
 
         var currentY = getScrollY();
-        if (!isProductRoute() && lastY > 300 && currentY < lastY - 200) {
+        if (!isProductUrlLike() && document.querySelector(CATALOG_CARD_SELECTOR) && lastY > 300 && currentY < lastY - 200) {
           window.scrollTo(0, lastY);
         }
       }, delay);
@@ -5558,7 +5586,7 @@ function setupDesktopAura() {
 
   function shouldRestore(state) {
     if (!state || state.from !== 'product-return-scroll') return false;
-    if (isProductRoute()) return false;
+    if (isProductBlockingRestore()) return false;
 
     var expiresAt = Number(state.expiresAt || 0);
     if (!expiresAt) {
@@ -5758,6 +5786,9 @@ function setupDesktopAura() {
   window.__TC_SAVE_PRODUCT_RETURN_SCROLL__ = saveReturnScroll;
   window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__ = restoreReturnScroll;
   window.__TC_FORCE_PRODUCT_RETURN_RESTORE__ = restoreReturnScroll;
+  window.__TC_IS_PRODUCT_ROUTE_BROAD__ = isProductRouteBroad;
+  window.__TC_IS_PRODUCT_BLOCKING_RESTORE__ = isProductBlockingRestore;
+  window.__TC_HAS_VISIBLE_PRODUCT_POPUP__ = hasVisibleProductPopup;
 
   window.__TC_PRODUCT_RETURN_SCROLL_STATE__ = function () {
     var state = readState();
@@ -5779,7 +5810,11 @@ function setupDesktopAura() {
       hash: location.hash || '',
       href: location.href || '',
       isProductRoute: isProductRoute(),
+      isProductRouteBroad: isProductRouteBroad(),
+      isProductBlockingRestore: isProductBlockingRestore(),
+      hasProductPageClass: hasProductPageClass(),
       hasProductPopupElement: hasProductPopupElement(),
+      hasVisibleProductPopup: hasVisibleProductPopup(),
       currentPageKey: getPageKey(),
       currentScrollY: getScrollY(),
       maxScrollY: getMaxScrollY(),
@@ -5838,12 +5873,53 @@ function setupDesktopAura() {
       (body && (body.classList.contains('tc-product-page') || body.classList.contains('tc-product-page-active')));
   }
 
-  function isProductRoute() {
+  function isProductUrlLike() {
     return isProductPathLike(location.pathname || '') ||
       isProductPathLike(location.hash || '') ||
-      isProductPathLike(location.href || '') ||
+      isProductPathLike(location.href || '');
+  }
+
+  function isElementVisible(el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    var style = getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || 1) === 0) return false;
+    var rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }
+
+  function hasVisibleProductPopup() {
+    if (window.__TC_HAS_VISIBLE_PRODUCT_POPUP__) return window.__TC_HAS_VISIBLE_PRODUCT_POPUP__();
+
+    var selectors = [
+      '.t-store__prod-popup.t-popup_show',
+      '.t-store__product-popup.t-popup_show',
+      '.js-store-prod-popup.t-popup_show',
+      '.t-popup_show .t-store__prod-popup',
+      '.t-popup_show .t-store__product-popup',
+      '.t-popup_show .js-store-prod-popup'
+    ];
+    var nodes = document.querySelectorAll(selectors.join(','));
+
+    for (var i = 0; i < nodes.length; i += 1) {
+      if (isElementVisible(nodes[i])) return true;
+    }
+
+    return false;
+  }
+
+  function isProductRouteBroad() {
+    return isProductUrlLike() ||
       hasProductPopupElement() ||
       hasProductPageClass();
+  }
+
+  function isProductRoute() {
+    return isProductRouteBroad();
+  }
+
+  function isProductBlockingRestore() {
+    if (window.__TC_IS_PRODUCT_BLOCKING_RESTORE__) return window.__TC_IS_PRODUCT_BLOCKING_RESTORE__();
+    return isProductUrlLike() || hasVisibleProductPopup();
   }
 
   function getScrollY() {
@@ -5903,14 +5979,30 @@ function setupDesktopAura() {
     }, 2000);
   }
 
+  function clearTripchillerProductClassesSoon() {
+    if (!lastExitReason) return;
+
+    [0, 80, 160, 320, 700].forEach(function (delay) {
+      setTimeout(function () {
+        if (!lastExitReason || isProductUrlLike()) return;
+
+        document.documentElement.classList.remove('tc-product-page-active', 'tc-site-header-product-suppressed');
+        if (document.body) {
+          document.body.classList.remove('tc-product-page-active', 'tc-site-header-product-suppressed');
+        }
+      }, delay);
+    });
+  }
+
   function scheduleRestoreAfterProductExit(reason) {
     lastExitReason = reason || '';
     window.__TC_PRODUCT_LAST_EXIT_REASON__ = lastExitReason;
+    clearTripchillerProductClassesSoon();
 
     [0, 50, 100, 180, 320, 600, 1000, 1600, 2400].forEach(function (delay) {
       setTimeout(function () {
         if (window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__) window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__();
-        if (!isProductRoute() && window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__) {
+        if (!isProductBlockingRestore() && window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__) {
           window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__();
         }
       }, delay);
@@ -5929,6 +6021,7 @@ function setupDesktopAura() {
     if (window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__) window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__();
 
     suppressReturnCardsBeforeExit();
+    clearTripchillerProductClassesSoon();
 
     if (canUseHistoryBack()) {
       try {
@@ -6010,7 +6103,11 @@ function setupDesktopAura() {
       hash: location.hash || '',
       href: location.href || '',
       isProductRoute: isProductRoute(),
+      isProductRouteBroad: isProductRouteBroad(),
+      isProductBlockingRestore: isProductBlockingRestore(),
+      hasProductPageClass: hasProductPageClass(),
       hasProductPopupElement: hasProductPopupElement(),
+      hasVisibleProductPopup: hasVisibleProductPopup(),
       currentScrollY: getScrollY(),
       maxScrollY: getMaxScrollY(),
       lastExitReason: lastExitReason,
@@ -6018,6 +6115,7 @@ function setupDesktopAura() {
       openedState: readOpenedState(),
       returnState: window.__TC_PRODUCT_RETURN_SCROLL_STATE__ ? window.__TC_PRODUCT_RETURN_SCROLL_STATE__() : null,
       loadMoreState: window.__TC_PRODUCT_RETURN_SCROLL_STATE__ ? (window.__TC_PRODUCT_RETURN_SCROLL_STATE__().loadMoreState || null) : null,
+      lastAttempt: window.__TC_PRODUCT_RETURN_SCROLL_LAST_ATTEMPT__ || null,
       hasReturnSpacer: !!document.getElementById('tc-product-return-scroll-spacer'),
       hasLegacyCurtainClass: document.documentElement.classList.contains('tc-product-transition-curtain') || document.documentElement.classList.contains('tc-product-transition-veil') || (document.body && (document.body.classList.contains('tc-product-transition-curtain') || document.body.classList.contains('tc-product-transition-veil'))),
       hasLegacyWelcomeStyle: window.__TC_HAS_LEGACY_WELCOME_STYLE__ ? window.__TC_HAS_LEGACY_WELCOME_STYLE__() : false,
