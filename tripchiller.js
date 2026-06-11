@@ -4798,7 +4798,7 @@ function setupDesktopAura() {
   var USER_PHOTOS = [
     { src: "https://static.tildacdn.com/tild3866-3134-4235-b739-386236373939/20250209_152049_IMG_.jpg", href: "https://tripchiller.com/tproduct/737223104992-camo-trauma", alt: "Camo Trauma" },
     { src: "https://static.tildacdn.com/tild3165-6233-4966-b365-306534343730/jT-rqCPef8n7kAtP79Dv.jpg", href: "", alt: "Фото адепта TRIPCHILLER" },
-    { src: "https://static.tildacdn.com/tild3239-3630-4538-b363-333364323737/IMG_4749__2.jpg", href: "https://static.tildacdn.com/tild3239-3630-4538-b363-333364323737/IMG_4749__2.jpg", alt: "SERAPHIM T-SHIRT" },
+    { src: "https://static.tildacdn.com/tild3239-3630-4538-b363-333364323737/IMG_4749__2.jpg", href: "https://tripchiller.com/tproduct/919617109602-seraphim", alt: "SERAPHIM T-SHIRT" },
     { src: "https://static.tildacdn.com/tild3234-3538-4661-b436-346663663433/photo_2025-12-07_17-.jpg", href: "https://tripchiller.com/tproduct/872098106042-dfmb", alt: "DFMB Distressed black cap" },
     { src: "https://static.tildacdn.com/tild6632-6531-4062-b932-326661346366/IMG_8909.JPG", href: "https://tripchiller.com/tproduct/878341104272-dfmb", alt: "DFMB washed cap" },
     { src: "https://static.tildacdn.com/tild3138-3131-4030-b235-343662656564/IMG_4749__3.jpg", href: "https://tripchiller.com/tproduct/872098106042-dfmb", alt: "Distressed DFM Sand Cap" },
