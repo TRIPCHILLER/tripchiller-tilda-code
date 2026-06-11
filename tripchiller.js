@@ -6982,7 +6982,7 @@ function setupDesktopAura() {
       record.querySelectorAll('.t-store__prod-popup .js-store-close-btn, .t-store__prod-popup .t-store__prod-popup__back, .t-store__prod-popup a, .t-store__prod-popup button, .t-store__prod-popup [role="button"], .t-popup .js-store-close-btn, .t-popup .t-store__prod-popup__back, .t-popup a, .t-popup button, .t-popup [role="button"]').forEach(function(back){
         var txt = normalize(back.textContent);
         if (txt.indexOf('more products') !== -1 || txt.indexOf('назад') !== -1 || txt.indexOf('каталог') !== -1) {
-          back.textContent = 'НАЗАД В ГАЛЕРЕЮ...';
+          back.textContent = 'НАЗАД В ГАЛЕРЕЮ';
           back.classList.add('tc-store-back-link');
           var zone = back.closest('.t-popup__close, .t-popup__close-wrapper, .js-store-close-btn, .t-store__prod-popup__close') || back.parentElement;
           if (zone) zone.classList.add('tc-store-back-zone');
@@ -7085,7 +7085,7 @@ function setupDesktopAura() {
       if (!parent) continue;
       var txt = String(parent.textContent || '').replace(/\s+/g, ' ').trim();
       if (!txt || txt.length > 80) continue;
-      parent.textContent = 'НАЗАД В ГАЛЕРЕЮ...';
+      parent.textContent = 'НАЗАД В ГАЛЕРЕЮ';
       parent.classList.add('tc-store-back-link');
       parent.style.setProperty('font-size', '20px', 'important');
       parent.style.setProperty('line-height', '1.2', 'important');

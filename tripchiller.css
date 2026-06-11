@@ -3605,20 +3605,56 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
 }
 
 #allrecords .tc-catalog-record .tc-store-back-link {
-  color: #2a4434 !important;
+  color: #777 !important;
   opacity: 1 !important;
-  font-family: var(--tc-font-main), monospace !important;
+  font-family: var(--tc-font-main, inherit) !important;
   letter-spacing: .04em !important;
   text-transform: uppercase !important;
   text-decoration: none !important;
   pointer-events: auto !important;
   display: inline-flex !important;
+  align-items: center !important;
   width: fit-content !important;
   max-width: max-content !important;
   align-self: flex-start !important;
   cursor: pointer !important;
   font-size: 20px !important;
   line-height: 1.2 !important;
+}
+
+#allrecords .tc-catalog-record .tc-store-back-link::before {
+  content: '««';
+  display: inline-block;
+  margin-right: .45em;
+  color: currentColor;
+  letter-spacing: -0.08em;
+}
+
+#allrecords .tc-catalog-record .tc-store-back-link:hover {
+  color: #5f5f5f !important;
+}
+
+@media (min-width: 960px) {
+  html.tc-product-page #allrecords .tc-catalog-record .tc-store-back-link,
+  body.tc-product-page #allrecords .tc-catalog-record .tc-store-back-link,
+  html.tc-product-page-active #allrecords .tc-catalog-record .tc-store-back-link,
+  body.tc-product-page-active #allrecords .tc-catalog-record .tc-store-back-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: max-content !important;
+    max-width: calc(100% - 32px) !important;
+    margin: clamp(32px, 5vh, 72px) auto clamp(40px, 7vh, 96px) !important;
+    color: #777 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    align-self: center !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    font-family: var(--tc-font-main, inherit) !important;
+    text-transform: uppercase !important;
+  }
 }
 
 
