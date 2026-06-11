@@ -1646,6 +1646,36 @@ body.tc-product-page-active .t-catalog__product-snippet {
   z-index: 2147483001 !important;
 }
 
+html.tc-product-page .t-popup.t-popup_show,
+body.tc-product-page .t-popup.t-popup_show,
+html.tc-product-page-active .t-popup.t-popup_show,
+body.tc-product-page-active .t-popup.t-popup_show,
+html.tc-product-page .t-popup.t-popup_show.tc-product-popup-top,
+body.tc-product-page .t-popup.t-popup_show.tc-product-popup-top,
+html.tc-product-page-active .t-popup.t-popup_show.tc-product-popup-top,
+body.tc-product-page-active .t-popup.t-popup_show.tc-product-popup-top,
+html.tc-product-page .t-store__prod-popup.t-popup_show,
+body.tc-product-page .t-store__prod-popup.t-popup_show,
+html.tc-product-page-active .t-store__prod-popup.t-popup_show,
+body.tc-product-page-active .t-store__prod-popup.t-popup_show {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483600 !important;
+  isolation: isolate !important;
+}
+
+html.tc-product-page .t-popup.t-popup_show .t-popup__container,
+body.tc-product-page .t-popup.t-popup_show .t-popup__container,
+html.tc-product-page-active .t-popup.t-popup_show .t-popup__container,
+body.tc-product-page-active .t-popup.t-popup_show .t-popup__container,
+html.tc-product-page .t-popup.t-popup_show .t-store__prod-popup__container,
+body.tc-product-page .t-popup.t-popup_show .t-store__prod-popup__container,
+html.tc-product-page-active .t-popup.t-popup_show .t-store__prod-popup__container,
+body.tc-product-page-active .t-popup.t-popup_show .t-store__prod-popup__container {
+  position: relative !important;
+  z-index: 2147483601 !important;
+}
+
 html.tc-product-page .tc-site-header,
 body.tc-product-page .tc-site-header,
 html.tc-product-page-active .tc-site-header,
@@ -1692,12 +1722,64 @@ body.tc-product-page-active #tc-egg-fall-overlay {
   transform: translateY(-100%) !important;
 }
 
+html.tc-product-page .tc-menu-eye-logo,
+body.tc-product-page .tc-menu-eye-logo,
+html.tc-product-page-active .tc-menu-eye-logo,
+body.tc-product-page-active .tc-menu-eye-logo,
+html.tc-product-page #tc-disk-switcher-root,
+body.tc-product-page #tc-disk-switcher-root,
+html.tc-product-page-active #tc-disk-switcher-root,
+body.tc-product-page-active #tc-disk-switcher-root,
+html.tc-product-page .tc-disk-switcher,
+body.tc-product-page .tc-disk-switcher,
+html.tc-product-page-active .tc-disk-switcher,
+body.tc-product-page-active .tc-disk-switcher,
+html.tc-product-page .tc-path-row,
+body.tc-product-page .tc-path-row,
+html.tc-product-page-active .tc-path-row,
+body.tc-product-page-active .tc-path-row,
+html.tc-product-page .flower,
+body.tc-product-page .flower,
+html.tc-product-page-active .flower,
+body.tc-product-page-active .flower,
+html.tc-product-page .eye-desktop,
+body.tc-product-page .eye-desktop,
+html.tc-product-page-active .eye-desktop,
+body.tc-product-page-active .eye-desktop,
+html.tc-product-page .eye-mobile,
+body.tc-product-page .eye-mobile,
+html.tc-product-page-active .eye-mobile,
+body.tc-product-page-active .eye-mobile {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 html.tc-product-page #allrecords > .r:not(.tc-product-record),
 body.tc-product-page #allrecords > .r:not(.tc-product-record),
 html.tc-product-page-active #allrecords > .r:not(.tc-product-record),
 body.tc-product-page-active #allrecords > .r:not(.tc-product-record) {
   position: relative !important;
   z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+html.tc-product-page .t-popup.t-popup_show .t-popup__close,
+body.tc-product-page .t-popup.t-popup_show .t-popup__close,
+html.tc-product-page-active .t-popup.t-popup_show .t-popup__close,
+body.tc-product-page-active .t-popup.t-popup_show .t-popup__close,
+html.tc-product-page .t-popup.t-popup_show .t-popup__close-icon,
+body.tc-product-page .t-popup.t-popup_show .t-popup__close-icon,
+html.tc-product-page-active .t-popup.t-popup_show .t-popup__close-icon,
+body.tc-product-page-active .t-popup.t-popup_show .t-popup__close-icon,
+html.tc-product-page .t-popup.t-popup_show svg.t-popup__close-icon.t-popup__close-icon_cross,
+body.tc-product-page .t-popup.t-popup_show svg.t-popup__close-icon.t-popup__close-icon_cross,
+html.tc-product-page-active .t-popup.t-popup_show svg.t-popup__close-icon.t-popup__close-icon_cross,
+body.tc-product-page-active .t-popup.t-popup_show svg.t-popup__close-icon.t-popup__close-icon_cross {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
   pointer-events: none !important;
 }
 
