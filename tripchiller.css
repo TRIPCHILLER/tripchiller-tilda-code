@@ -3470,6 +3470,13 @@ body.tc-product-page-active .tc-menu-eye-logo {
   color: #8f8f8f !important;
   opacity: 1 !important;
   text-transform: uppercase !important;
+  transition:
+    color .65s cubic-bezier(.16,.84,.24,1),
+    text-shadow .65s cubic-bezier(.16,.84,.24,1) !important;
+}
+
+#allrecords .tc-safe-filter-text {
+  will-change: color;
 }
 
 #allrecords .tc-safe-filter-item.tc-safe-filter-active,
