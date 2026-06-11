@@ -3846,3 +3846,61 @@ body.tc-product-return-cards-revealing:not(.tc-product-page-active) .tc-user-pho
   opacity: 0 !important;
   visibility: hidden !important;
 }
+
+/* Аварийно нейтрализуем старый product transition-слой из inline-кода Tilda. */
+html.tc-product-transition-curtain::before,
+html.tc-product-transition-curtain::after,
+body.tc-product-transition-curtain::before,
+body.tc-product-transition-curtain::after,
+html.tc-product-transition-veil::before,
+html.tc-product-transition-veil::after,
+body.tc-product-transition-veil::before,
+body.tc-product-transition-veil::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+#tc-product-return-scroll-spacer,
+.tc-product-return-scroll-spacer {
+  display: block !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+#allrecords button.js-catalog-load-more-btn::before,
+#allrecords button.js-catalog-load-more-btn::after,
+#allrecords .t-btn.js-catalog-load-more-btn::before,
+#allrecords .t-btn.js-catalog-load-more-btn::after {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  content: none !important;
+}
+
+#allrecords button.js-catalog-load-more-btn svg,
+#allrecords button.js-catalog-load-more-btn canvas,
+#allrecords button.js-catalog-load-more-btn [class*="preloader"],
+#allrecords button.js-catalog-load-more-btn [class*="loader"],
+#allrecords button.js-catalog-load-more-btn [class*="spinner"],
+#allrecords button.js-catalog-load-more-btn [class*="loading"],
+#allrecords .t-btn.js-catalog-load-more-btn svg,
+#allrecords .t-btn.js-catalog-load-more-btn canvas,
+#allrecords .t-btn.js-catalog-load-more-btn [class*="preloader"],
+#allrecords .t-btn.js-catalog-load-more-btn [class*="loader"],
+#allrecords .t-btn.js-catalog-load-more-btn [class*="spinner"],
+#allrecords .t-btn.js-catalog-load-more-btn [class*="loading"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
