@@ -1,97 +1,3 @@
-(function () {
-  "use strict";
-
-  if (window.__TC_KILL_LEGACY_PRODUCT_CURTAIN_V1__) return;
-  window.__TC_KILL_LEGACY_PRODUCT_CURTAIN_V1__ = true;
-
-  var LEGACY_PRODUCT_TRANSITION_CLASSES = [
-    'tc-product-transition-curtain',
-    'tc-product-transition-curtain-leaving',
-    'tc-product-transition-veil',
-    'tc-product-transition-veil-leaving'
-  ];
-
-  function hasLegacyProductPopupElement() {
-    return !!document.querySelector([
-      '.t-store__prod-popup',
-      '.t-store__product-popup',
-      '.js-store-prod-popup',
-      '.js-store-prod-popup.t-popup_show',
-      '.t-popup_show',
-      '.t-popup_show .t-store__prod-popup',
-      '.t-popup_show .t-store__product-popup',
-      '.t-store__prod-popup.t-popup_show',
-      '.t-store__product-popup.t-popup_show'
-    ].join(','));
-  }
-
-  function hasLegacyWelcomeStyle() {
-    var styles = document.querySelectorAll('style');
-    for (var i = 0; i < styles.length; i += 1) {
-      if (String(styles[i].textContent || '').indexOf('WELCOME TO') !== -1) return true;
-    }
-    return false;
-  }
-
-  function removeLegacyCurtainClasses() {
-    var root = document.documentElement;
-    var body = document.body;
-
-    LEGACY_PRODUCT_TRANSITION_CLASSES.forEach(function (cls) {
-      root.classList.remove(cls);
-      if (body) body.classList.remove(cls);
-    });
-
-    root.removeAttribute('data-tc-product-transition-curtain');
-    root.removeAttribute('data-tc-product-transition-veil');
-    if (body) {
-      body.removeAttribute('data-tc-product-transition-curtain');
-      body.removeAttribute('data-tc-product-transition-veil');
-    }
-  }
-
-  function disableLegacyCurtainGlobals() {
-    window.__TC_SHOW_PRODUCT_TRANSITION_CURTAIN__ = function () {};
-    window.__TC_HIDE_PRODUCT_TRANSITION_CURTAIN__ = function () {};
-    window.__TC_PRODUCT_TRANSITION_CURTAIN_STATE__ = function () {
-      return { disabled: true };
-    };
-    window.__TC_SHOW_PRODUCT_TRANSITION_VEIL__ = function () {};
-    window.__TC_HIDE_PRODUCT_TRANSITION_VEIL__ = function () {};
-    window.__TC_PRODUCT_TRANSITION_VEIL_STATE__ = function () {
-      return { disabled: true };
-    };
-  }
-
-  function removeLegacyCurtainStyleTags() {
-    document.querySelectorAll('style').forEach(function (style) {
-      var text = String(style.textContent || '');
-      if (
-        text.indexOf('tc-product-transition-curtain') !== -1 ||
-        text.indexOf('tc-product-transition-veil') !== -1 ||
-        text.indexOf('WELCOME TO') !== -1
-      ) {
-        if (style.parentNode) style.parentNode.removeChild(style);
-      }
-    });
-  }
-
-  function killLegacyCurtain() {
-    removeLegacyCurtainClasses();
-    disableLegacyCurtainGlobals();
-    removeLegacyCurtainStyleTags();
-  }
-
-  window.__TC_HAS_PRODUCT_POPUP_ELEMENT__ = hasLegacyProductPopupElement;
-  window.__TC_HAS_LEGACY_WELCOME_STYLE__ = hasLegacyWelcomeStyle;
-  window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__ = killLegacyCurtain;
-
-  killLegacyCurtain();
-  [0, 50, 150, 300, 700, 1200, 2000].forEach(function (delay) {
-    setTimeout(killLegacyCurtain, delay);
-  });
-})();
-
 (function(){
   "use strict";
 
@@ -109,10 +15,7 @@
       /\/tproduct\//.test(href) ||
       /\/product\//.test(href) ||
       /#!\/?tproduct(\/|$)/.test(hash) ||
-      /#!\/?product(\/|$)/.test(hash) ||
-      /#\/?tproduct(\/|$)/.test(hash) ||
-      /#\/?product(\/|$)/.test(hash) ||
-      hash.indexOf('tproduct') !== -1;
+      /#!\/?product(\/|$)/.test(hash);
   }
 
   function tcApplyProductRouteClassesEarly() {
@@ -3617,29 +3520,9 @@ eyeUnlockTimer = setTimeout(function(){
     });
   }
 
-  function cleanupLoadMoreLoader(btn) {
-    if (!btn || !btn.querySelectorAll) return;
-
-    btn.querySelectorAll([
-      'svg',
-      'canvas',
-      '[class*="preloader"]',
-      '[class*="loader"]',
-      '[class*="spinner"]',
-      '[class*="loading"]'
-    ].join(',')).forEach(function (node) {
-      if (node.classList && node.classList.contains(LOAD_TEXT_CLASS)) return;
-      node.setAttribute('aria-hidden', 'true');
-      node.style.setProperty('display', 'none', 'important');
-      node.style.setProperty('opacity', '0', 'important');
-      node.style.setProperty('visibility', 'hidden', 'important');
-    });
-  }
-
   function patchLoadMore() {
     document.querySelectorAll(LOAD_MORE_SELECTOR).forEach(function (btn) {
       btn.classList.add(LOAD_BTN_CLASS);
-      cleanupLoadMoreLoader(btn);
 
       var text = btn.querySelector(
         '.js-catalog-load-more-btn-text, .t-btnflex__text, .t-btntext, span'
@@ -4903,7 +4786,6 @@ function setupDesktopAura() {
   }
 })();
 
-
 (function () {
   "use strict";
 
@@ -4914,242 +4796,84 @@ function setupDesktopAura() {
   var BACKUP_RETURN_KEY = 'tc:productReturnScrollBackup:v1';
   var OPENED_KEY = 'tc:productOpenedFromSite:v1';
   var LEGACY_USER_PHOTOS_RETURN_KEY = 'tc:userPhotosReturn:v1';
-  var LOAD_MORE_STATE_PREFIX = 'tc:catalogLoadMore:v1:';
-  var LOAD_MORE_SELECTOR = '#allrecords button.js-catalog-load-more-btn, #allrecords .t-btn.js-catalog-load-more-btn';
-  var CATALOG_CARD_SELECTOR = '#allrecords .t-store__card, #allrecords .js-product, #allrecords .t-catalog__product';
-  var PRODUCT_LINK_SELECTOR = 'a[href*="/tproduct/"], a[href*="#!/tproduct/"], .js-product-url[href]';
-  var LOAD_MORE_TTL_MS = 6 * 60 * 60 * 1000;
   var RETURN_TTL_MS = 5 * 60 * 1000;
+  var LOAD_MORE_TTL_MS = 6 * 60 * 60 * 1000;
   var RESTORE_CLOSE_ENOUGH_PX = 80;
-  var RETURN_CARD_SUPPRESS_CLASS = 'tc-product-return-suppress-cards';
-  var RETURN_CARD_REVEAL_CLASS = 'tc-product-return-cards-revealing';
-  var RETURN_RESTORING_CLASS = 'tc-product-return-restoring-scroll';
-  var RETURN_CARD_REVEAL_MS = 240;
-  var RETURN_CARD_FAILSAFE_MS = 2000;
+  var LOAD_MORE_KEY_PREFIX = 'tc:catalogLoadMore:v1:';
+  var LOAD_MORE_SELECTOR = '#allrecords button.js-catalog-load-more-btn, #allrecords .t-btn.js-catalog-load-more-btn';
+  var CATALOG_CARD_SELECTOR = [
+    '#allrecords .t-store__card',
+    '#allrecords .t-catalog__card',
+    '#allrecords .js-store-product',
+    '#allrecords .js-catalog-product',
+    '#allrecords .t-catalog__product-snippet',
+    '#allrecords .t-catalog__product'
+  ].join(',');
   var activeRestoreKey = '';
   var activeRestoreToken = 0;
-  var returnCardFailSafeTimer = 0;
-  var returnCardRevealTimer = 0;
-  var suppressLoadMoreRememberUntil = 0;
-  var RETURN_SCROLL_SPACER_ID = 'tc-product-return-scroll-spacer';
-  var returnSpacerFailSafeTimer = 0;
-  var lastOpenGuardY = 0;
-  var lastCatalogStateKey = '';
-  var lastLoadMoreState = null;
-  var lastAutoExpandAttempt = null;
-  var lastRestoreReason = '';
-
-  function updateReturnCardClass(className, shouldAdd) {
-    document.documentElement.classList[shouldAdd ? 'add' : 'remove'](className);
-    if (document.body) document.body.classList[shouldAdd ? 'add' : 'remove'](className);
-  }
-
-  function clearReturnCardTimers() {
-    clearTimeout(returnCardFailSafeTimer);
-    clearTimeout(returnCardRevealTimer);
-    returnCardFailSafeTimer = 0;
-    returnCardRevealTimer = 0;
-  }
-
-  function revealReturnCards() {
-    clearReturnCardTimers();
-    updateReturnCardClass(RETURN_CARD_SUPPRESS_CLASS, false);
-    updateReturnCardClass(RETURN_RESTORING_CLASS, false);
-    updateReturnCardClass(RETURN_CARD_REVEAL_CLASS, true);
-
-    returnCardRevealTimer = setTimeout(function () {
-      updateReturnCardClass(RETURN_CARD_REVEAL_CLASS, false);
-      returnCardRevealTimer = 0;
-    }, RETURN_CARD_REVEAL_MS);
-  }
-
-  function suppressReturnCards() {
-    clearReturnCardTimers();
-    updateReturnCardClass(RETURN_CARD_REVEAL_CLASS, false);
-    updateReturnCardClass(RETURN_CARD_SUPPRESS_CLASS, true);
-
-    returnCardFailSafeTimer = setTimeout(function () {
-      revealReturnCards();
-    }, RETURN_CARD_FAILSAFE_MS);
-  }
-
-  function isProductPathLike(value) {
-    var text = String(value || '');
-    return /(^|\/)(tproduct|product)(\/|$)/.test(text) ||
-      /#!\/?(tproduct|product)(\/|$)/.test(text) ||
-      /#\/?(tproduct|product)(\/|$)/.test(text) ||
-      text.indexOf('tproduct') !== -1;
-  }
-
-  function hasProductPopupElement() {
-    if (window.__TC_HAS_PRODUCT_POPUP_ELEMENT__) return window.__TC_HAS_PRODUCT_POPUP_ELEMENT__();
-    return !!document.querySelector([
-      '.t-store__prod-popup',
-      '.t-store__product-popup',
-      '.js-store-prod-popup',
-      '.js-store-prod-popup.t-popup_show',
-      '.t-popup_show',
-      '.t-popup_show .t-store__prod-popup',
-      '.t-popup_show .t-store__product-popup',
-      '.t-store__prod-popup.t-popup_show',
-      '.t-store__product-popup.t-popup_show'
-    ].join(','));
-  }
-
-  function hasProductPageClass() {
-    var root = document.documentElement;
-    var body = document.body;
-    return (root && (root.classList.contains('tc-product-page') || root.classList.contains('tc-product-page-active'))) ||
-      (body && (body.classList.contains('tc-product-page') || body.classList.contains('tc-product-page-active')));
-  }
-
-  function isProductUrlLike(pathname) {
-    var path = pathname || location.pathname || '';
-    return isProductPathLike(path) ||
-      isProductPathLike(location.hash || '') ||
-      isProductPathLike(location.href || '');
-  }
-
-  function hasVisibleProductPopup() {
-    var selectors = [
-      '.t-store__prod-popup.t-popup_show',
-      '.t-store__product-popup.t-popup_show',
-      '.js-store-prod-popup.t-popup_show',
-      '.t-popup_show .t-store__prod-popup',
-      '.t-popup_show .t-store__product-popup',
-      '.t-popup_show .js-store-prod-popup'
-    ];
-    var nodes = document.querySelectorAll(selectors.join(','));
-
-    for (var i = 0; i < nodes.length; i += 1) {
-      if (isElementVisible(nodes[i])) return true;
-    }
-
-    return false;
-  }
-
-  function isProductRouteBroad(pathname) {
-    return isProductUrlLike(pathname) ||
-      hasProductPopupElement() ||
-      hasProductPageClass();
-  }
+  var activeExpandKey = '';
 
   function isProductRoute(pathname) {
-    return isProductRouteBroad(pathname);
-  }
-
-  function isProductBlockingRestore(pathname) {
-    return isProductUrlLike(pathname) || hasVisibleProductPopup();
+    var path = pathname || location.pathname || '';
+    return /^\/product\//.test(path) || /^\/tproduct\//.test(path);
   }
 
   function getPageKey() {
     return location.pathname + location.search + location.hash;
   }
 
-  function getCatalogStateKey() {
-    return location.pathname + location.search;
+  function getCatalogKey() {
+    return (location.pathname || '/') + (location.search || '');
   }
 
-  function getScrollY() {
-    return window.pageYOffset ||
-      document.documentElement.scrollTop ||
-      document.body.scrollTop ||
-      0;
-  }
-
-  function getMaxScrollY() {
-    var doc = document.documentElement;
-    var body = document.body;
-    return Math.max(
-      0,
-      (doc ? doc.scrollHeight : 0),
-      (body ? body.scrollHeight : 0),
-      (doc ? doc.offsetHeight : 0),
-      (body ? body.offsetHeight : 0)
-    ) - window.innerHeight;
-  }
-
-  function removeReturnScrollSpace() {
-    clearTimeout(returnSpacerFailSafeTimer);
-    returnSpacerFailSafeTimer = 0;
-    var spacer = document.getElementById(RETURN_SCROLL_SPACER_ID);
-    if (spacer && spacer.parentNode) spacer.parentNode.removeChild(spacer);
-  }
-
-  function ensureReturnScrollSpace(targetY) {
-    var body = document.body;
-    if (!body) return null;
-
-    var maxY = getMaxScrollY();
-    if (Number(targetY || 0) <= maxY) return document.getElementById(RETURN_SCROLL_SPACER_ID);
-
-    var spacer = document.getElementById(RETURN_SCROLL_SPACER_ID);
-    if (!spacer) {
-      spacer = document.createElement('div');
-      spacer.id = RETURN_SCROLL_SPACER_ID;
-      spacer.className = RETURN_SCROLL_SPACER_ID;
-      spacer.setAttribute('aria-hidden', 'true');
-      body.appendChild(spacer);
-    }
-
-    var needed = Math.ceil(Number(targetY || 0) - maxY + (window.innerHeight || 0) * 0.5);
-    spacer.style.cssText = 'height:' + Math.max(1, needed) + 'px!important;min-height:' + Math.max(1, needed) + 'px!important;display:block!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important;';
-
-    clearTimeout(returnSpacerFailSafeTimer);
-    returnSpacerFailSafeTimer = setTimeout(removeReturnScrollSpace, 5000);
-    return spacer;
-  }
-
-  function guardScrollDuringProductOpen(savedY) {
-    var startedAt = Date.now();
-    var maxDuration = 900;
-    var lastY = Number(savedY || 0);
-    lastOpenGuardY = lastY;
-
-    [0, 16, 32, 64, 120, 220, 360, 520, 760].forEach(function (delay) {
-      setTimeout(function () {
-        if (Date.now() - startedAt > maxDuration) return;
-        if (window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__) window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__();
-
-        var currentY = getScrollY();
-        if (!isProductUrlLike() && document.querySelector(CATALOG_CARD_SELECTOR) && lastY > 300 && currentY < lastY - 200) {
-          window.scrollTo(0, lastY);
-        }
-      }, delay);
-    });
+  function getLoadMoreStorageKey(catalogKey) {
+    return LOAD_MORE_KEY_PREFIX + String(catalogKey || getCatalogKey());
   }
 
   function isElementVisible(el) {
-    if (!el || !el.getBoundingClientRect) return false;
-    var style = getComputedStyle(el);
-    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || 1) === 0) return false;
-    var rect = el.getBoundingClientRect();
-    return rect.width > 0 && rect.height > 0;
+    if (!el || !el.ownerDocument) return false;
+    if (el.hidden) return false;
+
+    var style = window.getComputedStyle ? getComputedStyle(el) : null;
+    if (style && (style.display === 'none' || style.visibility === 'hidden')) return false;
+    if (el.getAttribute && el.getAttribute('aria-hidden') === 'true') return false;
+
+    var rects = el.getClientRects ? el.getClientRects() : [];
+    return !!(rects && rects.length);
   }
 
-  function getActiveCatalogFilterKey() {
+  function getVisibleCatalogCardCount() {
+    var seen = [];
+    var count = 0;
+
+    document.querySelectorAll(CATALOG_CARD_SELECTOR).forEach(function (card) {
+      if (!card || seen.indexOf(card) !== -1) return;
+      seen.push(card);
+      if (isElementVisible(card)) count += 1;
+    });
+
+    return count;
+  }
+
+  function getFilterKey() {
     var active = document.querySelector(
-      '#allrecords .tc-safe-filter-item.tc-safe-filter-active, ' +
-      '#allrecords .t-catalog__parts-switch-btn.t-active, ' +
-      '#allrecords .t-store__parts-switch-btn.t-active, ' +
-      '#allrecords .js-catalog-parts-switcher.t-active, ' +
-      '#allrecords [aria-current="true"], ' +
-      '#allrecords [aria-selected="true"]'
+      '#allrecords .tc-safe-filter-active .tc-safe-filter-text,' +
+      '#allrecords .tc-safe-filter-active,' +
+      '#allrecords .t-catalog__parts-switch-btn.t-active .t-catalog__parts-text-title,' +
+      '#allrecords .t-store__parts-switch-btn.t-active .t-catalog__parts-text-title,' +
+      '#allrecords .t-catalog__parts-button-base.t-active .t-catalog__parts-text-title,' +
+      '#allrecords .js-catalog-parts-switcher.t-active .t-catalog__parts-text-title'
     );
 
     return active ? String(active.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase() : '';
   }
 
-  function getLoadMoreStorageKey(catalogStateKey) {
-    return LOAD_MORE_STATE_PREFIX + (catalogStateKey || getCatalogStateKey());
-  }
-
-  function readLoadMoreState(catalogStateKey) {
+  function readLoadMoreState(catalogKey) {
     var raw = '';
     var state = null;
 
     try {
-      raw = sessionStorage.getItem(getLoadMoreStorageKey(catalogStateKey)) || '';
+      raw = sessionStorage.getItem(getLoadMoreStorageKey(catalogKey)) || '';
     } catch (_) {
       raw = '';
     }
@@ -5163,219 +4887,138 @@ function setupDesktopAura() {
     }
 
     if (!state || state.from !== 'catalog-load-more') return null;
-    if (Number(state.expiresAt || 0) && Date.now() > Number(state.expiresAt || 0)) {
-      try { sessionStorage.removeItem(getLoadMoreStorageKey(catalogStateKey)); } catch (_) {}
+    if (state.expiresAt && Date.now() > Number(state.expiresAt || 0)) {
+      try { sessionStorage.removeItem(getLoadMoreStorageKey(catalogKey)); } catch (_) {}
       return null;
     }
 
-    var currentFilterKey = getActiveCatalogFilterKey();
-    if (state.filterKey && currentFilterKey && state.filterKey !== currentFilterKey) return null;
-    lastCatalogStateKey = catalogStateKey || getCatalogStateKey();
-    lastLoadMoreState = state;
     return state;
   }
 
-  function countVisibleCatalogCards() {
-    var seen = [];
-    var count = 0;
-
-    document.querySelectorAll(CATALOG_CARD_SELECTOR).forEach(function (card) {
-      if (seen.indexOf(card) !== -1 || !isElementVisible(card)) return;
-      seen.push(card);
-      count += 1;
-    });
-
-    return count;
-  }
-
-  function writeLoadMoreState(nextState) {
-    if (!nextState || isProductRoute()) return;
-
+  function saveLoadMoreState(extra) {
     var now = Date.now();
-    var catalogStateKey = nextState.catalogStateKey || getCatalogStateKey();
-    var previous = readLoadMoreState(catalogStateKey) || {};
+    var catalogKey = getCatalogKey();
+    var previous = readLoadMoreState(catalogKey);
+    var visibleCount = getVisibleCatalogCardCount();
+    var filterKey = getFilterKey();
     var state = {
       from: 'catalog-load-more',
-      ts: previous.ts || now,
-      updatedAt: now,
+      ts: now,
       expiresAt: now + LOAD_MORE_TTL_MS,
-      catalogStateKey: catalogStateKey,
-      pageKey: catalogStateKey,
-      pathname: location.pathname,
-      search: location.search,
-      filterKey: nextState.filterKey || getActiveCatalogFilterKey(),
-      clickCount: Math.max(Number(previous.clickCount || 0), Number(nextState.clickCount || 0)),
-      maxVisibleCards: Math.max(Number(previous.maxVisibleCards || 0), Number(nextState.maxVisibleCards || 0), countVisibleCatalogCards())
+      catalogKey: catalogKey,
+      clickCount: Math.max(0, Number(previous && previous.clickCount || 0)) + (extra && extra.incrementClick ? 1 : 0),
+      maxVisibleCards: Math.max(visibleCount, Number(previous && previous.maxVisibleCards || 0)),
+      filterKey: filterKey || (previous && previous.filterKey) || ''
     };
 
+    if (extra && Number(extra.maxVisibleCards || 0) > state.maxVisibleCards) {
+      state.maxVisibleCards = Number(extra.maxVisibleCards || 0);
+    }
+
     try {
-      sessionStorage.setItem(getLoadMoreStorageKey(catalogStateKey), JSON.stringify(state));
-      lastCatalogStateKey = catalogStateKey;
-      lastLoadMoreState = state;
+      sessionStorage.setItem(getLoadMoreStorageKey(catalogKey), JSON.stringify(state));
     } catch (_) {}
+
+    return state;
   }
 
-  function rememberLoadMoreClick() {
-    if (isProductRoute()) return;
+  function getLoadMoreSnapshot() {
+    var catalogKey = getCatalogKey();
+    var currentCount = getVisibleCatalogCardCount();
+    var saved = readLoadMoreState(catalogKey);
+    var filterKey = getFilterKey();
 
-    var catalogStateKey = getCatalogStateKey();
-    var previous = readLoadMoreState(catalogStateKey) || {};
-    var clickCount = Number(previous.clickCount || 0) + 1;
+    if (!saved) {
+      return {
+        from: 'catalog-load-more',
+        ts: Date.now(),
+        expiresAt: Date.now() + LOAD_MORE_TTL_MS,
+        catalogKey: catalogKey,
+        clickCount: 0,
+        maxVisibleCards: currentCount,
+        filterKey: filterKey || ''
+      };
+    }
 
-    writeLoadMoreState({
-      catalogStateKey: catalogStateKey,
-      filterKey: getActiveCatalogFilterKey(),
-      clickCount: clickCount,
-      maxVisibleCards: countVisibleCatalogCards()
-    });
-
-    [220, 600, 1100].forEach(function (delay) {
-      setTimeout(function () {
-        writeLoadMoreState({
-          catalogStateKey: catalogStateKey,
-          filterKey: getActiveCatalogFilterKey(),
-          clickCount: clickCount,
-          maxVisibleCards: countVisibleCatalogCards()
-        });
-      }, delay);
-    });
-  }
-
-  function resetLoadMoreStateForCurrentPage() {
-    try {
-      sessionStorage.removeItem(getLoadMoreStorageKey(getCatalogStateKey()));
-    } catch (_) {}
+    return {
+      from: 'catalog-load-more',
+      ts: saved.ts || Date.now(),
+      expiresAt: saved.expiresAt || (Date.now() + LOAD_MORE_TTL_MS),
+      catalogKey: catalogKey,
+      clickCount: Number(saved.clickCount || 0),
+      maxVisibleCards: Math.max(currentCount, Number(saved.maxVisibleCards || 0)),
+      filterKey: filterKey || saved.filterKey || ''
+    };
   }
 
   function getVisibleLoadMoreButton() {
     var buttons = document.querySelectorAll(LOAD_MORE_SELECTOR);
-    for (var i = 0; i < buttons.length; i += 1) {
-      if (!buttons[i].disabled && isElementVisible(buttons[i])) return buttons[i];
-    }
-    return null;
+    var found = null;
+
+    buttons.forEach(function (btn) {
+      if (found) return;
+      if (!isElementVisible(btn)) return;
+      if (btn.disabled || btn.getAttribute('aria-disabled') === 'true') return;
+      found = btn;
+    });
+
+    return found;
   }
 
-  function findProductElementByHref(productHref) {
-    var targetHref = normalizeHref(productHref);
-    if (!targetHref) return null;
-
-    var links = document.querySelectorAll(PRODUCT_LINK_SELECTOR);
-    for (var i = 0; i < links.length; i += 1) {
-      var href = links[i].getAttribute('href') || '';
-      if (normalizeHref(href) === targetHref) {
-        return links[i].closest(CATALOG_CARD_SELECTOR) || links[i];
-      }
-    }
-
-    return null;
-  }
-
-  function collectReturnCatalogSnapshot(productHref) {
-    var card = findProductElementByHref(productHref);
-    var rect = card && card.getBoundingClientRect ? card.getBoundingClientRect() : null;
-    var catalogStateKey = getCatalogStateKey();
-    var loadMoreState = readLoadMoreState(catalogStateKey);
-
-    return {
-      sourceCardViewportTop: rect ? rect.top : null,
-      catalogStateKey: catalogStateKey,
-      visibleCatalogCardCount: countVisibleCatalogCards(),
-      loadMoreState: loadMoreState ? {
-        clickCount: Number(loadMoreState.clickCount || 0),
-        maxVisibleCards: Number(loadMoreState.maxVisibleCards || 0),
-        filterKey: loadMoreState.filterKey || ''
-      } : null
-    };
-  }
-
-  function clickLoadMoreForRestore(catalogStateKey) {
-    var button = getVisibleLoadMoreButton();
-    if (!button) return false;
-
-    suppressLoadMoreRememberUntil = Date.now() + 500;
-    button.click();
-
-    setTimeout(function () {
-      writeLoadMoreState({
-        catalogStateKey: catalogStateKey || getCatalogStateKey(),
-        filterKey: getActiveCatalogFilterKey(),
-        clickCount: Number((readLoadMoreState(catalogStateKey || getCatalogStateKey()) || {}).clickCount || 0),
-        maxVisibleCards: countVisibleCatalogCards()
-      });
-    }, 320);
-
-    return true;
-  }
-
-  function ensureCatalogExpandedForReturn(state, done) {
-    var productHref = state && state.productHref;
-    var catalogStateKey = state && (state.catalogStateKey || ((state.pathname || location.pathname || '') + (state.search || ''))) || getCatalogStateKey();
-    var savedLoadMoreState = readLoadMoreState(catalogStateKey);
-    var effectiveLoadMoreState = state && state.loadMoreState || savedLoadMoreState;
-    var desiredVisibleCount = Math.max(
-      Number(state && state.visibleCatalogCardCount || 0),
-      Number(effectiveLoadMoreState && effectiveLoadMoreState.maxVisibleCards || 0),
-      Number(savedLoadMoreState && savedLoadMoreState.maxVisibleCards || 0)
+  function ensureCatalogExpandedFromSavedState(done, restoreState) {
+    var state = restoreState && restoreState.loadMoreState ? restoreState.loadMoreState : null;
+    var catalogKey = (state && state.catalogKey) || (restoreState && restoreState.catalogKey) || getCatalogKey();
+    var saved = state || readLoadMoreState(catalogKey);
+    var desiredCount = Math.max(
+      Number(saved && saved.maxVisibleCards || 0),
+      Number(restoreState && restoreState.visibleCatalogCardCount || 0)
     );
-    var savedClicks = Math.max(
-      Number(effectiveLoadMoreState && effectiveLoadMoreState.clickCount || 0),
-      Number(savedLoadMoreState && savedLoadMoreState.clickCount || 0)
-    );
-    var maxAttempts = Math.min(12, Math.max(8, savedClicks + 3));
+    var finish = typeof done === 'function' ? done : function () {};
     var attempts = 0;
+    var maxAttempts = Math.max(4, Math.min(18, Number(saved && saved.clickCount || 0) + 8));
+    var expandKey = [catalogKey, desiredCount, restoreState && restoreState.ts || ''].join('|');
 
-    function finish() {
-      done();
+    if (!desiredCount) {
+      finish();
+      return;
     }
+
+    if (activeExpandKey === expandKey) return;
+    activeExpandKey = expandKey;
 
     function step() {
-      if (productHref && findProductElementByHref(productHref)) {
-        finish();
-        return;
-      }
+      var visibleCount = getVisibleCatalogCardCount();
+      var btn = getVisibleLoadMoreButton();
 
-      if (desiredVisibleCount > 0 && countVisibleCatalogCards() >= desiredVisibleCount) {
-        finish();
-        return;
-      }
-
-      lastAutoExpandAttempt = { reason: 'return', catalogStateKey: catalogStateKey, attempts: attempts, desiredVisibleCount: desiredVisibleCount, visibleCatalogCardCount: countVisibleCatalogCards() };
-
-      if (attempts >= maxAttempts || !clickLoadMoreForRestore(catalogStateKey)) {
+      if (visibleCount >= desiredCount || !btn || attempts >= maxAttempts) {
+        activeExpandKey = '';
         finish();
         return;
       }
 
       attempts += 1;
-      setTimeout(step, 240);
+      try { btn.click(); } catch (_) {}
+
+      setTimeout(step, attempts < 4 ? 260 : 520);
     }
 
     step();
   }
 
-  function autoExpandCatalogFromSavedState() {
-    if (isProductRoute()) return;
-
-    var catalogStateKey = getCatalogStateKey();
-    var state = readLoadMoreState(catalogStateKey);
-    if (!state) return;
-
-    var desiredVisibleCount = Number(state.maxVisibleCards || 0);
-    var maxAttempts = Math.min(12, Math.max(1, Number(state.clickCount || 0) + 2));
-    var attempts = 0;
-
-    function step() {
-      lastAutoExpandAttempt = { reason: 'saved-state', catalogStateKey: catalogStateKey, attempts: attempts, desiredVisibleCount: desiredVisibleCount, visibleCatalogCardCount: countVisibleCatalogCards() };
-      if (desiredVisibleCount > 0 && countVisibleCatalogCards() >= desiredVisibleCount) return;
-      if (attempts >= maxAttempts || !clickLoadMoreForRestore(catalogStateKey)) return;
-
-      attempts += 1;
-      setTimeout(step, 260);
-    }
-
-    step();
+  function getScrollY() {
+    return window.pageYOffset ||
+      document.documentElement.scrollTop ||
+      document.body.scrollTop ||
+      0;
   }
 
+  function getMaxScrollY() {
+    return Math.max(
+      0,
+      document.documentElement.scrollHeight - window.innerHeight,
+      document.body ? document.body.scrollHeight - window.innerHeight : 0
+    );
+  }
 
   function isCloseEnough(a, b) {
     return Math.abs(Number(a || 0) - Number(b || 0)) < RESTORE_CLOSE_ENOUGH_PX;
@@ -5417,7 +5060,8 @@ function setupDesktopAura() {
     if (!productHref || !isTProductHref(productHref)) return;
 
     var now = Date.now();
-    var snapshot = collectReturnCatalogSnapshot(productHref);
+    var loadMoreSnapshot = getLoadMoreSnapshot();
+    var visibleCatalogCardCount = getVisibleCatalogCardCount();
     var state = {
       ts: now,
       expiresAt: now + RETURN_TTL_MS,
@@ -5425,14 +5069,13 @@ function setupDesktopAura() {
       source: source || '',
       productHref: normalizeHref(productHref),
       pageKey: getPageKey(),
-      catalogStateKey: snapshot.catalogStateKey,
       pathname: location.pathname,
       search: location.search,
       hash: location.hash,
       scrollY: getScrollY(),
-      sourceCardViewportTop: snapshot.sourceCardViewportTop,
-      visibleCatalogCardCount: snapshot.visibleCatalogCardCount,
-      loadMoreState: snapshot.loadMoreState
+      catalogKey: getCatalogKey(),
+      visibleCatalogCardCount: visibleCatalogCardCount,
+      loadMoreState: loadMoreSnapshot
     };
 
     try {
@@ -5443,16 +5086,14 @@ function setupDesktopAura() {
         expiresAt: now + RETURN_TTL_MS,
         from: source || '',
         pageKey: getPageKey(),
-        catalogStateKey: snapshot.catalogStateKey,
+        catalogKey: getCatalogKey(),
+        visibleCatalogCardCount: visibleCatalogCardCount,
+        loadMoreState: loadMoreSnapshot,
         scrollY: getScrollY(),
-        productHref: normalizeHref(productHref),
-        visibleCatalogCardCount: snapshot.visibleCatalogCardCount
+        productHref: normalizeHref(productHref)
       }));
       sessionStorage.removeItem(LEGACY_USER_PHOTOS_RETURN_KEY);
     } catch (_) {}
-
-    guardScrollDuringProductOpen(state.scrollY);
-    if (window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__) window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__();
 
     if (window.__TC_DEBUG_PRODUCT_RETURN_SCROLL__) {
       console.log('[TC_PRODUCT_RETURN_SAVE]', state);
@@ -5507,6 +5148,19 @@ function setupDesktopAura() {
     saveReturnScroll(href, source);
   }
 
+  function saveLoadMoreFromEvent(e) {
+    if (!e || !e.target || !e.target.closest) return;
+    if (!e.target.closest(LOAD_MORE_SELECTOR)) return;
+
+    saveLoadMoreState({ incrementClick: true });
+
+    [180, 520, 1100, 1800].forEach(function (delay) {
+      setTimeout(function () {
+        saveLoadMoreState();
+      }, delay);
+    });
+  }
+
   function migrateLegacyState(raw) {
     var legacy = null;
     try {
@@ -5537,7 +5191,6 @@ function setupDesktopAura() {
       source: 'user-photos-legacy',
       productHref: normalizeHref(legacy.productHref || ''),
       pageKey: pageKey,
-      catalogStateKey: pathname + search,
       pathname: pathname,
       search: search,
       hash: hash,
@@ -5610,7 +5263,7 @@ function setupDesktopAura() {
 
   function shouldRestore(state) {
     if (!state || state.from !== 'product-return-scroll') return false;
-    if (isProductBlockingRestore()) return false;
+    if (isProductRoute()) return false;
 
     var expiresAt = Number(state.expiresAt || 0);
     if (!expiresAt) {
@@ -5628,22 +5281,6 @@ function setupDesktopAura() {
     return currentPath === savedPath;
   }
 
-
-  function applyCatalogStateToReturnState(state) {
-    if (!state) return state;
-
-    var catalogStateKey = state.catalogStateKey || ((state.pathname || location.pathname || '') + (state.search || '')) || getCatalogStateKey();
-    var loadMoreState = readLoadMoreState(catalogStateKey);
-    state.catalogStateKey = catalogStateKey;
-    if (!state.loadMoreState && loadMoreState) state.loadMoreState = loadMoreState;
-    if (!state.visibleCatalogCardCount && loadMoreState && loadMoreState.maxVisibleCards) {
-      state.visibleCatalogCardCount = Number(loadMoreState.maxVisibleCards || 0);
-    }
-    lastCatalogStateKey = catalogStateKey;
-    lastLoadMoreState = state.loadMoreState || loadMoreState || null;
-    return state;
-  }
-
   function getRestoreStateKey(state) {
     return [
       state.ts || '',
@@ -5656,26 +5293,16 @@ function setupDesktopAura() {
 
   function endRestoreUi(stateKey) {
     if (activeRestoreKey === stateKey) activeRestoreKey = '';
-    removeReturnScrollSpace();
-    revealReturnCards();
+    document.documentElement.classList.remove('tc-product-return-restoring-scroll');
+    if (document.body) document.body.classList.remove('tc-product-return-restoring-scroll');
   }
 
-  function restoreReturnScroll(reason) {
-    var state = applyCatalogStateToReturnState(readState());
-    lastRestoreReason = typeof reason === 'string' && reason ? reason : (window.__TC_PRODUCT_LAST_EXIT_REASON__ || 'auto');
-    if (!shouldRestore(state)) return;
-
-    var stateKey = getRestoreStateKey(state);
-    if (activeRestoreKey === stateKey) return;
-    activeRestoreKey = stateKey;
-
+  function startReturnScrollRestore(state, stateKey) {
     var targetY = Number(state.scrollY || 0);
     if (!Number.isFinite(targetY) || targetY < 0) targetY = 0;
 
-    suppressReturnCards();
-    updateReturnCardClass(RETURN_RESTORING_CLASS, true);
-    ensureReturnScrollSpace(targetY);
-    if (window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__) window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__();
+    document.documentElement.classList.add('tc-product-return-restoring-scroll');
+    if (document.body) document.body.classList.add('tc-product-return-restoring-scroll');
 
     try {
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -5704,22 +5331,10 @@ function setupDesktopAura() {
       30000
     ];
 
-    function getCurrentRestoreTarget(latestState) {
-      var card = latestState && latestState.productHref ? findProductElementByHref(latestState.productHref) : null;
-      var hasSavedTop = latestState && latestState.sourceCardViewportTop !== null && latestState.sourceCardViewportTop !== undefined;
-      var savedTop = Number(latestState && latestState.sourceCardViewportTop);
-
-      if (card && card.getBoundingClientRect && hasSavedTop && Number.isFinite(savedTop)) {
-        return Math.max(0, getScrollY() + card.getBoundingClientRect().top - savedTop);
-      }
-
-      return targetY;
-    }
-
     function attemptRestore() {
       if (token !== activeRestoreToken) return;
 
-      var latestState = applyCatalogStateToReturnState(readState());
+      var latestState = readState();
       if (!shouldRestore(latestState)) {
         endRestoreUi(stateKey);
         return;
@@ -5728,11 +5343,8 @@ function setupDesktopAura() {
       attempts += 1;
       blurProductSourceFocus();
 
-      var currentTargetY = getCurrentRestoreTarget(latestState);
-      ensureReturnScrollSpace(currentTargetY);
       var maxY = getMaxScrollY();
-      var y = maxY > 0 ? Math.min(currentTargetY, maxY) : currentTargetY;
-      if (window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__) window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__();
+      var y = maxY > 0 ? Math.min(targetY, maxY) : targetY;
 
       window.scrollTo(0, y);
 
@@ -5743,7 +5355,7 @@ function setupDesktopAura() {
 
         var currentY = getScrollY();
 
-        if (isCloseEnough(currentY, currentTargetY) || (maxY >= currentTargetY - RESTORE_CLOSE_ENOUGH_PX && isCloseEnough(currentY, y))) {
+        if (isCloseEnough(currentY, targetY) || (maxY >= targetY - RESTORE_CLOSE_ENOUGH_PX && isCloseEnough(currentY, y))) {
           successCount += 1;
         } else {
           successCount = 0;
@@ -5751,8 +5363,7 @@ function setupDesktopAura() {
 
         window.__TC_PRODUCT_RETURN_SCROLL_LAST_ATTEMPT__ = {
           attempts: attempts,
-          targetY: currentTargetY,
-          savedScrollY: targetY,
+          targetY: targetY,
           appliedY: y,
           currentY: currentY,
           maxY: maxY,
@@ -5772,49 +5383,36 @@ function setupDesktopAura() {
       }, 120);
     }
 
-    ensureCatalogExpandedForReturn(state, function () {
-      if (token !== activeRestoreToken) return;
-
-      delays.forEach(function (delay) {
-        setTimeout(attemptRestore, delay);
-      });
+    delays.forEach(function (delay) {
+      setTimeout(attemptRestore, delay);
     });
+  }
+
+  function restoreReturnScroll() {
+    var state = readState();
+    if (!shouldRestore(state)) return;
+
+    var stateKey = getRestoreStateKey(state);
+    if (activeRestoreKey === stateKey) return;
+    activeRestoreKey = stateKey;
+
+    ensureCatalogExpandedFromSavedState(function () {
+      startReturnScrollRestore(state, stateKey);
+    }, state);
   }
 
   document.addEventListener('pointerdown', saveFromEvent, true);
   document.addEventListener('click', saveFromEvent, true);
-
-  document.addEventListener('click', function (e) {
-    if (!e || !e.target || !e.target.closest) return;
-
-    if (e.target.closest(LOAD_MORE_SELECTOR)) {
-      if (Date.now() > suppressLoadMoreRememberUntil) rememberLoadMoreClick();
-      return;
-    }
-
-    if (e.target.closest('#allrecords .t-catalog__parts-switch-wrapper, #allrecords .t-store__parts-switch-wrapper')) {
-      resetLoadMoreStateForCurrentPage();
-    }
-  }, true);
+  document.addEventListener('click', saveLoadMoreFromEvent, true);
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      autoExpandCatalogFromSavedState();
-      restoreReturnScroll();
-    });
+    document.addEventListener('DOMContentLoaded', restoreReturnScroll);
   } else {
-    autoExpandCatalogFromSavedState();
     restoreReturnScroll();
   }
 
-  window.addEventListener('load', function () {
-    autoExpandCatalogFromSavedState();
-    restoreReturnScroll();
-  });
-  window.addEventListener('pageshow', function () {
-    autoExpandCatalogFromSavedState();
-    restoreReturnScroll();
-  });
+  window.addEventListener('load', restoreReturnScroll);
+  window.addEventListener('pageshow', restoreReturnScroll);
   window.addEventListener('popstate', restoreReturnScroll);
   window.addEventListener('hashchange', restoreReturnScroll);
 
@@ -5822,17 +5420,14 @@ function setupDesktopAura() {
     setTimeout(restoreReturnScroll, delay);
   });
 
-  window.__TC_SUPPRESS_PRODUCT_RETURN_CARDS__ = suppressReturnCards;
-  window.__TC_REVEAL_PRODUCT_RETURN_CARDS__ = revealReturnCards;
   window.__TC_SAVE_PRODUCT_RETURN_SCROLL__ = saveReturnScroll;
   window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__ = restoreReturnScroll;
   window.__TC_FORCE_PRODUCT_RETURN_RESTORE__ = restoreReturnScroll;
-  window.__TC_IS_PRODUCT_ROUTE_BROAD__ = isProductRouteBroad;
-  window.__TC_IS_PRODUCT_BLOCKING_RESTORE__ = isProductBlockingRestore;
-  window.__TC_HAS_VISIBLE_PRODUCT_POPUP__ = hasVisibleProductPopup;
+  window.__TC_CATALOG_LOAD_MORE_STATE__ = function () { return readLoadMoreState(getCatalogKey()); };
+  window.__TC_VISIBLE_CATALOG_CARD_COUNT__ = getVisibleCatalogCardCount;
 
   window.__TC_PRODUCT_RETURN_SCROLL_STATE__ = function () {
-    var state = applyCatalogStateToReturnState(readState());
+    var state = readState();
     var expiresAt = state ? Number(state.expiresAt || 0) : 0;
     return {
       raw: (function () {
@@ -5842,36 +5437,15 @@ function setupDesktopAura() {
         try { return sessionStorage.getItem(BACKUP_RETURN_KEY) || ''; } catch (_) { return ''; }
       })(),
       parsed: state,
-      returnState: state,
-      catalogStateKey: state && (state.catalogStateKey || ((state.pathname || location.pathname || '') + (state.search || ''))) || getCatalogStateKey(),
-      loadMoreState: readLoadMoreState(state && (state.catalogStateKey || ((state.pathname || location.pathname || '') + (state.search || ''))) || getCatalogStateKey()),
-      lastCatalogStateKey: lastCatalogStateKey,
-      lastLoadMoreState: lastLoadMoreState,
-      visibleCatalogCardCount: countVisibleCatalogCards(),
-      lastRestoreReason: lastRestoreReason,
-      lastAutoExpandAttempt: lastAutoExpandAttempt,
       expiresAt: expiresAt,
       ttlLeftMs: expiresAt ? Math.max(0, expiresAt - Date.now()) : 0,
       shouldRestore: shouldRestore(state),
-      path: location.pathname || '',
-      hash: location.hash || '',
-      href: location.href || '',
       isProductRoute: isProductRoute(),
-      isProductRouteBroad: isProductRouteBroad(),
-      isProductBlockingRestore: isProductBlockingRestore(),
-      hasProductPageClass: hasProductPageClass(),
-      hasProductPopupElement: hasProductPopupElement(),
-      hasVisibleProductPopup: hasVisibleProductPopup(),
       currentPageKey: getPageKey(),
-      currentCatalogStateKey: getCatalogStateKey(),
+      currentCatalogKey: getCatalogKey(),
       currentScrollY: getScrollY(),
-      maxScrollY: getMaxScrollY(),
-      lastExitReason: window.__TC_PRODUCT_LAST_EXIT_REASON__ || '',
-      lastEscExitAt: window.__TC_PRODUCT_LAST_ESC_EXIT_AT__ || 0,
-      lastOpenGuardY: lastOpenGuardY,
-      hasReturnSpacer: !!document.getElementById(RETURN_SCROLL_SPACER_ID),
-      hasLegacyCurtainClass: document.documentElement.classList.contains('tc-product-transition-curtain') || document.documentElement.classList.contains('tc-product-transition-veil') || (document.body && (document.body.classList.contains('tc-product-transition-curtain') || document.body.classList.contains('tc-product-transition-veil'))),
-      hasLegacyWelcomeStyle: window.__TC_HAS_LEGACY_WELCOME_STYLE__ ? window.__TC_HAS_LEGACY_WELCOME_STYLE__() : false,
+      loadMoreState: readLoadMoreState(getCatalogKey()),
+      visibleCatalogCardCount: getVisibleCatalogCardCount(),
       lastAttempt: window.__TC_PRODUCT_RETURN_SCROLL_LAST_ATTEMPT__ || null,
       activeElement: document.activeElement ? {
         tag: document.activeElement.tagName,
@@ -5888,102 +5462,10 @@ function setupDesktopAura() {
   window.__TC_PRODUCT_EXIT_CONTROLLER_V1__ = true;
 
   var OPENED_KEY = 'tc:productOpenedFromSite:v1';
-  var lastEscExitAt = 0;
-  var lastExitReason = '';
-
-  function isProductPathLike(value) {
-    var text = String(value || '');
-    return /(^|\/)(tproduct|product)(\/|$)/.test(text) ||
-      /#!\/?(tproduct|product)(\/|$)/.test(text) ||
-      /#\/?(tproduct|product)(\/|$)/.test(text) ||
-      text.indexOf('tproduct') !== -1;
-  }
-
-  function hasProductPopupElement() {
-    if (window.__TC_HAS_PRODUCT_POPUP_ELEMENT__) return window.__TC_HAS_PRODUCT_POPUP_ELEMENT__();
-    return !!document.querySelector([
-      '.t-store__prod-popup',
-      '.t-store__product-popup',
-      '.js-store-prod-popup',
-      '.js-store-prod-popup.t-popup_show',
-      '.t-popup_show',
-      '.t-popup_show .t-store__prod-popup',
-      '.t-popup_show .t-store__product-popup',
-      '.t-store__prod-popup.t-popup_show',
-      '.t-store__product-popup.t-popup_show'
-    ].join(','));
-  }
-
-  function hasProductPageClass() {
-    var root = document.documentElement;
-    var body = document.body;
-    return (root && (root.classList.contains('tc-product-page') || root.classList.contains('tc-product-page-active'))) ||
-      (body && (body.classList.contains('tc-product-page') || body.classList.contains('tc-product-page-active')));
-  }
-
-  function isProductUrlLike() {
-    return isProductPathLike(location.pathname || '') ||
-      isProductPathLike(location.hash || '') ||
-      isProductPathLike(location.href || '');
-  }
-
-  function isElementVisible(el) {
-    if (!el || !el.getBoundingClientRect) return false;
-    var style = getComputedStyle(el);
-    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || 1) === 0) return false;
-    var rect = el.getBoundingClientRect();
-    return rect.width > 0 && rect.height > 0;
-  }
-
-  function hasVisibleProductPopup() {
-    if (window.__TC_HAS_VISIBLE_PRODUCT_POPUP__) return window.__TC_HAS_VISIBLE_PRODUCT_POPUP__();
-
-    var selectors = [
-      '.t-store__prod-popup.t-popup_show',
-      '.t-store__product-popup.t-popup_show',
-      '.js-store-prod-popup.t-popup_show',
-      '.t-popup_show .t-store__prod-popup',
-      '.t-popup_show .t-store__product-popup',
-      '.t-popup_show .js-store-prod-popup'
-    ];
-    var nodes = document.querySelectorAll(selectors.join(','));
-
-    for (var i = 0; i < nodes.length; i += 1) {
-      if (isElementVisible(nodes[i])) return true;
-    }
-
-    return false;
-  }
-
-  function isProductRouteBroad() {
-    return isProductUrlLike() ||
-      hasProductPopupElement() ||
-      hasProductPageClass();
-  }
 
   function isProductRoute() {
-    return isProductRouteBroad();
-  }
-
-  function isProductBlockingRestore() {
-    if (window.__TC_IS_PRODUCT_BLOCKING_RESTORE__) return window.__TC_IS_PRODUCT_BLOCKING_RESTORE__();
-    return isProductUrlLike() || hasVisibleProductPopup();
-  }
-
-  function getScrollY() {
-    return window.pageYOffset || document.documentElement.scrollTop || (document.body && document.body.scrollTop) || 0;
-  }
-
-  function getMaxScrollY() {
-    var doc = document.documentElement;
-    var body = document.body;
-    return Math.max(
-      0,
-      (doc ? doc.scrollHeight : 0),
-      (body ? body.scrollHeight : 0),
-      (doc ? doc.offsetHeight : 0),
-      (body ? body.offsetHeight : 0)
-    ) - window.innerHeight;
+    var path = location.pathname || '';
+    return /^\/product\//.test(path) || /^\/tproduct\//.test(path);
   }
 
   function readOpenedState() {
@@ -6005,84 +5487,24 @@ function setupDesktopAura() {
     var expiresAt = Number(state.expiresAt || 0);
     if (expiresAt && Date.now() > expiresAt) return false;
 
+    // history.length is not perfect, but if we have our own marker,
+    // it is safe enough to try history.back().
     return window.history && window.history.length > 1;
   }
 
-  function suppressReturnCardsBeforeExit() {
-    if (window.__TC_SUPPRESS_PRODUCT_RETURN_CARDS__) {
-      window.__TC_SUPPRESS_PRODUCT_RETURN_CARDS__();
-      return;
-    }
-
-    document.documentElement.classList.add('tc-product-return-suppress-cards');
-    if (document.body) document.body.classList.add('tc-product-return-suppress-cards');
-
-    setTimeout(function () {
-      document.documentElement.classList.remove('tc-product-return-suppress-cards');
-      document.documentElement.classList.remove('tc-product-return-cards-revealing');
-      if (document.body) {
-        document.body.classList.remove('tc-product-return-suppress-cards');
-        document.body.classList.remove('tc-product-return-cards-revealing');
-      }
-    }, 2000);
-  }
-
-  function clearTripchillerProductClassesSoon() {
-    if (!lastExitReason) return;
-
-    [0, 80, 160, 320, 700].forEach(function (delay) {
-      setTimeout(function () {
-        if (!lastExitReason || isProductUrlLike()) return;
-
-        document.documentElement.classList.remove('tc-product-page-active', 'tc-site-header-product-suppressed');
-        if (document.body) {
-          document.body.classList.remove('tc-product-page-active', 'tc-site-header-product-suppressed');
-        }
-      }, delay);
-    });
-  }
-
-  function forceReturnRestoreBurst(reason) {
-    [0, 50, 120, 240, 500, 900, 1400, 2200].forEach(function (delay) {
-      setTimeout(function () {
-        if (window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__) window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__();
-        if (!isProductBlockingRestore() && window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__) {
-          window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__(reason || lastExitReason || 'exit');
-        }
-      }, delay);
-    });
-  }
-
-  function scheduleRestoreAfterProductExit(reason) {
-    lastExitReason = reason || '';
-    window.__TC_PRODUCT_LAST_EXIT_REASON__ = lastExitReason;
-    clearTripchillerProductClassesSoon();
-    forceReturnRestoreBurst(lastExitReason || 'exit');
-  }
-
-  function fallbackToHome(reason) {
-    suppressReturnCardsBeforeExit();
-    scheduleRestoreAfterProductExit(reason || 'fallback');
+  function fallbackToHome() {
     window.location.href = '/';
   }
 
-  function exitProductViaTripchillerFlow(reason) {
-    lastExitReason = reason || '';
-    window.__TC_PRODUCT_LAST_EXIT_REASON__ = lastExitReason;
-    if (window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__) window.__TC_KILL_LEGACY_PRODUCT_CURTAIN__();
-
-    suppressReturnCardsBeforeExit();
-    clearTripchillerProductClassesSoon();
-
+  function goBackToPreviousPage() {
     if (canUseHistoryBack()) {
       try {
         history.back();
-        scheduleRestoreAfterProductExit(reason || 'history-back');
         return true;
       } catch (_) {}
     }
 
-    fallbackToHome(reason || 'fallback');
+    fallbackToHome();
     return false;
   }
 
@@ -6094,39 +5516,22 @@ function setupDesktopAura() {
 
     var text = String(link.textContent || '').toLowerCase();
     var href = link.getAttribute && String(link.getAttribute('href') || '');
+    var absoluteHref = '';
+
+    try {
+      absoluteHref = href ? new URL(href, location.origin).href : '';
+    } catch (_) {
+      absoluteHref = href;
+    }
 
     return (
       text.indexOf('назад') !== -1 ||
       text.indexOf('галере') !== -1 ||
       text.indexOf('more products') !== -1 ||
       href === '/' ||
-      href === 'https://tripchiller.com/' ||
-      href === 'http://tripchiller.com/'
+      absoluteHref === 'https://tripchiller.com/' ||
+      absoluteHref === 'http://tripchiller.com/'
     );
-  }
-
-  function isEditableTarget() {
-    var active = document.activeElement;
-    var tag = active && active.tagName;
-    if (tag && /^(INPUT|TEXTAREA|SELECT)$/.test(tag)) return true;
-    return !!(active && active.closest && active.closest('[contenteditable="true"]'));
-  }
-
-  function handleProductEsc(e) {
-    if (!e || (e.key !== 'Escape' && e.key !== 'Esc')) return;
-    if (isEditableTarget()) return;
-    if (!isProductRoute()) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-
-    var now = Date.now();
-    if (now - lastEscExitAt < 700) return;
-    lastEscExitAt = now;
-    window.__TC_PRODUCT_LAST_ESC_EXIT_AT__ = lastEscExitAt;
-
-    exitProductViaTripchillerFlow('esc');
   }
 
   document.addEventListener('click', function (e) {
@@ -6137,57 +5542,46 @@ function setupDesktopAura() {
     e.stopPropagation();
     e.stopImmediatePropagation();
 
-    exitProductViaTripchillerFlow('back-link');
+    goBackToPreviousPage();
   }, true);
 
-  window.addEventListener('keydown', handleProductEsc, true);
-  document.addEventListener('keydown', handleProductEsc, true);
-  window.addEventListener('keyup', handleProductEsc, true);
-  document.addEventListener('keyup', handleProductEsc, true);
+  document.addEventListener('keydown', function (e) {
+    if (!isProductRoute()) return;
+    if (!e || e.key !== 'Escape') return;
 
-  window.__TC_EXIT_PRODUCT_VIA_TRIPCHILLER_FLOW__ = exitProductViaTripchillerFlow;
-  window.__TC_SCHEDULE_PRODUCT_RESTORE_AFTER_EXIT__ = scheduleRestoreAfterProductExit;
-  window.__TC_FORCE_PRODUCT_RETURN_RESTORE_BURST__ = forceReturnRestoreBurst;
+    var tag = document.activeElement && document.activeElement.tagName;
+    if (tag && /^(INPUT|TEXTAREA|SELECT)$/.test(tag)) return;
 
-  window.__TC_PRODUCT_FLOW_DEBUG__ = function () {
-    return {
-      exit: window.__TC_PRODUCT_EXIT_STATE__ ? window.__TC_PRODUCT_EXIT_STATE__() : null,
-      restore: window.__TC_PRODUCT_RETURN_SCROLL_STATE__ ? window.__TC_PRODUCT_RETURN_SCROLL_STATE__() : null
-    };
-  };
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    goBackToPreviousPage();
+  }, true);
 
   window.__TC_PRODUCT_EXIT_STATE__ = function () {
-    var restoreState = window.__TC_PRODUCT_RETURN_SCROLL_STATE__ ? window.__TC_PRODUCT_RETURN_SCROLL_STATE__() : null;
-
     return {
-      path: location.pathname || '',
-      hash: location.hash || '',
-      href: location.href || '',
       isProductRoute: isProductRoute(),
-      isProductRouteBroad: isProductRouteBroad(),
-      isProductBlockingRestore: isProductBlockingRestore(),
-      hasProductPageClass: hasProductPageClass(),
-      hasProductPopupElement: hasProductPopupElement(),
-      hasVisibleProductPopup: hasVisibleProductPopup(),
-      currentScrollY: getScrollY(),
-      maxScrollY: getMaxScrollY(),
-      lastExitReason: lastExitReason,
-      lastCatalogStateKey: restoreState ? (restoreState.lastCatalogStateKey || '') : '',
-      lastLoadMoreState: restoreState ? (restoreState.lastLoadMoreState || null) : null,
-      visibleCatalogCardCount: restoreState ? restoreState.visibleCatalogCardCount : 0,
-      lastRestoreReason: restoreState ? (restoreState.lastRestoreReason || '') : '',
-      lastAutoExpandAttempt: restoreState ? (restoreState.lastAutoExpandAttempt || null) : null,
-      lastEscExitAt: lastEscExitAt,
       openedState: readOpenedState(),
-      returnState: restoreState,
-      loadMoreState: restoreState ? (restoreState.loadMoreState || null) : null,
-      lastAttempt: window.__TC_PRODUCT_RETURN_SCROLL_LAST_ATTEMPT__ || null,
-      hasReturnSpacer: !!document.getElementById('tc-product-return-scroll-spacer'),
-      hasLegacyCurtainClass: document.documentElement.classList.contains('tc-product-transition-curtain') || document.documentElement.classList.contains('tc-product-transition-veil') || (document.body && (document.body.classList.contains('tc-product-transition-curtain') || document.body.classList.contains('tc-product-transition-veil'))),
-      hasLegacyWelcomeStyle: window.__TC_HAS_LEGACY_WELCOME_STYLE__ ? window.__TC_HAS_LEGACY_WELCOME_STYLE__() : false,
       canUseHistoryBack: canUseHistoryBack(),
       historyLength: history.length,
       referrer: document.referrer || ''
+    };
+  };
+})();
+
+(function () {
+  "use strict";
+
+  window.__TC_PRODUCT_FLOW_DEBUG__ = function () {
+    return {
+      path: location.pathname,
+      hash: location.hash,
+      scrollY: window.pageYOffset || document.documentElement.scrollTop || 0,
+      loadMoreState: window.__TC_CATALOG_LOAD_MORE_STATE__ ? window.__TC_CATALOG_LOAD_MORE_STATE__() : null,
+      visibleCatalogCardCount: window.__TC_VISIBLE_CATALOG_CARD_COUNT__ ? window.__TC_VISIBLE_CATALOG_CARD_COUNT__() : 0,
+      productReturnState: window.__TC_PRODUCT_RETURN_SCROLL_STATE__ ? window.__TC_PRODUCT_RETURN_SCROLL_STATE__() : null,
+      productExitState: window.__TC_PRODUCT_EXIT_STATE__ ? window.__TC_PRODUCT_EXIT_STATE__() : null
     };
   };
 })();
