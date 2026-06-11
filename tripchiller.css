@@ -3780,3 +3780,47 @@ body.tc-product-page-active .tc-menu-eye-logo {
   transform: translateY(2px) scale(.97) !important;
   filter: brightness(.92) !important;
 }
+
+/* Product transition curtain: masks Tilda product route state bleed. */
+html.tc-product-transition-curtain,
+body.tc-product-transition-curtain {
+  cursor: wait;
+}
+
+html.tc-product-transition-curtain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483640;
+  pointer-events: auto;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,0.96) 0%, rgba(245,245,242,0.98) 42%, rgba(229,229,224,0.99) 100%);
+  opacity: 1;
+  transition: opacity 420ms ease;
+}
+
+html.tc-product-transition-curtain.tc-product-transition-curtain-leaving::before {
+  opacity: 0;
+  pointer-events: none;
+}
+
+html.tc-product-transition-curtain::after {
+  content: "WELCOME TO";
+  position: fixed;
+  top: 10vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483641;
+  pointer-events: none;
+  font-family: "BetterVCR", "VT323", monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: rgba(20, 20, 20, 0.45);
+  text-transform: uppercase;
+  opacity: 0.8;
+  transition: opacity 420ms ease;
+}
+
+html.tc-product-transition-curtain.tc-product-transition-curtain-leaving::after {
+  opacity: 0;
+}
