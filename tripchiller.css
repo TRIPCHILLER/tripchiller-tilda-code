@@ -3830,3 +3830,19 @@ html.tc-product-return-cards-revealing body:not(.tc-product-page-active) .tc-use
 body.tc-product-return-cards-revealing:not(.tc-product-page-active) .tc-user-photos__photo-link {
   transition: opacity 220ms ease;
 }
+
+/* Скрываем только внутренний loader/spinner у кнопки «Загрузить ещё». */
+#allrecords button.js-catalog-load-more-btn [class*="loader"],
+#allrecords button.js-catalog-load-more-btn [class*="spinner"],
+#allrecords button.js-catalog-load-more-btn [class*="loading"],
+#allrecords button.js-catalog-load-more-btn .t-store__load-more-loader,
+#allrecords button.js-catalog-load-more-btn .t-catalog__load-more-loader,
+#allrecords .t-btn.js-catalog-load-more-btn [class*="loader"],
+#allrecords .t-btn.js-catalog-load-more-btn [class*="spinner"],
+#allrecords .t-btn.js-catalog-load-more-btn [class*="loading"],
+#allrecords .t-btn.js-catalog-load-more-btn .t-store__load-more-loader,
+#allrecords .t-btn.js-catalog-load-more-btn .t-catalog__load-more-loader {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
