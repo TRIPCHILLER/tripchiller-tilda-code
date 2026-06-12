@@ -337,12 +337,16 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
 
   .tc-site-header__mobile-panel {
     position: fixed;
-    inset: 0;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 28px;
+    width: 100%;
     min-height: 100vh;
     min-height: 100svh;
     height: 100dvh;
@@ -355,20 +359,52 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
     transform: translateY(-12px);
     transition: opacity .25s ease, visibility .25s ease, transform .25s ease;
     pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 
   html.tc-site-header-menu-open .tc-site-header__mobile-panel,
   body.tc-site-header-menu-open .tc-site-header__mobile-panel {
+    top: 0 !important;
+    bottom: auto !important;
+    min-height: 100vh;
+    min-height: 100svh;
+    height: 100dvh;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
     pointer-events: auto;
   }
 
+  .tc-site-header__mobile-panel,
+  .tc-site-header__mobile-panel *,
+  .tc-site-header__mobile-panel .tc-site-header__link,
+  .tc-site-header__mobile-panel .tc-site-header__link * {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+  }
+
   .tc-site-header__mobile-panel .tc-site-header__link {
     font-size: clamp(29px, 8.5vw, 46px);
     line-height: 1.1;
     text-align: center;
+    touch-action: manipulation;
+  }
+
+  .tc-site-header__mobile-panel ::selection {
+    background: transparent !important;
+    color: inherit !important;
+  }
+
+  .tc-site-header__mobile-panel ::-moz-selection {
+    background: transparent !important;
+    color: inherit !important;
   }
 }
 
@@ -3437,16 +3473,11 @@ html.tc-page-contacts .tw-type-1a br {
 
 @media (max-width: 959px) {
   #allrecords .tc-catalog-record .t-store__parts-switch-wrapper,
-  #allrecords .tc-catalog-record .t-store__parts-switch,
-  #allrecords .tc-catalog-record .t-catalog__parts,
-  #allrecords .tc-catalog-record .t-catalog__parts-wrapper,
   #allrecords .tc-catalog-record .t-catalog__parts-switch-wrapper,
   #rec2312983111 .t-store__parts-switch-wrapper,
-  #rec2312983111 .t-store__parts-switch,
-  #rec2312983111 .t-catalog__parts,
-  #rec2312983111 .t-catalog__parts-wrapper,
   #rec2312983111 .t-catalog__parts-switch-wrapper {
     display: flex !important;
+    flex-direction: row !important;
     justify-content: center !important;
     align-items: center !important;
     flex-wrap: wrap !important;
@@ -3456,9 +3487,19 @@ html.tc-page-contacts .tw-type-1a br {
     margin-right: auto !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
-    gap: 8px !important;
+    column-gap: clamp(18px, 5vw, 28px) !important;
+    row-gap: 10px !important;
     text-align: center !important;
     box-sizing: border-box !important;
+  }
+
+  #allrecords .tc-catalog-record .t-store__parts-switch,
+  #allrecords .tc-catalog-record .t-catalog__parts,
+  #allrecords .tc-catalog-record .t-catalog__parts-wrapper,
+  #rec2312983111 .t-store__parts-switch,
+  #rec2312983111 .t-catalog__parts,
+  #rec2312983111 .t-catalog__parts-wrapper {
+    display: contents !important;
   }
 
   #allrecords .tc-catalog-record .t-catalog__parts-switch-btn,
@@ -3469,8 +3510,35 @@ html.tc-page-contacts .tw-type-1a br {
   #rec2312983111 .t-store__parts-switch-btn,
   #rec2312983111 .js-catalog-parts-switcher,
   #rec2312983111 .t-catalog__parts-button-base {
+    display: inline-flex !important;
     flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
     margin: 0 !important;
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+    text-align: center !important;
+  }
+
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn *,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn *,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher *,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base *,
+  #allrecords .tc-catalog-record .t-catalog__parts-text-title,
+  #allrecords .tc-catalog-record .t-store__parts-text-title,
+  #rec2312983111 .t-catalog__parts-switch-btn *,
+  #rec2312983111 .t-store__parts-switch-btn *,
+  #rec2312983111 .js-catalog-parts-switcher *,
+  #rec2312983111 .t-catalog__parts-button-base *,
+  #rec2312983111 .t-catalog__parts-text-title,
+  #rec2312983111 .t-store__parts-text-title {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
   }
 }
 
