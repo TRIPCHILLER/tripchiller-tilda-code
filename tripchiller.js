@@ -3960,6 +3960,15 @@ eyeUnlockTimer = setTimeout(function(){
   const isDesktop = desktopMedia.matches;
   const isMobile = mobileMedia.matches;
 
+  function isMobileRuntime() {
+    return (
+      mobileMedia.matches ||
+      window.innerWidth <= 980 ||
+      document.documentElement.clientWidth <= 980 ||
+      (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)
+    );
+  }
+
   if (document.getElementById("tc-fixed-bg")) return;
 
   const supportsMask =
@@ -4050,20 +4059,9 @@ eyeUnlockTimer = setTimeout(function(){
       document.body.scrollTop ||
       0;
 
-    const grid =
-      document.querySelector(".uc-shop-grid") ||
-      document.querySelector(".uc-custom-grid") ||
-      document.querySelector(".tc-catalog-record") ||
-      document.querySelector("#rec2312983111") ||
-      document.querySelector(".t-store") ||
-      document.querySelector(".t-catalog") ||
-      document.querySelector(".js-store") ||
-      document.querySelector(".t-store__grid-cont") ||
-      document.querySelector(".t-store__grid") ||
-      document.querySelector(".t778") ||
-      document.querySelector(".t778__container");
-
+    const grid = getActiveProductsGrid();
     const gridRect = grid ? grid.getBoundingClientRect() : null;
+    const gridSelector = getGridSelectorName(grid);
     const canCheckSupports = typeof CSS !== "undefined" && CSS.supports;
 
     return {
@@ -4082,6 +4080,9 @@ eyeUnlockTimer = setTimeout(function(){
         webkitMask: !!(canCheckSupports && CSS.supports("-webkit-mask-image", "linear-gradient(to bottom, black, transparent)")),
         mask: !!(canCheckSupports && CSS.supports("mask-image", "linear-gradient(to bottom, black, transparent)"))
       },
+      initialized: !!window.__TC_MOBILE_BG_REVEAL_INITIALIZED__,
+      updateCount: window.__TC_MOBILE_BG_REVEAL_UPDATE_COUNT__ || 0,
+      runtimeMobile: isMobileRuntime(),
       hasBg: !!debugBg,
       hasColorLayer: !!color,
       hasAuraLayer: !!aura,
@@ -4100,7 +4101,11 @@ eyeUnlockTimer = setTimeout(function(){
         document.body.offsetHeight,
         document.documentElement.offsetHeight
       ),
+      chosenGridSelector: gridSelector || window.__TC_MOBILE_BG_LAST_GRID_SELECTOR__ || "",
+      chosenGridClass: grid ? grid.className : window.__TC_MOBILE_BG_LAST_GRID_CLASS__ || "",
+      chosenGridHeight: grid ? Math.round(gridRect.height) : window.__TC_MOBILE_BG_LAST_GRID_HEIGHT__ || 0,
       grid: grid ? {
+        selector: gridSelector,
         className: grid.className,
         topAbs: Math.round(gridRect.top + scrollY),
         bottomAbs: Math.round(gridRect.bottom + scrollY),
@@ -4134,45 +4139,89 @@ eyeUnlockTimer = setTimeout(function(){
     );
   }
 
-  function setupMobileScrollReveal() {
-    let scrollRaf = 0;
-    const MOBILE_REVEAL_PRESTART_PX = 1500;
+  const CATALOG_FALLBACK_GRID_SELECTORS = [
+    ".tc-catalog-record",
+    "#rec2312983111",
+    ".t-store__grid-cont",
+    ".t-store__grid",
+    ".t-store",
+    ".t-catalog",
+    ".js-store",
+    ".t778",
+    ".t778__container"
+  ];
 
-    function getCatalogFallbackGrid() {
-      return (
-        document.querySelector(".tc-catalog-record") ||
-        document.querySelector("#rec2312983111") ||
-        document.querySelector(".t-store") ||
-        document.querySelector(".t-catalog") ||
-        document.querySelector(".js-store") ||
-        document.querySelector(".t-store__grid-cont") ||
-        document.querySelector(".t-store__grid") ||
-        document.querySelector(".t778") ||
-        document.querySelector(".t778__container")
-      );
+  function isUsableGrid(el) {
+    if (!el || !el.getBoundingClientRect) return false;
+
+    const rect = el.getBoundingClientRect();
+    const style = getComputedStyle(el);
+
+    if (style.display === "none") return false;
+    if (style.visibility === "hidden") return false;
+    if (rect.height < 20 && el.scrollHeight < 20) return false;
+
+    return true;
+  }
+
+  function pickFirstUsableGrid(selectors) {
+    for (const selector of selectors) {
+      const nodes = document.querySelectorAll(selector);
+      for (const node of nodes) {
+        if (isUsableGrid(node)) return node;
+      }
     }
 
-    function getActiveProductsGrid() {
-      const body = document.body;
-      const prefersCustom = !!(body && body.classList.contains("tc-section-custom"));
+    return null;
+  }
 
-      if (prefersCustom) {
-        return (
-          document.querySelector(".uc-custom-grid") ||
-          document.querySelector(".uc-shop-grid") ||
-          getCatalogFallbackGrid()
-        );
-      }
+  function getCatalogFallbackGrid() {
+    return pickFirstUsableGrid(CATALOG_FALLBACK_GRID_SELECTORS);
+  }
 
+  function getActiveProductsGrid() {
+    const body = document.body;
+    const prefersCustom = !!(body && body.classList.contains("tc-section-custom"));
+
+    if (prefersCustom) {
       return (
-        document.querySelector(".uc-shop-grid") ||
-        document.querySelector(".uc-custom-grid") ||
+        pickFirstUsableGrid([".uc-custom-grid"]) ||
+        pickFirstUsableGrid([".uc-shop-grid"]) ||
         getCatalogFallbackGrid()
       );
     }
 
+    return (
+      pickFirstUsableGrid([".uc-shop-grid"]) ||
+      pickFirstUsableGrid([".uc-custom-grid"]) ||
+      getCatalogFallbackGrid()
+    );
+  }
+
+  function getGridSelectorName(grid) {
+    if (!grid || !grid.matches) return "";
+
+    const selectors = [
+      ".uc-shop-grid",
+      ".uc-custom-grid",
+      ...CATALOG_FALLBACK_GRID_SELECTORS
+    ];
+
+    for (const selector of selectors) {
+      if (grid.matches(selector)) return selector;
+    }
+
+    return "";
+  }
+
+  function setupMobileScrollReveal() {
+    let scrollRaf = 0;
+    const MOBILE_REVEAL_PRESTART_PX = 1500;
+
     function updateMobileReveal() {
       scrollRaf = 0;
+      window.__TC_MOBILE_BG_REVEAL_UPDATE_COUNT__ =
+        (window.__TC_MOBILE_BG_REVEAL_UPDATE_COUNT__ || 0) + 1;
 
       loadColorLayer();
 
@@ -4184,10 +4233,15 @@ eyeUnlockTimer = setTimeout(function(){
 
       const viewportH = window.innerHeight || document.documentElement.clientHeight || 1;
       const grid = getActiveProductsGrid();
+      const gridRect = grid ? grid.getBoundingClientRect() : null;
       let revealStart = getDocumentHeight();
 
+      window.__TC_MOBILE_BG_LAST_GRID_SELECTOR__ = getGridSelectorName(grid);
+      window.__TC_MOBILE_BG_LAST_GRID_CLASS__ = grid ? grid.className : "";
+      window.__TC_MOBILE_BG_LAST_GRID_HEIGHT__ = gridRect ? Math.round(gridRect.height) : 0;
+
       if (grid) {
-        const rect = grid.getBoundingClientRect();
+        const rect = gridRect;
         const gridTopAbs = rect.top + scrollY;
         const gridBottomAbs = rect.bottom + scrollY;
         revealStart = Math.max(gridTopAbs, gridBottomAbs - MOBILE_REVEAL_PRESTART_PX);
@@ -4281,6 +4335,20 @@ eyeUnlockTimer = setTimeout(function(){
     }
 
     scheduleMobileReveal();
+    setTimeout(scheduleMobileReveal, 50);
+    setTimeout(scheduleMobileReveal, 300);
+    setTimeout(scheduleMobileReveal, 1200);
+  }
+
+  let mobileRevealInitialized = false;
+
+  function ensureMobileScrollReveal() {
+    if (mobileRevealInitialized) return;
+    if (!isMobileRuntime()) return;
+
+    mobileRevealInitialized = true;
+    window.__TC_MOBILE_BG_REVEAL_INITIALIZED__ = true;
+    setupMobileScrollReveal();
   }
 
 function setupDesktopAura() {
@@ -4633,9 +4701,11 @@ function setupDesktopAura() {
     }
   });
 }
-  if (isMobile) {
-    setupMobileScrollReveal();
-  }
+  ensureMobileScrollReveal();
+  window.addEventListener("load", ensureMobileScrollReveal, { once: true });
+  window.addEventListener("pageshow", ensureMobileScrollReveal);
+  window.addEventListener("resize", ensureMobileScrollReveal);
+  window.addEventListener("orientationchange", ensureMobileScrollReveal);
 
   if (isDesktop && supportsMask) {
     setupDesktopAura();
