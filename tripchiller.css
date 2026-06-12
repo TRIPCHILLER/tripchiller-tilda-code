@@ -327,6 +327,11 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
     pointer-events: auto;
   }
 
+  html.tc-site-header-menu-open .tc-site-header,
+  body.tc-site-header-menu-open .tc-site-header {
+    z-index: 100000 !important;
+  }
+
   .tc-site-header__inner {
     display: flex;
     justify-content: flex-end;
@@ -349,6 +354,8 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
     top: 0 !important;
     right: 0 !important;
     bottom: auto !important;
+    z-index: 99990 !important;
+    isolation: isolate;
     display: block;
     width: 100% !important;
     min-height: 100vh !important;
@@ -389,6 +396,7 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
     position: absolute !important;
     left: 50% !important;
     top: 50% !important;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
