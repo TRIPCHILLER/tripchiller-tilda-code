@@ -258,6 +258,73 @@
 
   window.__TC_SYNC_SITE_HEADER_REVEAL__ = syncSiteHeaderReveal;
 
+  window.__TC_MOBILE_MENU_GEOMETRY__ = function () {
+    var panel = document.querySelector('.tc-site-header__mobile-panel');
+    var links = document.querySelector('.tc-site-header__mobile-links');
+    var header = document.querySelector('.tc-site-header');
+
+    var rect = function (el) {
+      if (!el) return null;
+      var r = el.getBoundingClientRect();
+      return {
+        top: Math.round(r.top),
+        left: Math.round(r.left),
+        width: Math.round(r.width),
+        height: Math.round(r.height),
+        bottom: Math.round(r.bottom),
+        centerY: Math.round(r.top + r.height / 2)
+      };
+    };
+
+    var css = function (el) {
+      if (!el) return null;
+      var s = getComputedStyle(el);
+      return {
+        position: s.position,
+        display: s.display,
+        top: s.top,
+        bottom: s.bottom,
+        height: s.height,
+        transform: s.transform,
+        opacity: s.opacity,
+        visibility: s.visibility,
+        pointerEvents: s.pointerEvents
+      };
+    };
+
+    return {
+      path: location.pathname,
+      htmlClass: document.documentElement.className,
+      bodyClass: document.body.className,
+      viewport: {
+        innerWidth: innerWidth,
+        innerHeight: innerHeight,
+        visualViewport: window.visualViewport ? {
+          width: Math.round(window.visualViewport.width),
+          height: Math.round(window.visualViewport.height),
+          offsetTop: Math.round(window.visualViewport.offsetTop || 0)
+        } : null
+      },
+      parent: {
+        panelParentClass: panel && panel.parentElement ? panel.parentElement.className : null,
+        panelIsInsideHeader: !!(panel && header && header.contains(panel))
+      },
+      rects: {
+        header: rect(header),
+        panel: rect(panel),
+        links: rect(links)
+      },
+      css: {
+        header: css(header),
+        panel: css(panel),
+        links: css(links)
+      },
+      linksOffsetFromViewportCenter: links
+        ? Math.round((links.getBoundingClientRect().top + links.getBoundingClientRect().height / 2) - innerHeight / 2)
+        : null
+    };
+  };
+
   function safeSyncSiteHeaderReveal() {
     if (typeof window.__TC_SYNC_SITE_HEADER_REVEAL__ === 'function') {
       window.__TC_SYNC_SITE_HEADER_REVEAL__();
@@ -590,6 +657,20 @@
       return item;
     }
 
+    function ensureBodyLevelMobilePanel(panel) {
+      if (!panel || !document.body) return panel;
+
+      if (panel.parentElement !== document.body) {
+        if (header.parentNode === document.body && header.nextSibling) {
+          document.body.insertBefore(panel, header.nextSibling);
+        } else {
+          document.body.appendChild(panel);
+        }
+      }
+
+      return panel;
+    }
+
     function ensureMobilePanelLinkGroup(panel) {
       if (!panel) return null;
 
@@ -667,13 +748,24 @@
 
       mobilePanel.appendChild(mobileLinks);
       header.appendChild(inner);
-      header.appendChild(mobilePanel);
       document.body.insertBefore(header, document.body.firstChild);
+      ensureBodyLevelMobilePanel(mobilePanel);
     }
 
     var burger = header.querySelector('.tc-site-header__burger');
-    var mobilePanel = header.querySelector('.tc-site-header__mobile-panel');
+    var mobilePanel = document.querySelector('.tc-site-header__mobile-panel');
 
+    if (!mobilePanel) {
+      mobilePanel = document.createElement('div');
+      mobilePanel.className = 'tc-site-header__mobile-panel';
+      mobilePanel.setAttribute('aria-hidden', 'true');
+      var recoveredMobileLinks = document.createElement('div');
+      recoveredMobileLinks.className = 'tc-site-header__mobile-links';
+      TC_HEADER_LINKS.forEach(function(link){ recoveredMobileLinks.appendChild(createLink(link)); });
+      mobilePanel.appendChild(recoveredMobileLinks);
+    }
+
+    ensureBodyLevelMobilePanel(mobilePanel);
     ensureMobilePanelLinkGroup(mobilePanel);
     ensureSiteHeaderEye(header);
     initSiteHeaderEyeMotion();
