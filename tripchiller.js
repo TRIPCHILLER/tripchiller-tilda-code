@@ -3963,8 +3963,10 @@ eyeUnlockTimer = setTimeout(function(){
   if (document.getElementById("tc-fixed-bg")) return;
 
   const supportsMask =
-    CSS.supports("-webkit-mask-image", "linear-gradient(to bottom, black, transparent)") ||
-    CSS.supports("mask-image", "linear-gradient(to bottom, black, transparent)");
+    typeof CSS !== "undefined" &&
+    CSS.supports &&
+    (CSS.supports("-webkit-mask-image", "linear-gradient(to bottom, black, transparent)") ||
+      CSS.supports("mask-image", "linear-gradient(to bottom, black, transparent)"));
 
   const bg = document.createElement("div");
   bg.id = "tc-fixed-bg";
@@ -4004,8 +4006,7 @@ eyeUnlockTimer = setTimeout(function(){
   let colorLoaded = false;
 
   function loadColorLayer() {
-    if (colorLoaded) return;
-    if (!supportsMask) return;
+    if (colorLoaded && colorLayer.style.backgroundImage) return;
 
     colorLoaded = true;
 
@@ -4032,10 +4033,86 @@ eyeUnlockTimer = setTimeout(function(){
       bg.classList.add("is-visible");
     }, 1000);
 
-    if (supportsMask && (isDesktop || isMobile)) {
+    if (isDesktop || isMobile) {
       setTimeout(loadColorLayer, 1400);
     }
   }, { once: true });
+
+
+  window.__TC_MOBILE_BG_REVEAL_STATE__ = function () {
+    const debugBg = document.getElementById("tc-fixed-bg");
+    const color = debugBg ? debugBg.querySelector(".tc-bg-color") : null;
+    const aura = debugBg ? debugBg.querySelector(".tc-bg-aura") : null;
+
+    const scrollY =
+      window.pageYOffset ||
+      document.documentElement.scrollTop ||
+      document.body.scrollTop ||
+      0;
+
+    const grid =
+      document.querySelector(".uc-shop-grid") ||
+      document.querySelector(".uc-custom-grid") ||
+      document.querySelector(".tc-catalog-record") ||
+      document.querySelector("#rec2312983111") ||
+      document.querySelector(".t-store") ||
+      document.querySelector(".t-catalog") ||
+      document.querySelector(".js-store") ||
+      document.querySelector(".t-store__grid-cont") ||
+      document.querySelector(".t-store__grid") ||
+      document.querySelector(".t778") ||
+      document.querySelector(".t778__container");
+
+    const gridRect = grid ? grid.getBoundingClientRect() : null;
+    const canCheckSupports = typeof CSS !== "undefined" && CSS.supports;
+
+    return {
+      path: location.pathname,
+      viewport: {
+        innerWidth,
+        innerHeight,
+        docClientWidth: document.documentElement.clientWidth,
+        docClientHeight: document.documentElement.clientHeight
+      },
+      media: {
+        desktop: window.matchMedia(DESKTOP_QUERY).matches,
+        mobile: window.matchMedia(MOBILE_QUERY).matches
+      },
+      supports: {
+        webkitMask: !!(canCheckSupports && CSS.supports("-webkit-mask-image", "linear-gradient(to bottom, black, transparent)")),
+        mask: !!(canCheckSupports && CSS.supports("mask-image", "linear-gradient(to bottom, black, transparent)"))
+      },
+      hasBg: !!debugBg,
+      hasColorLayer: !!color,
+      hasAuraLayer: !!aura,
+      colorLayerBackground: color ? getComputedStyle(color).backgroundImage : null,
+      colorLayerOpacity: color ? getComputedStyle(color).opacity : null,
+      bgVars: debugBg ? {
+        mobileColorOpacity: debugBg.style.getPropertyValue("--mobile-color-opacity"),
+        mobileBandOpacity: debugBg.style.getPropertyValue("--mobile-band-opacity"),
+        mobileHard: debugBg.style.getPropertyValue("--mobile-hard"),
+        mobileSoft: debugBg.style.getPropertyValue("--mobile-soft")
+      } : null,
+      scrollY,
+      docHeight: Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.offsetHeight
+      ),
+      grid: grid ? {
+        className: grid.className,
+        topAbs: Math.round(gridRect.top + scrollY),
+        bottomAbs: Math.round(gridRect.bottom + scrollY),
+        height: Math.round(gridRect.height)
+      } : null,
+      last: {
+        revealStart: window.__TC_MOBILE_BG_LAST_REVEAL_START__ || null,
+        revealEnd: window.__TC_MOBILE_BG_LAST_REVEAL_END__ || null,
+        progress: window.__TC_MOBILE_BG_LAST_PROGRESS__ || 0
+      }
+    };
+  };
 
   function clamp01(value) {
     if (value < 0) return 0;
@@ -4061,6 +4138,20 @@ eyeUnlockTimer = setTimeout(function(){
     let scrollRaf = 0;
     const MOBILE_REVEAL_PRESTART_PX = 1500;
 
+    function getCatalogFallbackGrid() {
+      return (
+        document.querySelector(".tc-catalog-record") ||
+        document.querySelector("#rec2312983111") ||
+        document.querySelector(".t-store") ||
+        document.querySelector(".t-catalog") ||
+        document.querySelector(".js-store") ||
+        document.querySelector(".t-store__grid-cont") ||
+        document.querySelector(".t-store__grid") ||
+        document.querySelector(".t778") ||
+        document.querySelector(".t778__container")
+      );
+    }
+
     function getActiveProductsGrid() {
       const body = document.body;
       const prefersCustom = !!(body && body.classList.contains("tc-section-custom"));
@@ -4068,13 +4159,15 @@ eyeUnlockTimer = setTimeout(function(){
       if (prefersCustom) {
         return (
           document.querySelector(".uc-custom-grid") ||
-          document.querySelector(".uc-shop-grid")
+          document.querySelector(".uc-shop-grid") ||
+          getCatalogFallbackGrid()
         );
       }
 
       return (
         document.querySelector(".uc-shop-grid") ||
-        document.querySelector(".uc-custom-grid")
+        document.querySelector(".uc-custom-grid") ||
+        getCatalogFallbackGrid()
       );
     }
 
@@ -4104,6 +4197,10 @@ eyeUnlockTimer = setTimeout(function(){
       const revealRange = Math.max(1, revealEnd - revealStart);
       const progress = clamp01((scrollY - revealStart) / revealRange);
 
+      window.__TC_MOBILE_BG_LAST_REVEAL_START__ = revealStart;
+      window.__TC_MOBILE_BG_LAST_REVEAL_END__ = revealEnd;
+      window.__TC_MOBILE_BG_LAST_PROGRESS__ = progress;
+
       const feather = Math.max(90, Math.min(180, viewportH * 0.18));
       const revealY = -feather + progress * (viewportH + feather * 2);
 
@@ -4129,7 +4226,7 @@ eyeUnlockTimer = setTimeout(function(){
       bg.style.setProperty("--mobile-band-mid", bandMid.toFixed(2) + "px");
       bg.style.setProperty("--mobile-band-end", bandEnd.toFixed(2) + "px");
 
-      bg.style.setProperty("--mobile-color-opacity", progress <= 0.003 ? "0" : "1");
+      bg.style.setProperty("--mobile-color-opacity", progress <= 0.003 ? "0" : progress.toFixed(3));
       bg.style.setProperty("--mobile-band-opacity", bandOpacity.toFixed(3));
     }
 
@@ -4536,7 +4633,7 @@ function setupDesktopAura() {
     }
   });
 }
-  if (isMobile && supportsMask) {
+  if (isMobile) {
     setupMobileScrollReveal();
   }
 
