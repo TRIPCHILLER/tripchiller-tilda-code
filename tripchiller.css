@@ -3577,6 +3577,145 @@ html.tc-page-contacts .tw-type-1a br {
     overflow-wrap: normal !important;
     hyphens: none !important;
   }
+
+  #allrecords .tc-catalog-record .t-store__parts-switch-wrapper,
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-wrapper,
+  #allrecords .tc-catalog-record .t-catalog__parts,
+  #allrecords .tc-catalog-record .t-catalog__parts-wrapper,
+  #allrecords .tc-catalog-record .t-store__parts-switch,
+  #rec2312983111 .t-store__parts-switch-wrapper,
+  #rec2312983111 .t-catalog__parts-switch-wrapper,
+  #rec2312983111 .t-catalog__parts,
+  #rec2312983111 .t-catalog__parts-wrapper,
+  #rec2312983111 .t-store__parts-switch {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+  }
+
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base,
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn *,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn *,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher *,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base *,
+  #allrecords .tc-catalog-record .t-catalog__parts-text-title,
+  #allrecords .tc-catalog-record .t-store__parts-text-title,
+  #rec2312983111 .t-catalog__parts-switch-btn,
+  #rec2312983111 .t-store__parts-switch-btn,
+  #rec2312983111 .js-catalog-parts-switcher,
+  #rec2312983111 .t-catalog__parts-button-base,
+  #rec2312983111 .t-catalog__parts-switch-btn *,
+  #rec2312983111 .t-store__parts-switch-btn *,
+  #rec2312983111 .js-catalog-parts-switcher *,
+  #rec2312983111 .t-catalog__parts-button-base *,
+  #rec2312983111 .t-catalog__parts-text-title,
+  #rec2312983111 .t-store__parts-text-title {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+  }
+
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base,
+  #rec2312983111 .t-catalog__parts-switch-btn,
+  #rec2312983111 .t-store__parts-switch-btn,
+  #rec2312983111 .js-catalog-parts-switcher,
+  #rec2312983111 .t-catalog__parts-button-base {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    touch-action: manipulation !important;
+  }
+
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn:active,
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn:focus,
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn:focus-visible,
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn.t-active,
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn_active,
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn[class*="_active"],
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn:active,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn:focus,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn:focus-visible,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn.t-active,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn_active,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn[class*="_active"],
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher:active,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher:focus,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher:focus-visible,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher.t-active,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher[class*="_active"],
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base:active,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base:focus,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base:focus-visible,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base.t-active,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base[class*="_active"],
+  #rec2312983111 .t-catalog__parts-switch-btn:active,
+  #rec2312983111 .t-catalog__parts-switch-btn:focus,
+  #rec2312983111 .t-catalog__parts-switch-btn:focus-visible,
+  #rec2312983111 .t-catalog__parts-switch-btn.t-active,
+  #rec2312983111 .t-catalog__parts-switch-btn_active,
+  #rec2312983111 .t-catalog__parts-switch-btn[class*="_active"],
+  #rec2312983111 .t-store__parts-switch-btn:active,
+  #rec2312983111 .t-store__parts-switch-btn:focus,
+  #rec2312983111 .t-store__parts-switch-btn:focus-visible,
+  #rec2312983111 .t-store__parts-switch-btn.t-active,
+  #rec2312983111 .t-store__parts-switch-btn_active,
+  #rec2312983111 .t-store__parts-switch-btn[class*="_active"],
+  #rec2312983111 .js-catalog-parts-switcher:active,
+  #rec2312983111 .js-catalog-parts-switcher:focus,
+  #rec2312983111 .js-catalog-parts-switcher:focus-visible,
+  #rec2312983111 .js-catalog-parts-switcher.t-active,
+  #rec2312983111 .js-catalog-parts-switcher[class*="_active"],
+  #rec2312983111 .t-catalog__parts-button-base:active,
+  #rec2312983111 .t-catalog__parts-button-base:focus,
+  #rec2312983111 .t-catalog__parts-button-base:focus-visible,
+  #rec2312983111 .t-catalog__parts-button-base.t-active,
+  #rec2312983111 .t-catalog__parts-button-base[class*="_active"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn::selection,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn::selection,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher::selection,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base::selection,
+  #allrecords .tc-catalog-record .t-catalog__parts-text-title::selection,
+  #allrecords .tc-catalog-record .t-store__parts-text-title::selection,
+  #rec2312983111 .t-catalog__parts-switch-btn::selection,
+  #rec2312983111 .t-store__parts-switch-btn::selection,
+  #rec2312983111 .js-catalog-parts-switcher::selection,
+  #rec2312983111 .t-catalog__parts-button-base::selection,
+  #rec2312983111 .t-catalog__parts-text-title::selection,
+  #rec2312983111 .t-store__parts-text-title::selection {
+    background: transparent !important;
+    color: inherit !important;
+  }
+
+  #allrecords .tc-catalog-record .t-catalog__parts-switch-btn::-moz-selection,
+  #allrecords .tc-catalog-record .t-store__parts-switch-btn::-moz-selection,
+  #allrecords .tc-catalog-record .js-catalog-parts-switcher::-moz-selection,
+  #allrecords .tc-catalog-record .t-catalog__parts-button-base::-moz-selection,
+  #allrecords .tc-catalog-record .t-catalog__parts-text-title::-moz-selection,
+  #allrecords .tc-catalog-record .t-store__parts-text-title::-moz-selection,
+  #rec2312983111 .t-catalog__parts-switch-btn::-moz-selection,
+  #rec2312983111 .t-store__parts-switch-btn::-moz-selection,
+  #rec2312983111 .js-catalog-parts-switcher::-moz-selection,
+  #rec2312983111 .t-catalog__parts-button-base::-moz-selection,
+  #rec2312983111 .t-catalog__parts-text-title::-moz-selection,
+  #rec2312983111 .t-store__parts-text-title::-moz-selection {
+    background: transparent !important;
+    color: inherit !important;
+  }
 }
 
 /* 3) скрываем SKU/Артикул, но не удаляем из данных */
