@@ -3946,10 +3946,12 @@ eyeUnlockTimer = setTimeout(function(){
 })();
 
 (function () {
-  const BG_BW = "https://static.tildacdn.com/tild3534-6439-4037-a361-323538303363/BGbw.webp";
-  const BG_COLOR_EYES = "https://static.tildacdn.com/tild3132-3630-4434-b237-653763376365/BGColor2.webp";
-  const BG_COLOR_CLEAN = "https://static.tildacdn.com/tild6165-6634-4434-b464-316436366535/BGColor.webp";
+  const BG_BW_DESKTOP = "https://static.tildacdn.com/tild3534-6439-4037-a361-323538303363/BGbw.webp";
+  const BG_COLOR_EYES_DESKTOP = "https://static.tildacdn.com/tild3132-3630-4434-b237-653763376365/BGColor2.webp";
+  const BG_COLOR_CLEAN_DESKTOP = "https://static.tildacdn.com/tild6165-6634-4434-b464-316436366535/BGColor.webp";
   const BG_COLOR_RED = "https://static.tildacdn.com/tild3961-6534-4636-a137-383465666237/BGred.webp";
+  const BG_BW_MOBILE = "https://static.tildacdn.com/tild3931-6439-4436-a562-333866343034/TRIP_BG_MOBILE_BW.webp";
+  const BG_COLOR_MOBILE = "https://static.tildacdn.com/tild3933-6664-4938-a435-653464656264/TRIP_BG_MOBILE_COLOR.webp";
 
   const DESKTOP_QUERY = "(min-width: 981px) and (pointer: fine)";
   const MOBILE_QUERY = "(max-width: 980px), (pointer: coarse)";
@@ -3967,6 +3969,10 @@ eyeUnlockTimer = setTimeout(function(){
       document.documentElement.clientWidth <= 980 ||
       (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)
     );
+  }
+
+  function shouldUseMobileBg() {
+    return isMobileRuntime();
   }
 
   if (document.getElementById("tc-fixed-bg")) return;
@@ -4010,32 +4016,59 @@ eyeUnlockTimer = setTimeout(function(){
   const rippleCleanLayers = bg.querySelectorAll(".tc-bg-ripple-clean-1, .tc-bg-ripple-clean-2");
   const rippleRedLayers = bg.querySelectorAll(".tc-bg-ripple-red-1, .tc-bg-ripple-red-2");
 
-  bwLayer.style.backgroundImage = `url("${BG_BW}")`;
-
   let colorLoaded = false;
+  let applySourcesRaf = 0;
 
-  function loadColorLayer() {
-    if (colorLoaded && colorLayer.style.backgroundImage) return;
+  function applyBackgroundImageSources() {
+    const useMobile = shouldUseMobileBg();
+    const bw = useMobile ? BG_BW_MOBILE : BG_BW_DESKTOP;
+    const colorEyes = useMobile ? BG_COLOR_MOBILE : BG_COLOR_EYES_DESKTOP;
+    const colorClean = useMobile ? BG_COLOR_MOBILE : BG_COLOR_CLEAN_DESKTOP;
 
-    colorLoaded = true;
+    bwLayer.style.backgroundImage = `url("${bw}")`;
 
-    auraLayer.style.backgroundImage = `url("${BG_COLOR_EYES}")`;
-    colorLayer.style.backgroundImage = `url("${BG_COLOR_EYES}")`;
-    auraCleanLayer.style.backgroundImage = `url("${BG_COLOR_CLEAN}")`;
-    colorCleanLayer.style.backgroundImage = `url("${BG_COLOR_CLEAN}")`;
-    auraRedLayer.style.backgroundImage = `url("${BG_COLOR_RED}")`;
-    colorRedLayer.style.backgroundImage = `url("${BG_COLOR_RED}")`;
+    if (colorLoaded) {
+      auraLayer.style.backgroundImage = `url("${colorEyes}")`;
+      colorLayer.style.backgroundImage = `url("${colorEyes}")`;
+      auraCleanLayer.style.backgroundImage = `url("${colorClean}")`;
+      colorCleanLayer.style.backgroundImage = `url("${colorClean}")`;
+      auraRedLayer.style.backgroundImage = `url("${BG_COLOR_RED}")`;
+      colorRedLayer.style.backgroundImage = `url("${BG_COLOR_RED}")`;
 
-    rippleEyesLayers.forEach(function (layer) {
-      layer.style.backgroundImage = `url("${BG_COLOR_EYES}")`;
-    });
-    rippleCleanLayers.forEach(function (layer) {
-      layer.style.backgroundImage = `url("${BG_COLOR_CLEAN}")`;
-    });
-    rippleRedLayers.forEach(function (layer) {
-      layer.style.backgroundImage = `url("${BG_COLOR_RED}")`;
+      rippleEyesLayers.forEach(function (layer) {
+        layer.style.backgroundImage = `url("${colorEyes}")`;
+      });
+      rippleCleanLayers.forEach(function (layer) {
+        layer.style.backgroundImage = `url("${colorClean}")`;
+      });
+      rippleRedLayers.forEach(function (layer) {
+        layer.style.backgroundImage = `url("${BG_COLOR_RED}")`;
+      });
+    }
+
+    window.__TC_BG_LAST_SOURCE_MODE__ = useMobile ? "mobile" : "desktop";
+    window.__TC_BG_LAST_BW_URL__ = bw;
+    window.__TC_BG_LAST_COLOR_URL__ = colorEyes;
+  }
+
+  function scheduleApplyBackgroundImageSources() {
+    if (applySourcesRaf) return;
+
+    applySourcesRaf = requestAnimationFrame(function () {
+      applySourcesRaf = 0;
+      applyBackgroundImageSources();
     });
   }
+
+  function loadColorLayer() {
+    colorLoaded = true;
+    applyBackgroundImageSources();
+  }
+
+  applyBackgroundImageSources();
+
+  window.addEventListener("resize", scheduleApplyBackgroundImageSources);
+  window.addEventListener("orientationchange", scheduleApplyBackgroundImageSources);
 
   window.addEventListener("load", function () {
     setTimeout(function () {
@@ -4083,6 +4116,9 @@ eyeUnlockTimer = setTimeout(function(){
       initialized: !!window.__TC_MOBILE_BG_REVEAL_INITIALIZED__,
       updateCount: window.__TC_MOBILE_BG_REVEAL_UPDATE_COUNT__ || 0,
       runtimeMobile: isMobileRuntime(),
+      sourceMode: window.__TC_BG_LAST_SOURCE_MODE__ || "",
+      bwUrl: window.__TC_BG_LAST_BW_URL__ || "",
+      colorUrl: window.__TC_BG_LAST_COLOR_URL__ || "",
       hasBg: !!debugBg,
       hasColorLayer: !!color,
       hasAuraLayer: !!aura,
@@ -4116,6 +4152,31 @@ eyeUnlockTimer = setTimeout(function(){
         revealEnd: window.__TC_MOBILE_BG_LAST_REVEAL_END__ || null,
         progress: window.__TC_MOBILE_BG_LAST_PROGRESS__ || 0
       }
+    };
+  };
+
+  window.__TC_BG_SOURCE_STATE__ = function () {
+    const debugBg = document.getElementById("tc-fixed-bg");
+    const bw = debugBg ? debugBg.querySelector(".tc-bg-bw") : null;
+    const color = debugBg ? debugBg.querySelector(".tc-bg-color") : null;
+
+    return {
+      path: location.pathname,
+      runtimeMobile: shouldUseMobileBg(),
+      sourceMode: window.__TC_BG_LAST_SOURCE_MODE__ || "",
+      bwUrl: window.__TC_BG_LAST_BW_URL__ || "",
+      colorUrl: window.__TC_BG_LAST_COLOR_URL__ || "",
+      zoomWbMobileUrl: "https://static.tildacdn.com/tild6134-6335-4565-b965-663238326534/TRIP_BG_MOBILE_WB.webp",
+      bwBackground: bw ? getComputedStyle(bw).backgroundImage : null,
+      colorBackground: color ? getComputedStyle(color).backgroundImage : null,
+      zoomBackground: (function () {
+        const zoomBg =
+          document.querySelector(".t-zoomer__bg") ||
+          document.querySelector(".t-zoomer__wrapper") ||
+          document.querySelector(".t-zoomer");
+
+        return zoomBg ? getComputedStyle(zoomBg).backgroundImage : null;
+      })()
     };
   };
 
