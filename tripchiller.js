@@ -7540,13 +7540,9 @@ function setupDesktopAura() {
       icons.className = LINK_CLASS + '__icons';
       icons.setAttribute('aria-hidden', 'true');
 
-      var arrowUrl = getBackArrowUrl();
       for (var i = 0; i < 2; i += 1) {
-        var icon = document.createElement('img');
+        var icon = document.createElement('span');
         icon.className = LINK_CLASS + '__icon';
-        icon.src = arrowUrl;
-        icon.alt = '';
-        icon.decoding = 'async';
         icons.appendChild(icon);
       }
 
@@ -7571,37 +7567,51 @@ function setupDesktopAura() {
     return !!(window.matchMedia && window.matchMedia('(min-width: 981px) and (pointer: fine)').matches);
   }
 
+  function getProductContentBottom() {
+    var candidates = [
+      document.querySelector('.t-store__prod-popup__slider'),
+      document.querySelector('.t-store__prod-popup__gallery'),
+      document.querySelector('.t-store__prod-popup__info'),
+      document.querySelector('.t-store__prod-popup__text'),
+      document.querySelector('.t-store__prod-popup__descr'),
+      document.querySelector('.js-store-prod-text'),
+      document.querySelector('.t-product__text'),
+      document.querySelector('#rec2312983111')
+    ];
+
+    var bottom = 0;
+
+    candidates.forEach(function (node) {
+      if (!node || !node.getBoundingClientRect) return;
+
+      var rect = node.getBoundingClientRect();
+      if (!rect || rect.height < 1) return;
+
+      bottom = Math.max(bottom, rect.bottom);
+    });
+
+    return bottom;
+  }
+
   function getProductBackLinkDesktopPosition() {
-    var popup =
-      document.querySelector('.t-popup.t-popup_show') ||
-      document.querySelector('.t-store__prod-popup') ||
-      document.querySelector('.js-store-prod-popup') ||
-      document.querySelector('#rec2312983111');
-
-    var desc =
-      document.querySelector('.t-store__prod-popup__text') ||
-      document.querySelector('.t-store__prod-popup__descr') ||
-      document.querySelector('.js-store-prod-text') ||
-      document.querySelector('.t-store__prod-popup__info') ||
-      document.querySelector('.t-product__text');
-
-    var popupRect = popup ? popup.getBoundingClientRect() : null;
-    var descRect = desc ? desc.getBoundingClientRect() : null;
     var viewportH = window.innerHeight || document.documentElement.clientHeight || 1;
+    var productBottom = getProductContentBottom();
 
-    var minTop = descRect ? Math.round(descRect.bottom + 44) : Math.round(viewportH * 0.72);
-    if (popupRect) {
-      minTop = Math.max(minTop, Math.round(popupRect.top + viewportH * 0.54));
+    if (!productBottom || productBottom < 1) {
+      productBottom = Math.round(viewportH * 0.68);
     }
-    var maxTop = Math.round(viewportH - 96);
-    if (popupRect) {
-      maxTop = Math.min(maxTop, Math.round(popupRect.bottom - 72));
-    }
-    var top = Math.min(Math.max(minTop, Math.round(viewportH * 0.68)), maxTop);
+
+    var freeSpace = Math.max(0, viewportH - productBottom);
+    var top = Math.round(productBottom + freeSpace / 2);
+
+    top = Math.max(Math.round(viewportH * 0.70), top);
+    top = Math.min(Math.round(viewportH - 56), top);
 
     return {
       top: top,
-      left: Math.round(window.innerWidth / 2)
+      left: Math.round(window.innerWidth / 2),
+      productBottom: Math.round(productBottom),
+      freeSpace: Math.round(freeSpace)
     };
   }
 
@@ -7614,6 +7624,7 @@ function setupDesktopAura() {
 
     var pos = getProductBackLinkDesktopPosition();
     link.style.setProperty('--tc-product-back-top', pos.top + 'px');
+    window.__TC_PRODUCT_BACK_LAST_POSITION__ = pos;
   }
 
   function removeNativeBackLinkElement(el) {
@@ -7702,6 +7713,21 @@ function setupDesktopAura() {
       hasLink: !!link,
       linkText: link ? link.textContent.replace(/\s+/g, ' ').trim() : '',
       iconCount: link ? link.querySelectorAll('.' + LINK_CLASS + '__icon').length : 0,
+      lastPosition: window.__TC_PRODUCT_BACK_LAST_POSITION__ || null,
+      icons: link ? Array.prototype.map.call(
+        link.querySelectorAll('.' + LINK_CLASS + '__icon'),
+        function (icon) {
+          var style = getComputedStyle(icon);
+          return {
+            tag: icon.tagName,
+            width: style.width,
+            height: style.height,
+            backgroundColor: style.backgroundColor,
+            mask: style.webkitMaskImage || style.maskImage,
+            marginLeft: style.marginLeft
+          };
+        }
+      ) : [],
       nativeStoreBackCount: document.querySelectorAll('.tc-store-back-link').length,
       nativeCatalogCloseTextCount: document.querySelectorAll('.js-catalog-close-text, .t-catalog__prod-popup__close-txt').length,
       nativeHiddenCount: document.querySelectorAll('.' + NATIVE_HIDDEN_CLASS).length,
