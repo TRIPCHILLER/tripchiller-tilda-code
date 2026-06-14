@@ -4117,15 +4117,15 @@ body.tc-product-return-restoring-scroll .js-store-prod-popup {
   color: #5f5f5f !important;
 }
 
-html.tc-product-page .tc-native-product-back-hidden,
-body.tc-product-page .tc-native-product-back-hidden,
-html.tc-product-page-active .tc-native-product-back-hidden,
-body.tc-product-page-active .tc-native-product-back-hidden,
-html.tc-product-page #allrecords .tc-native-product-back-hidden,
-body.tc-product-page #allrecords .tc-native-product-back-hidden,
-html.tc-product-page-active #allrecords .tc-native-product-back-hidden,
-body.tc-product-page-active #allrecords .tc-native-product-back-hidden {
+.tc-native-product-back-hidden,
+#allrecords .tc-native-product-back-hidden,
+.tc-store-back-link.tc-native-product-back-hidden,
+.js-catalog-close-text.tc-native-product-back-hidden,
+.t-catalog__prod-popup__close-txt.tc-native-product-back-hidden {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .tc-product-back-link {
@@ -4199,12 +4199,45 @@ body.tc-product-page-active .tc-product-back-link {
   display: inline-block;
 }
 
-@media (min-width: 981px) {
-  html.tc-product-page .tc-product-back-link,
-  body.tc-product-page .tc-product-back-link,
-  html.tc-product-page-active .tc-product-back-link,
-  body.tc-product-page-active .tc-product-back-link {
-    bottom: 72px;
+@media (min-width: 981px) and (pointer: fine) {
+  .tc-product-back-link {
+    position: fixed !important;
+    left: 50% !important;
+    top: var(--tc-product-back-top, calc(100vh - 96px)) !important;
+    bottom: auto !important;
+    transform: translate3d(-50%, 0, 0) !important;
+    z-index: 2147483646 !important;
+    pointer-events: auto !important;
+    font-family: var(--tc-font-main, 'DS VTCorona Cyr', monospace) !important;
+    font-size: 18px !important;
+    line-height: 1.1 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .04em !important;
+    transition: color .14s ease, opacity .14s ease !important;
+  }
+
+  .tc-product-back-link,
+  .tc-product-back-link:hover,
+  .tc-product-back-link:active,
+  .tc-product-back-link:focus,
+  .tc-product-back-link.tc-ui-pressed,
+  .tc-product-back-link.tc-pressed,
+  .tc-product-back-link.is-leaving {
+    transform: translate3d(-50%, 0, 0) !important;
+  }
+
+  .tc-product-back-link__icons {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+  }
+
+  .tc-product-back-link__icon {
+    display: block !important;
+    width: .75em !important;
+    height: .75em !important;
+    object-fit: contain !important;
+    flex: 0 0 auto !important;
   }
 }
 
@@ -4221,7 +4254,7 @@ body.tc-product-page-active .tc-product-back-link {
   html.tc-product-page #allrecords .tc-catalog-record .tc-store-back-link,
   body.tc-product-page #allrecords .tc-catalog-record .tc-store-back-link,
   html.tc-product-page-active #allrecords .tc-catalog-record .tc-store-back-link,
-  body.tc-product-page-active #allrecords .tc-catalog-record .tc-store-back-link {
+  body.tc-product-page-active #allrecords .tc-catalog-record .tc-store-back-link:not(.tc-native-product-back-hidden) {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -4237,6 +4270,19 @@ body.tc-product-page-active .tc-product-back-link {
     text-decoration: none !important;
     font-family: var(--tc-font-main, inherit) !important;
     text-transform: uppercase !important;
+  }
+}
+
+@media (min-width: 960px) {
+  .tc-native-product-back-hidden,
+  #allrecords .tc-native-product-back-hidden,
+  .tc-store-back-link.tc-native-product-back-hidden,
+  .js-catalog-close-text.tc-native-product-back-hidden,
+  .t-catalog__prod-popup__close-txt.tc-native-product-back-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
 }
 

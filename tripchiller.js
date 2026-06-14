@@ -7567,21 +7567,96 @@ function setupDesktopAura() {
     return link;
   }
 
+  function isDesktopProductBackMode() {
+    return !!(window.matchMedia && window.matchMedia('(min-width: 981px) and (pointer: fine)').matches);
+  }
+
+  function getProductBackLinkDesktopPosition() {
+    var popup =
+      document.querySelector('.t-popup.t-popup_show') ||
+      document.querySelector('.t-store__prod-popup') ||
+      document.querySelector('.js-store-prod-popup') ||
+      document.querySelector('#rec2312983111');
+
+    var desc =
+      document.querySelector('.t-store__prod-popup__text') ||
+      document.querySelector('.t-store__prod-popup__descr') ||
+      document.querySelector('.js-store-prod-text') ||
+      document.querySelector('.t-store__prod-popup__info') ||
+      document.querySelector('.t-product__text');
+
+    var popupRect = popup ? popup.getBoundingClientRect() : null;
+    var descRect = desc ? desc.getBoundingClientRect() : null;
+    var viewportH = window.innerHeight || document.documentElement.clientHeight || 1;
+
+    var minTop = descRect ? Math.round(descRect.bottom + 44) : Math.round(viewportH * 0.72);
+    if (popupRect) {
+      minTop = Math.max(minTop, Math.round(popupRect.top + viewportH * 0.54));
+    }
+    var maxTop = Math.round(viewportH - 96);
+    if (popupRect) {
+      maxTop = Math.min(maxTop, Math.round(popupRect.bottom - 72));
+    }
+    var top = Math.min(Math.max(minTop, Math.round(viewportH * 0.68)), maxTop);
+
+    return {
+      top: top,
+      left: Math.round(window.innerWidth / 2)
+    };
+  }
+
+  function applyDesktopBackLinkPosition(link) {
+    if (!link) return;
+    if (!isDesktopProductBackMode()) {
+      link.style.removeProperty('--tc-product-back-top');
+      return;
+    }
+
+    var pos = getProductBackLinkDesktopPosition();
+    link.style.setProperty('--tc-product-back-top', pos.top + 'px');
+  }
+
+  function removeNativeBackLinkElement(el) {
+    if (!el) return;
+    if (el.closest && el.closest('.' + LINK_CLASS)) return;
+
+    var root =
+      (el.closest && (
+        el.closest('.t396__elem') ||
+        el.closest('.tn-elem') ||
+        el.closest('a, button, [role="button"]')
+      )) ||
+      el;
+
+    if (!root || root === document.body || root === document.documentElement) return;
+    if (root.classList) root.classList.add(NATIVE_HIDDEN_CLASS);
+
+    var text = String(root.textContent || '').replace(/\s+/g, ' ').trim().toUpperCase();
+    if (text.length > 180) {
+      if (el.parentNode) el.parentNode.removeChild(el);
+      return;
+    }
+
+    if (root.parentNode) root.parentNode.removeChild(root);
+  }
+
   function hideNativeProductBackLinks() {
     if (!isProductRoute()) return;
 
-    document.querySelectorAll('a, button, [role="button"], .tn-atom, .t-btn, .tc-store-back-link, .t-store__prod-popup__back, .js-store-close-btn, span').forEach(function (el) {
-      if (!el || !el.classList || (el.closest && el.closest('.' + LINK_CLASS))) return;
+    document.querySelectorAll(
+      '.tc-store-back-link, .js-catalog-close-text, .t-catalog__prod-popup__close-txt'
+    ).forEach(removeNativeBackLinkElement);
+
+    document.querySelectorAll('a, button, [role="button"], .tn-atom, .tn-elem, .t396__elem, .t-btn, span, div').forEach(function (el) {
+      if (!el || !el.classList) return;
+      if (el.closest && el.closest('.' + LINK_CLASS)) return;
       if (el.closest && el.closest('script, style, noscript, template')) return;
 
       var text = String(el.textContent || '').replace(/\s+/g, ' ').trim().toUpperCase();
       if (!text || text.indexOf('НАЗАД В ГАЛЕРЕЮ') === -1) return;
-      if (text.length > 120) return;
+      if (text.length > 180) return;
 
-      var root = (el.closest && el.closest('.t396__elem')) || (el.closest && el.closest('a, button, [role="button"]')) || el;
-      if (!root || (root.closest && root.closest('.' + LINK_CLASS))) return;
-      if (root === document.body || root === document.documentElement) return;
-      root.classList.add(NATIVE_HIDDEN_CLASS);
+      removeNativeBackLinkElement(el);
     });
   }
 
@@ -7600,8 +7675,9 @@ function setupDesktopAura() {
     if (body) body.classList.toggle(ACTIVE_CLASS, active);
 
     if (active) {
-      ensureProductBackLink();
+      var ensuredLink = ensureProductBackLink();
       hideNativeProductBackLinks();
+      applyDesktopBackLinkPosition(ensuredLink);
       return;
     }
 
@@ -7619,7 +7695,6 @@ function setupDesktopAura() {
 
   window.__TC_PRODUCT_BACK_LINK_STATE__ = function () {
     var link = document.querySelector('.' + LINK_CLASS);
-    var nativeHidden = document.querySelectorAll('.' + NATIVE_HIDDEN_CLASS).length;
 
     return {
       path: location.pathname,
@@ -7627,7 +7702,14 @@ function setupDesktopAura() {
       hasLink: !!link,
       linkText: link ? link.textContent.replace(/\s+/g, ' ').trim() : '',
       iconCount: link ? link.querySelectorAll('.' + LINK_CLASS + '__icon').length : 0,
-      nativeHiddenCount: nativeHidden,
+      nativeStoreBackCount: document.querySelectorAll('.tc-store-back-link').length,
+      nativeCatalogCloseTextCount: document.querySelectorAll('.js-catalog-close-text, .t-catalog__prod-popup__close-txt').length,
+      nativeHiddenCount: document.querySelectorAll('.' + NATIVE_HIDDEN_CLASS).length,
+      viewport: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        centerX: Math.round(window.innerWidth / 2)
+      },
       rect: link ? (function () {
         var r = link.getBoundingClientRect();
         return {
@@ -7636,13 +7718,28 @@ function setupDesktopAura() {
           width: Math.round(r.width),
           height: Math.round(r.height),
           centerX: Math.round(r.left + r.width / 2),
-          bottom: Math.round(r.bottom)
+          bottom: Math.round(r.bottom),
+          centerDelta: Math.round((r.left + r.width / 2) - window.innerWidth / 2)
         };
+      })() : null,
+      elementAtLinkCenter: link ? (function () {
+        var r = link.getBoundingClientRect();
+        var x = Math.round(r.left + r.width / 2);
+        var y = Math.round(r.top + r.height / 2);
+        var el = document.elementFromPoint(x, y);
+        return el ? {
+          tag: el.tagName,
+          className: String(el.className || ''),
+          text: String(el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+          isLinkOrChild: el === link || (el.closest && el.closest('.' + LINK_CLASS) === link)
+        } : null;
       })() : null,
       css: link ? {
         position: getComputedStyle(link).position,
-        transform: getComputedStyle(link).transform,
+        top: getComputedStyle(link).top,
         bottom: getComputedStyle(link).bottom,
+        left: getComputedStyle(link).left,
+        transform: getComputedStyle(link).transform,
         zIndex: getComputedStyle(link).zIndex
       } : null
     };
@@ -7655,6 +7752,7 @@ function setupDesktopAura() {
   }
 
   window.addEventListener('load', scheduleSync);
+  window.addEventListener('resize', scheduleSync);
   window.addEventListener('pageshow', scheduleSync);
   window.addEventListener('popstate', scheduleSync);
   window.addEventListener('hashchange', scheduleSync);
