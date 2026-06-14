@@ -6043,14 +6043,14 @@ function setupDesktopAura() {
 
   document.addEventListener('pointerdown', function (event) {
     if (!event || !event.target || !event.target.closest) return;
-    if (event.target.closest('.tc-store-back-link, .js-store-close-btn, .t-store__prod-popup__close, .t-popup__close, .t-popup__close-wrapper')) {
+    if (event.target.closest('.tc-product-back-link, .tc-store-back-link, .js-store-close-btn, .t-store__prod-popup__close, .t-popup__close, .t-popup__close-wrapper')) {
       armReturnStabilization();
     }
   }, true);
 
   document.addEventListener('click', function (event) {
     if (!event || !event.target || !event.target.closest) return;
-    if (event.target.closest('.tc-store-back-link, .js-store-close-btn, .t-store__prod-popup__close, .t-popup__close, .t-popup__close-wrapper')) {
+    if (event.target.closest('.tc-product-back-link, .tc-store-back-link, .js-store-close-btn, .t-store__prod-popup__close, .t-popup__close, .t-popup__close-wrapper')) {
       armReturnStabilization();
     }
   }, true);
@@ -7429,6 +7429,189 @@ function setupDesktopAura() {
       }
     };
   };
+
+})();
+
+(function () {
+  "use strict";
+
+  if (window.__TC_PRODUCT_BACK_LINK_V1__) return;
+  window.__TC_PRODUCT_BACK_LINK_V1__ = true;
+
+  var LINK_CLASS = 'tc-product-back-link';
+  var ACTIVE_CLASS = 'tc-product-back-link-active';
+  var NATIVE_HIDDEN_CLASS = 'tc-native-product-back-hidden';
+
+  function isProductRoute() {
+    var path = String(location.pathname || '');
+    var hash = String(location.hash || '');
+    return /^\/product(\/|$)/.test(path) ||
+      /^\/tproduct(\/|$)/.test(path) ||
+      /#!\/?(?:product|tproduct)(\/|$)/.test(hash);
+  }
+
+  function getTripchillerAssetBaseUrl() {
+    var script = document.currentScript;
+    if (!script || !script.src || script.src.indexOf('tripchiller.js') === -1) {
+      script = document.querySelector('script[src*="tripchiller.js"]');
+    }
+    if (!script || !script.src) return '';
+    return script.src.replace(/tripchiller\.js.*$/, '');
+  }
+
+  function getBackArrowUrl() {
+    var base = getTripchillerAssetBaseUrl();
+    if (base) return base + 'assets/BackArrow.svg';
+    return 'https://cdn.jsdelivr.net/gh/TRIPCHILLER/tripchiller-tilda-code/assets/BackArrow.svg';
+  }
+
+  function ensureProductBackLink() {
+    if (!document.body) return null;
+
+    var link = document.querySelector('.' + LINK_CLASS);
+    if (!link) {
+      link = document.createElement('a');
+      link.className = LINK_CLASS;
+      link.href = '/';
+      link.setAttribute('aria-label', 'Назад в галерею');
+
+      var icons = document.createElement('span');
+      icons.className = LINK_CLASS + '__icons';
+      icons.setAttribute('aria-hidden', 'true');
+
+      var arrowUrl = getBackArrowUrl();
+      for (var i = 0; i < 2; i += 1) {
+        var icon = document.createElement('img');
+        icon.className = LINK_CLASS + '__icon';
+        icon.src = arrowUrl;
+        icon.alt = '';
+        icon.decoding = 'async';
+        icons.appendChild(icon);
+      }
+
+      var text = document.createElement('span');
+      text.className = LINK_CLASS + '__text';
+      text.textContent = 'НАЗАД В ГАЛЕРЕЮ...';
+
+      link.appendChild(icons);
+      link.appendChild(text);
+      link.addEventListener('click', function () {
+        link.classList.add('is-leaving');
+      });
+      document.body.appendChild(link);
+    }
+
+    link.href = '/';
+    link.style.removeProperty('display');
+    return link;
+  }
+
+  function hideNativeProductBackLinks() {
+    if (!isProductRoute()) return;
+
+    document.querySelectorAll('a, button, [role="button"], .tn-atom, .t-btn, .tc-store-back-link, .t-store__prod-popup__back, .js-store-close-btn, span').forEach(function (el) {
+      if (!el || !el.classList || (el.closest && el.closest('.' + LINK_CLASS))) return;
+      if (el.closest && el.closest('script, style, noscript, template')) return;
+
+      var text = String(el.textContent || '').replace(/\s+/g, ' ').trim().toUpperCase();
+      if (!text || text.indexOf('НАЗАД В ГАЛЕРЕЮ') === -1) return;
+      if (text.length > 120) return;
+
+      var root = (el.closest && el.closest('.t396__elem')) || (el.closest && el.closest('a, button, [role="button"]')) || el;
+      if (!root || (root.closest && root.closest('.' + LINK_CLASS))) return;
+      if (root === document.body || root === document.documentElement) return;
+      root.classList.add(NATIVE_HIDDEN_CLASS);
+    });
+  }
+
+  function clearNativeHidden() {
+    document.querySelectorAll('.' + NATIVE_HIDDEN_CLASS).forEach(function (el) {
+      el.classList.remove(NATIVE_HIDDEN_CLASS);
+    });
+  }
+
+  function syncProductBackLink() {
+    var active = isProductRoute();
+    var html = document.documentElement;
+    var body = document.body;
+
+    html.classList.toggle(ACTIVE_CLASS, active);
+    if (body) body.classList.toggle(ACTIVE_CLASS, active);
+
+    if (active) {
+      ensureProductBackLink();
+      hideNativeProductBackLinks();
+      return;
+    }
+
+    var link = document.querySelector('.' + LINK_CLASS);
+    if (link && link.parentNode) link.parentNode.removeChild(link);
+    clearNativeHidden();
+  }
+
+  function scheduleSync() {
+    syncProductBackLink();
+    [100, 400, 900].forEach(function (delay) {
+      setTimeout(syncProductBackLink, delay);
+    });
+  }
+
+  window.__TC_PRODUCT_BACK_LINK_STATE__ = function () {
+    var link = document.querySelector('.' + LINK_CLASS);
+    var nativeHidden = document.querySelectorAll('.' + NATIVE_HIDDEN_CLASS).length;
+
+    return {
+      path: location.pathname,
+      isProductRoute: isProductRoute(),
+      hasLink: !!link,
+      linkText: link ? link.textContent.replace(/\s+/g, ' ').trim() : '',
+      iconCount: link ? link.querySelectorAll('.' + LINK_CLASS + '__icon').length : 0,
+      nativeHiddenCount: nativeHidden,
+      rect: link ? (function () {
+        var r = link.getBoundingClientRect();
+        return {
+          top: Math.round(r.top),
+          left: Math.round(r.left),
+          width: Math.round(r.width),
+          height: Math.round(r.height),
+          centerX: Math.round(r.left + r.width / 2),
+          bottom: Math.round(r.bottom)
+        };
+      })() : null,
+      css: link ? {
+        position: getComputedStyle(link).position,
+        transform: getComputedStyle(link).transform,
+        bottom: getComputedStyle(link).bottom,
+        zIndex: getComputedStyle(link).zIndex
+      } : null
+    };
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scheduleSync);
+  } else {
+    scheduleSync();
+  }
+
+  window.addEventListener('load', scheduleSync);
+  window.addEventListener('pageshow', scheduleSync);
+  window.addEventListener('popstate', scheduleSync);
+  window.addEventListener('hashchange', scheduleSync);
+  document.addEventListener('click', function () {
+    setTimeout(scheduleSync, 50);
+  }, true);
+
+  var observer = new MutationObserver(function () {
+    if (!isProductRoute()) return;
+    scheduleSync();
+  });
+
+  function startObserver() {
+    if (!document.documentElement) return;
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  }
+
+  startObserver();
 })();
 
 (function(){
