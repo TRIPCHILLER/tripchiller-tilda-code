@@ -1297,6 +1297,23 @@ body .t-zoomable__wrapper {
   background-color: transparent !important;
 }
 
+@media (max-width: 980px), (pointer: coarse) {
+  body .t-zoomer,
+  body .t-zoomer__wrapper,
+  body .t-zoomer__bg,
+  body .t-zoomable__wrapper {
+    background:
+      linear-gradient(
+        rgba(255, 255, 255, 0.64),
+        rgba(255, 255, 255, 0.64)
+      ),
+      url("https://static.tildacdn.com/tild6134-6335-4565-b965-663238326534/TRIP_BG_MOBILE_WB.webp")
+      center center / cover no-repeat fixed !important;
+
+    background-color: transparent !important;
+  }
+}
+
 /* На случай, если белый фон сидит на внутренних контейнерах */
 body .t-zoomer__container,
 body .t-zoomer__content,
@@ -1556,6 +1573,33 @@ body.tc-product-popup-open #rec2312983111 {
   min-height: 100vh !important;
   animation: tcProductRecordFadeIn .55s ease both !important;
   will-change: opacity !important;
+}
+
+@media (max-width: 980px), (pointer: coarse) {
+  body.tc-product-popup-open .t-popup.t-popup_show,
+  body.tc-product-popup-open .t-popup_show,
+  body.tc-product-popup-open .t-store__prod-popup,
+  body.tc-product-popup-open .js-store-prod-popup {
+    background:
+      linear-gradient(
+        rgba(255, 255, 255, 0.64),
+        rgba(255, 255, 255, 0.64)
+      ),
+      url("https://static.tildacdn.com/tild6134-6335-4565-b965-663238326534/TRIP_BG_MOBILE_WB.webp")
+      center center / cover no-repeat fixed !important;
+
+    background-color: transparent !important;
+  }
+
+  html.tc-product-page #rec2312983111,
+  body.tc-product-page #rec2312983111,
+  html.tc-product-page-active #rec2312983111,
+  body.tc-product-page-active #rec2312983111,
+  body.tc-product-popup-open #rec2312983111 {
+    background-image:
+      linear-gradient(rgba(255,255,255,.50), rgba(255,255,255,.50)),
+      url("https://static.tildacdn.com/tild6134-6335-4565-b965-663238326534/TRIP_BG_MOBILE_WB.webp") !important;
+  }
 }
 
 @keyframes tcProductRecordFadeIn {
