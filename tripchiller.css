@@ -4167,7 +4167,9 @@ body.tc-product-page-active .tc-product-back-link {
     pointer-events: auto !important;
   }
 
-  html:has(.t-zoomer_show) .tc-product-back-link {
+  body.t-zoomer__show .tc-product-back-link,
+  body.t-zoomer__active .tc-product-back-link,
+  body.t-zoomer__show_fixed .tc-product-back-link {
     opacity: 0 !important;
     pointer-events: none !important;
   }
