@@ -4167,6 +4167,11 @@ body.tc-product-page-active .tc-product-back-link {
     pointer-events: auto !important;
   }
 
+  html:has(.t-zoomer_show) .tc-product-back-link {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
   .tc-product-back-link:hover,
   .tc-product-back-link:focus-visible {
     color: #ad0b11 !important;
@@ -4258,6 +4263,20 @@ body.tc-product-page-active .tc-product-back-link {
   .t-popup.t-popup_show.tc-product-popup-top .t-btn,
   .t-popup.t-popup_show.tc-product-popup-top .tc-product-back-link {
     cursor: pointer;
+  }
+
+  .t-popup.t-popup_show.tc-product-record .t-slds__bgimg,
+  .t-popup.t-popup_show.tc-product-record .js-product-img,
+  .t-popup.t-popup_show.tc-product-record .t-zoomable,
+  .t-popup.t-popup_show.tc-catalog-record .t-slds__bgimg,
+  .t-popup.t-popup_show.tc-catalog-record .js-product-img,
+  .t-popup.t-popup_show.tc-catalog-record .t-zoomable,
+  .t-popup.t-popup_show.tc-product-popup-top .t-slds__bgimg,
+  .t-popup.t-popup_show.tc-product-popup-top .js-product-img,
+  .t-popup.t-popup_show.tc-product-popup-top .t-zoomable,
+  .t-zoomer_show .t-carousel__zoomer__img,
+  .t-zoomer_show .t-zoomer__img {
+    cursor: none !important;
   }
 
   .tc-product-back-link__icons {
