@@ -7416,7 +7416,8 @@ function setupDesktopAura() {
       backLinkIntercept: 'window-capture',
       escIntercept: 'window+document keydown/keyup/keypress capture',
       escCloseOn: 'keydown',
-      escSwallowOn: 'keyup/keypress',
+      escSwallowOn: 'keyup/keypress + shield',
+      escShieldMs: 1800,
       icons: link ? Array.prototype.map.call(
         link.querySelectorAll('.' + LINK_CLASS + '__icon'),
         function (icon) {
@@ -7518,24 +7519,31 @@ function setupDesktopAura() {
   }, true);
 
   var lastProductEscNativeCloseAt = 0;
+  var productEscShieldUntil = 0;
 
   function interceptProductEscNativeClose(event) {
     if (!isDesktopProductBackMode()) return;
     if (!event) return;
     if (event.key !== 'Escape' && event.code !== 'Escape' && event.keyCode !== 27) return;
     if (document.querySelector('.t-zoomer__wrapper, .t-zoomer_show, .t-zoomable__wrapper')) return;
-    if (!getVisibleProductPopup()) return;
+
+    var now = Date.now();
+    var popup = getVisibleProductPopup();
+    var shieldActive = now < productEscShieldUntil;
+
+    if (!popup && !shieldActive) return;
 
     event.preventDefault();
     event.stopPropagation();
     if (event.stopImmediatePropagation) event.stopImmediatePropagation();
 
     if (event.type !== 'keydown') return;
+    if (!popup) return;
 
-    var now = Date.now();
     if (now - lastProductEscNativeCloseAt < 350) return;
 
     lastProductEscNativeCloseAt = now;
+    productEscShieldUntil = now + 1800;
     closeProductPopupViaNativeCloseControl();
   }
 
