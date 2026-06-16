@@ -7418,6 +7418,7 @@ function setupDesktopAura() {
       escCloseOn: 'keydown',
       escSwallowOn: 'keyup/keypress + shield',
       escShieldMs: 1800,
+      escZoomerGuard: 't-zoomer_show only',
       icons: link ? Array.prototype.map.call(
         link.querySelectorAll('.' + LINK_CLASS + '__icon'),
         function (icon) {
@@ -7525,7 +7526,7 @@ function setupDesktopAura() {
     if (!isDesktopProductBackMode()) return;
     if (!event) return;
     if (event.key !== 'Escape' && event.code !== 'Escape' && event.keyCode !== 27) return;
-    if (document.querySelector('.t-zoomer__wrapper, .t-zoomer_show, .t-zoomable__wrapper')) return;
+    if (document.querySelector('.t-zoomer_show')) return;
 
     var now = Date.now();
     var popup = getVisibleProductPopup();
