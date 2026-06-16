@@ -7414,6 +7414,9 @@ function setupDesktopAura() {
       nativeCloseControl: !!getProductPopupNativeCloseControl(),
       nativeCloseStrategy: 'close-control-mouse-sequence',
       backLinkIntercept: 'window-capture',
+      escIntercept: 'window+document keydown/keyup/keypress capture',
+      escCloseOn: 'keydown',
+      escSwallowOn: 'keyup/keypress',
       icons: link ? Array.prototype.map.call(
         link.querySelectorAll('.' + LINK_CLASS + '__icon'),
         function (icon) {
@@ -7514,17 +7517,34 @@ function setupDesktopAura() {
     setTimeout(scheduleSync, 50);
   }, true);
 
-  window.addEventListener('keydown', function (event) {
-    if (!isProductRoute() || !isDesktopProductBackMode()) return;
-    if (!event || event.key !== 'Escape') return;
+  var lastProductEscNativeCloseAt = 0;
+
+  function interceptProductEscNativeClose(event) {
+    if (!isDesktopProductBackMode()) return;
+    if (!event) return;
+    if (event.key !== 'Escape' && event.code !== 'Escape' && event.keyCode !== 27) return;
     if (document.querySelector('.t-zoomer__wrapper, .t-zoomer_show, .t-zoomable__wrapper')) return;
     if (!getVisibleProductPopup()) return;
 
     event.preventDefault();
     event.stopPropagation();
     if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+
+    if (event.type !== 'keydown') return;
+
+    var now = Date.now();
+    if (now - lastProductEscNativeCloseAt < 350) return;
+
+    lastProductEscNativeCloseAt = now;
     closeProductPopupViaNativeCloseControl();
-  }, true);
+  }
+
+  window.addEventListener('keydown', interceptProductEscNativeClose, true);
+  window.addEventListener('keyup', interceptProductEscNativeClose, true);
+  window.addEventListener('keypress', interceptProductEscNativeClose, true);
+  document.addEventListener('keydown', interceptProductEscNativeClose, true);
+  document.addEventListener('keyup', interceptProductEscNativeClose, true);
+  document.addEventListener('keypress', interceptProductEscNativeClose, true);
 
   var observer = new MutationObserver(function () {
     if (!isProductRoute()) return;
