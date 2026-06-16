@@ -7118,6 +7118,63 @@ function setupDesktopAura() {
       document.querySelector('.t-store__prod-popup.t-popup_show');
   }
 
+  function getCurrentTildaProductId() {
+    var match = window.location.pathname.match(/\/tproduct\/(\d+)/);
+    return match ? match[1] : '';
+  }
+
+  function getCurrentProductCardShortDescription() {
+    var productId = getCurrentTildaProductId();
+    if (!productId) return '';
+
+    var cards = document.querySelectorAll('.js-product.t-catalog__card, .t-catalog__card.js-product');
+
+    for (var i = 0; i < cards.length; i += 1) {
+      var card = cards[i];
+      var link = card.querySelector('a[href*="/tproduct/"]');
+      if (!link) continue;
+
+      var href = link.getAttribute('href') || '';
+      if (href.indexOf(productId) === -1) continue;
+
+      var descr = card.querySelector('.js-catalog-prod-descr');
+      if (!descr) return '';
+
+      return (descr.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+
+    return '';
+  }
+
+  function syncProductPopupShortDescription() {
+    var popup = getVisibleProductPopup();
+    if (!popup) return;
+
+    var shortDescription = getCurrentProductCardShortDescription();
+    var existing = popup.querySelector('.tc-product-popup-short-descr');
+
+    if (!shortDescription) {
+      if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+      return;
+    }
+
+    var titleWrapper = popup.querySelector('.t-catalog__prod-popup__title-wrapper');
+    var title = popup.querySelector('.t-catalog__prod-popup__name, .js-catalog-prod-name.js-product-name');
+    if (!titleWrapper && !title) return;
+
+    var descr = existing || document.createElement('div');
+    descr.className = 'tc-product-popup-short-descr';
+    if (descr.textContent !== shortDescription) descr.textContent = shortDescription;
+
+    if (!existing) {
+      if (title && title.parentNode) {
+        title.parentNode.insertBefore(descr, title.nextSibling);
+      } else {
+        titleWrapper.appendChild(descr);
+      }
+    }
+  }
+
   function closeProductPopupViaNativeBackdrop() {
     var popup = getVisibleProductPopup();
     if (!popup) return false;
@@ -7395,8 +7452,12 @@ function setupDesktopAura() {
 
   function scheduleSync() {
     syncProductBackLink();
+    syncProductPopupShortDescription();
     [100, 400, 900].forEach(function (delay) {
-      setTimeout(syncProductBackLink, delay);
+      setTimeout(function () {
+        syncProductBackLink();
+        syncProductPopupShortDescription();
+      }, delay);
     });
   }
 
@@ -7436,6 +7497,8 @@ function setupDesktopAura() {
       nativeStoreBackCount: document.querySelectorAll('.tc-store-back-link').length,
       nativeCatalogCloseTextCount: document.querySelectorAll('.js-catalog-close-text, .t-catalog__prod-popup__close-txt').length,
       nativeHiddenCount: document.querySelectorAll('.' + NATIVE_HIDDEN_CLASS).length,
+      shortDescription: getCurrentProductCardShortDescription(),
+      shortDescriptionInjected: !!document.querySelector('.tc-product-popup-short-descr'),
       viewport: {
         width: window.innerWidth,
         height: window.innerHeight,

@@ -3773,6 +3773,19 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
   opacity: 0 !important;
 }
 
+@media (min-width: 981px) and (pointer: fine) {
+  .tc-product-popup-short-descr {
+    margin-top: 8px !important;
+    margin-bottom: 18px !important;
+    color: rgba(0, 0, 0, .52) !important;
+    font-family: 'DS VTCorona Cyr', 'Corona', monospace !important;
+    font-size: 16px !important;
+    line-height: 1.25 !important;
+    letter-spacing: .02em !important;
+    text-transform: none !important;
+  }
+}
+
 /* 4) скрываем технический хвост характеристик в основном теле */
 #allrecords .t-store__prod-popup .js-store-prod-all-charcs,
 #allrecords .t-store__prod-popup .js-store-prod-charcs,
