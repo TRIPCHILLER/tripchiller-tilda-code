@@ -5493,6 +5493,7 @@ function setupDesktopAura() {
   var INTRO_CLASS = 'tc-catalog-intro-playing';
   var INTRO_KEY_PREFIX = 'tc:catalogIntroPlayed:v1:';
   var INTRO_DURATION_MS = 1180;
+  var PRODUCT_CLOSE_SKIP_REVEAL_KEY = 'tc:skipCatalogRevealAfterProductClose:v1';
   var CATALOG_CARD_SELECTOR = [
     '#allrecords .tc-catalog-record .t-store__card',
     '#allrecords .tc-catalog-record .t-catalog__card',
@@ -5514,6 +5515,35 @@ function setupDesktopAura() {
   function getIntroKey() {
     return INTRO_KEY_PREFIX + getCatalogKey();
   }
+
+  function isDesktopProductBackMode() {
+    return !!(window.matchMedia && window.matchMedia('(min-width: 981px) and (pointer: fine)').matches);
+  }
+
+  function markProductCloseShouldSkipReveal() {
+    try { sessionStorage.setItem(PRODUCT_CLOSE_SKIP_REVEAL_KEY, String(Date.now())); } catch (_) {}
+  }
+
+  function shouldSkipCatalogRevealAfterProductClose() {
+    var raw = '';
+    try { raw = sessionStorage.getItem(PRODUCT_CLOSE_SKIP_REVEAL_KEY) || ''; } catch (_) { raw = ''; }
+
+    var ts = Number(raw || 0);
+    if (!ts) return false;
+
+    if (Date.now() - ts > 5000) {
+      clearProductCloseSkipReveal();
+      return false;
+    }
+
+    return isDesktopProductBackMode();
+  }
+
+  function clearProductCloseSkipReveal() {
+    try { sessionStorage.removeItem(PRODUCT_CLOSE_SKIP_REVEAL_KEY); } catch (_) {}
+  }
+
+  window.__TC_MARK_PRODUCT_CLOSE_SKIP_REVEAL__ = markProductCloseShouldSkipReveal;
 
   function isProductRoute() {
     var path = location.pathname || '';
@@ -5570,6 +5600,11 @@ function setupDesktopAura() {
     if (introStarted) return false;
     if (suppressedByNavigation) return false;
     if (isProductRoute()) return false;
+    if (shouldSkipCatalogRevealAfterProductClose()) {
+      suppressedByNavigation = true;
+      clearProductCloseSkipReveal();
+      return false;
+    }
     if (hasProductReturnState()) {
       suppressedByNavigation = true;
       return false;
@@ -7109,6 +7144,7 @@ function setupDesktopAura() {
 
       link.classList.add('tc-pressed');
       link.classList.add('is-leaving');
+      if (typeof window.__TC_MARK_PRODUCT_CLOSE_SKIP_REVEAL__ === 'function') window.__TC_MARK_PRODUCT_CLOSE_SKIP_REVEAL__();
 
       setTimeout(closeProductPopupViaNativeBackdrop, 120);
       return;
@@ -7410,6 +7446,7 @@ function setupDesktopAura() {
     event.preventDefault();
     event.stopPropagation();
     if (typeof armReturnStabilization === 'function') armReturnStabilization();
+    if (typeof window.__TC_MARK_PRODUCT_CLOSE_SKIP_REVEAL__ === 'function') window.__TC_MARK_PRODUCT_CLOSE_SKIP_REVEAL__();
     closeProductPopupViaNativeBackdrop();
   }, true);
 
