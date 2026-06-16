@@ -5251,11 +5251,8 @@ function setupDesktopAura() {
 
   var RETURN_KEY = 'tc:productReturnScroll:v1';
   var BACKUP_RETURN_KEY = 'tc:productReturnScrollBackup:v1';
-  var OPENED_KEY = 'tc:productOpenedFromSite:v1';
   var LEGACY_USER_PHOTOS_RETURN_KEY = 'tc:userPhotosReturn:v1';
-  var RETURN_TTL_MS = 5 * 60 * 1000;
   var LOAD_MORE_TTL_MS = 6 * 60 * 60 * 1000;
-  var RESTORE_CLOSE_ENOUGH_PX = 80;
   var LOAD_MORE_KEY_PREFIX = 'tc:catalogLoadMore:v1:';
   var LOAD_MORE_SELECTOR = '#allrecords button.js-catalog-load-more-btn, #allrecords .t-btn.js-catalog-load-more-btn';
   var CATALOG_CARD_SELECTOR = [
@@ -5266,18 +5263,7 @@ function setupDesktopAura() {
     '#allrecords .t-catalog__product-snippet',
     '#allrecords .t-catalog__product'
   ].join(',');
-  var activeRestoreKey = '';
-  var activeRestoreToken = 0;
   var activeExpandKey = '';
-
-  function isProductRoute(pathname) {
-    var path = pathname || location.pathname || '';
-    return /^\/product\//.test(path) || /^\/tproduct\//.test(path);
-  }
-
-  function getPageKey() {
-    return location.pathname + location.search + location.hash;
-  }
 
   function getCatalogKey() {
     return (location.pathname || '/') + (location.search || '');
@@ -5462,147 +5448,12 @@ function setupDesktopAura() {
     step();
   }
 
-  function getScrollY() {
-    return window.pageYOffset ||
-      document.documentElement.scrollTop ||
-      document.body.scrollTop ||
-      0;
-  }
-
-  function getMaxScrollY() {
-    return Math.max(
-      0,
-      document.documentElement.scrollHeight - window.innerHeight,
-      document.body ? document.body.scrollHeight - window.innerHeight : 0
-    );
-  }
-
-  function isCloseEnough(a, b) {
-    return Math.abs(Number(a || 0) - Number(b || 0)) < RESTORE_CLOSE_ENOUGH_PX;
-  }
-
-  function normalizeHref(href) {
-    if (!href) return '';
+  function clearProductReturnScrollState() {
     try {
-      return new URL(href, location.origin).href;
-    } catch (_) {
-      return String(href || '');
-    }
-  }
-
-  function isTProductHref(href) {
-    return /\/tproduct\//.test(String(href || '')) ||
-      /#!\/tproduct\//.test(String(href || ''));
-  }
-
-  function blurProductSourceFocus() {
-    var active = document.activeElement;
-    if (!active || typeof active.blur !== 'function') return;
-
-    if (
-      active.closest &&
-      (
-        active.closest('#tc-user-photos-root') ||
-        active.closest('.js-store-grid-cont') ||
-        active.closest('.t-store') ||
-        active.closest('.t-catalog')
-      )
-    ) {
-      active.blur();
-    }
-  }
-
-  function saveReturnScroll(productHref, source) {
-    if (isProductRoute()) return;
-    if (!productHref || !isTProductHref(productHref)) return;
-
-    var now = Date.now();
-    var loadMoreSnapshot = getLoadMoreSnapshot();
-    var visibleCatalogCardCount = getVisibleCatalogCardCount();
-    var state = {
-      ts: now,
-      expiresAt: now + RETURN_TTL_MS,
-      from: 'product-return-scroll',
-      source: source || '',
-      productHref: normalizeHref(productHref),
-      pageKey: getPageKey(),
-      pathname: location.pathname,
-      search: location.search,
-      hash: location.hash,
-      scrollY: getScrollY(),
-      catalogKey: getCatalogKey(),
-      visibleCatalogCardCount: visibleCatalogCardCount,
-      loadMoreState: loadMoreSnapshot
-    };
-
-    try {
-      sessionStorage.setItem(RETURN_KEY, JSON.stringify(state));
-      sessionStorage.setItem(BACKUP_RETURN_KEY, JSON.stringify(state));
-      sessionStorage.setItem(OPENED_KEY, JSON.stringify({
-        ts: now,
-        expiresAt: now + RETURN_TTL_MS,
-        from: source || '',
-        pageKey: getPageKey(),
-        catalogKey: getCatalogKey(),
-        visibleCatalogCardCount: visibleCatalogCardCount,
-        loadMoreState: loadMoreSnapshot,
-        scrollY: getScrollY(),
-        productHref: normalizeHref(productHref)
-      }));
+      sessionStorage.removeItem(RETURN_KEY);
+      sessionStorage.removeItem(BACKUP_RETURN_KEY);
       sessionStorage.removeItem(LEGACY_USER_PHOTOS_RETURN_KEY);
     } catch (_) {}
-
-    if (window.__TC_DEBUG_PRODUCT_RETURN_SCROLL__) {
-      console.log('[TC_PRODUCT_RETURN_SAVE]', state);
-    }
-
-    try {
-      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    } catch (_) {}
-
-    blurProductSourceFocus();
-  }
-
-  function getProductHrefFromEventTarget(target) {
-    if (!target || !target.closest) return '';
-
-    var userPhoto = target.closest('.tc-user-photos__photo-link');
-    if (userPhoto && userPhoto.dataset && userPhoto.dataset.productHref) {
-      return userPhoto.dataset.productHref;
-    }
-
-    var link = target.closest('a[href]');
-    if (link && isTProductHref(link.getAttribute('href'))) {
-      return link.getAttribute('href');
-    }
-
-    var productLink = target.closest(
-      'a[href*="/tproduct/"],' +
-      'a[href*="#!/tproduct/"],' +
-      '.js-product-url[href],' +
-      '.t-store__card a[href*="/tproduct/"],' +
-      '.t-store__card a[href*="#!/tproduct/"],' +
-      '.t-catalog__product a[href*="/tproduct/"],' +
-      '.t-catalog__product a[href*="#!/tproduct/"]'
-    );
-
-    if (productLink && productLink.getAttribute) {
-      return productLink.getAttribute('href') || '';
-    }
-
-    return '';
-  }
-
-  function saveFromEvent(e) {
-    if (!e || !e.target) return;
-    var href = getProductHrefFromEventTarget(e.target);
-    if (!href) return;
-
-    var source = e.target.closest && e.target.closest('#tc-user-photos-root')
-      ? 'user-photos'
-      : 'catalog';
-
-    saveReturnScroll(href, source);
   }
 
   function saveLoadMoreFromEvent(e) {
@@ -5618,298 +5469,19 @@ function setupDesktopAura() {
     });
   }
 
-  function migrateLegacyState(raw) {
-    var legacy = null;
-    try {
-      legacy = JSON.parse(raw || '');
-    } catch (_) {
-      legacy = null;
-    }
+  clearProductReturnScrollState();
 
-    if (!legacy || legacy.from !== 'user-photos') return null;
-
-    var pageKey = legacy.path || getPageKey();
-    var pathname = location.pathname;
-    var search = location.search;
-    var hash = location.hash;
-
-    try {
-      var url = new URL(pageKey, location.origin);
-      pathname = url.pathname;
-      search = url.search;
-      hash = url.hash;
-    } catch (_) {}
-
-    var ts = Number(legacy.ts || 0) || Date.now();
-    var state = {
-      ts: ts,
-      expiresAt: ts + RETURN_TTL_MS,
-      from: 'product-return-scroll',
-      source: 'user-photos-legacy',
-      productHref: normalizeHref(legacy.productHref || ''),
-      pageKey: pageKey,
-      pathname: pathname,
-      search: search,
-      hash: hash,
-      scrollY: Number(legacy.scrollY || 0) || 0
-    };
-
-    try {
-      sessionStorage.setItem(RETURN_KEY, JSON.stringify(state));
-      sessionStorage.setItem(BACKUP_RETURN_KEY, JSON.stringify(state));
-      sessionStorage.removeItem(LEGACY_USER_PHOTOS_RETURN_KEY);
-    } catch (_) {}
-
-    return state;
-  }
-
-  function parseStateRaw(raw) {
-    if (!raw) return null;
-    try {
-      return JSON.parse(raw);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  function readState() {
-    var raw = '';
-    var state = null;
-
-    try {
-      raw = sessionStorage.getItem(RETURN_KEY) || '';
-    } catch (_) {
-      raw = '';
-    }
-
-    state = parseStateRaw(raw);
-    if (state) return state;
-
-    try {
-      raw = sessionStorage.getItem(BACKUP_RETURN_KEY) || '';
-    } catch (_) {
-      raw = '';
-    }
-
-    state = parseStateRaw(raw);
-    if (state) {
-      try {
-        sessionStorage.setItem(RETURN_KEY, JSON.stringify(state));
-      } catch (_) {}
-      return state;
-    }
-
-    try {
-      raw = sessionStorage.getItem(LEGACY_USER_PHOTOS_RETURN_KEY) || '';
-    } catch (_) {
-      raw = '';
-    }
-
-    if (!raw) return null;
-    return migrateLegacyState(raw);
-  }
-
-  function clearState() {
-    activeRestoreKey = '';
-    try {
-      sessionStorage.removeItem(RETURN_KEY);
-      sessionStorage.removeItem(BACKUP_RETURN_KEY);
-      sessionStorage.removeItem(LEGACY_USER_PHOTOS_RETURN_KEY);
-    } catch (_) {}
-  }
-
-  function shouldRestore(state) {
-    if (!state || state.from !== 'product-return-scroll') return false;
-    if (isProductRoute()) return false;
-
-    var expiresAt = Number(state.expiresAt || 0);
-    if (!expiresAt) {
-      expiresAt = (Number(state.ts || 0) || Date.now()) + RETURN_TTL_MS;
-    }
-
-    if (Date.now() > expiresAt) {
-      clearState();
-      return false;
-    }
-
-    var currentPath = location.pathname || '/';
-    var savedPath = state.pathname || '/';
-
-    return currentPath === savedPath;
-  }
-
-  function getRestoreStateKey(state) {
-    return [
-      state.ts || '',
-      state.expiresAt || '',
-      state.pathname || '',
-      state.scrollY || '',
-      state.productHref || ''
-    ].join('|');
-  }
-
-  function endRestoreUi(stateKey) {
-    if (activeRestoreKey === stateKey) activeRestoreKey = '';
-    document.documentElement.classList.remove('tc-product-return-restoring-scroll');
-    if (document.body) document.body.classList.remove('tc-product-return-restoring-scroll');
-  }
-
-  function startReturnScrollRestore(state, stateKey) {
-    var targetY = Number(state.scrollY || 0);
-    if (!Number.isFinite(targetY) || targetY < 0) targetY = 0;
-
-    document.documentElement.classList.add('tc-product-return-restoring-scroll');
-    if (document.body) document.body.classList.add('tc-product-return-restoring-scroll');
-
-    try {
-      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    } catch (_) {}
-
-    var successCount = 0;
-    var attempts = 0;
-    var completedChecks = 0;
-    var token = ++activeRestoreToken;
-    var delays = [
-      0,
-      50,
-      120,
-      240,
-      500,
-      900,
-      1400,
-      2200,
-      3200,
-      4500,
-      6000,
-      8000,
-      10000,
-      15000,
-      22000,
-      30000
-    ];
-
-    function attemptRestore() {
-      if (token !== activeRestoreToken) return;
-
-      var latestState = readState();
-      if (!shouldRestore(latestState)) {
-        endRestoreUi(stateKey);
-        return;
-      }
-
-      attempts += 1;
-      blurProductSourceFocus();
-
-      var maxY = getMaxScrollY();
-      var y = maxY > 0 ? Math.min(targetY, maxY) : targetY;
-
-      window.scrollTo(0, y);
-
-      setTimeout(function () {
-        if (token !== activeRestoreToken) return;
-
-        completedChecks += 1;
-
-        var currentY = getScrollY();
-
-        if (isCloseEnough(currentY, targetY) || (maxY >= targetY - RESTORE_CLOSE_ENOUGH_PX && isCloseEnough(currentY, y))) {
-          successCount += 1;
-        } else {
-          successCount = 0;
-        }
-
-        window.__TC_PRODUCT_RETURN_SCROLL_LAST_ATTEMPT__ = {
-          attempts: attempts,
-          targetY: targetY,
-          appliedY: y,
-          currentY: currentY,
-          maxY: maxY,
-          successCount: successCount,
-          state: latestState
-        };
-
-        if (successCount >= 2) {
-          endRestoreUi(stateKey);
-          clearState();
-          return;
-        }
-
-        if (completedChecks >= delays.length) {
-          endRestoreUi(stateKey);
-        }
-      }, 120);
-    }
-
-    delays.forEach(function (delay) {
-      setTimeout(attemptRestore, delay);
-    });
-  }
-
-  function restoreReturnScroll() {
-    var state = readState();
-    if (!shouldRestore(state)) return;
-
-    var stateKey = getRestoreStateKey(state);
-    if (activeRestoreKey === stateKey) return;
-    activeRestoreKey = stateKey;
-
-    ensureCatalogExpandedFromSavedState(function () {
-      startReturnScrollRestore(state, stateKey);
-    }, state);
-  }
-
-  document.addEventListener('pointerdown', saveFromEvent, true);
-  document.addEventListener('click', saveFromEvent, true);
-  document.addEventListener('click', saveLoadMoreFromEvent, true);
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', restoreReturnScroll);
-  } else {
-    restoreReturnScroll();
-  }
-
-  window.addEventListener('load', restoreReturnScroll);
-  window.addEventListener('pageshow', restoreReturnScroll);
-  window.addEventListener('popstate', restoreReturnScroll);
-  window.addEventListener('hashchange', restoreReturnScroll);
-
-  [50, 150, 400, 900, 1600, 2400].forEach(function (delay) {
-    setTimeout(restoreReturnScroll, delay);
-  });
-
-  window.__TC_SAVE_PRODUCT_RETURN_SCROLL__ = saveReturnScroll;
-  window.__TC_RESTORE_PRODUCT_RETURN_SCROLL__ = restoreReturnScroll;
-  window.__TC_FORCE_PRODUCT_RETURN_RESTORE__ = restoreReturnScroll;
   window.__TC_CATALOG_LOAD_MORE_STATE__ = function () { return readLoadMoreState(getCatalogKey()); };
   window.__TC_VISIBLE_CATALOG_CARD_COUNT__ = getVisibleCatalogCardCount;
 
   window.__TC_PRODUCT_RETURN_SCROLL_STATE__ = function () {
-    var state = readState();
-    var expiresAt = state ? Number(state.expiresAt || 0) : 0;
     return {
-      raw: (function () {
-        try { return sessionStorage.getItem(RETURN_KEY) || ''; } catch (_) { return ''; }
-      })(),
-      backupRaw: (function () {
-        try { return sessionStorage.getItem(BACKUP_RETURN_KEY) || ''; } catch (_) { return ''; }
-      })(),
-      parsed: state,
-      expiresAt: expiresAt,
-      ttlLeftMs: expiresAt ? Math.max(0, expiresAt - Date.now()) : 0,
-      shouldRestore: shouldRestore(state),
-      isProductRoute: isProductRoute(),
-      currentPageKey: getPageKey(),
-      currentCatalogKey: getCatalogKey(),
-      currentScrollY: getScrollY(),
-      loadMoreState: readLoadMoreState(getCatalogKey()),
-      visibleCatalogCardCount: getVisibleCatalogCardCount(),
-      lastAttempt: window.__TC_PRODUCT_RETURN_SCROLL_LAST_ATTEMPT__ || null,
-      activeElement: document.activeElement ? {
-        tag: document.activeElement.tagName,
-        cls: document.activeElement.className
-      } : null
+      disabled: true,
+      reason: 'native-tilda-popup-close'
     };
   };
+
+  document.addEventListener('click', saveLoadMoreFromEvent, true);
 })();
 
 (function () {
@@ -5919,10 +5491,7 @@ function setupDesktopAura() {
   window.__TC_CATALOG_INTRO_V1__ = true;
 
   var INTRO_CLASS = 'tc-catalog-intro-playing';
-  var RETURN_RESTORE_CLASS = 'tc-product-return-restoring-scroll';
   var INTRO_KEY_PREFIX = 'tc:catalogIntroPlayed:v1:';
-  var RETURN_KEY = 'tc:productReturnScroll:v1';
-  var BACKUP_RETURN_KEY = 'tc:productReturnScrollBackup:v1';
   var INTRO_DURATION_MS = 1180;
   var CATALOG_CARD_SELECTOR = [
     '#allrecords .tc-catalog-record .t-store__card',
@@ -5936,7 +5505,6 @@ function setupDesktopAura() {
   ].join(',');
   var introStarted = false;
   var suppressedByNavigation = false;
-  var returnFlowSuppressed = false;
   var cleanupTimer = 0;
 
   function getCatalogKey() {
@@ -5953,55 +5521,11 @@ function setupDesktopAura() {
     return /^\/product\//.test(path) || /^\/tproduct\//.test(path) || /#!\/?(?:product|tproduct)(\/|$)/.test(hash);
   }
 
-  function parseState(raw) {
-    if (!raw) return null;
-    try { return JSON.parse(raw); } catch (_) { return null; }
-  }
-
-  function readProductReturnState() {
-    var raw = '';
-    var state = null;
-
-    try { raw = sessionStorage.getItem(RETURN_KEY) || ''; } catch (_) { raw = ''; }
-    state = parseState(raw);
-    if (state && state.from === 'product-return-scroll') return state;
-
-    try { raw = sessionStorage.getItem(BACKUP_RETURN_KEY) || ''; } catch (_) { raw = ''; }
-    state = parseState(raw);
-    if (state && state.from === 'product-return-scroll') return state;
-
-    return null;
-  }
-
-  function hasLiveProductReturnState() {
-    var state = readProductReturnState();
-    if (!state) return false;
-
-    var expiresAt = Number(state.expiresAt || 0);
-    if (expiresAt && Date.now() > expiresAt) return false;
-
-    return state;
-  }
-
-  function setReturnRestoreClass(enabled) {
-    document.documentElement.classList.toggle(RETURN_RESTORE_CLASS, !!enabled);
-    if (document.body) document.body.classList.toggle(RETURN_RESTORE_CLASS, !!enabled);
-  }
-
   function armReturnStabilization() {
-    if (hasLiveProductReturnState()) setReturnRestoreClass(true);
+    // Product return scroll restore intentionally disabled.
   }
 
   function hasProductReturnState() {
-    var state = hasLiveProductReturnState();
-    if (!state) return false;
-
-    if (!isProductRoute() && (state.pathname || '/') === (location.pathname || '/')) {
-      returnFlowSuppressed = true;
-      setReturnRestoreClass(true);
-      return true;
-    }
-
     return false;
   }
 
@@ -6046,7 +5570,7 @@ function setupDesktopAura() {
     if (introStarted) return false;
     if (suppressedByNavigation) return false;
     if (isProductRoute()) return false;
-    if (returnFlowSuppressed || hasProductReturnState()) {
+    if (hasProductReturnState()) {
       suppressedByNavigation = true;
       return false;
     }
@@ -7777,6 +7301,7 @@ function setupDesktopAura() {
       linkText: link ? link.textContent.replace(/\s+/g, ' ').trim() : '',
       iconCount: link ? link.querySelectorAll('.' + LINK_CLASS + '__icon').length : 0,
       lastPosition: window.__TC_PRODUCT_BACK_LAST_POSITION__ || null,
+      returnScrollDisabled: true,
       icons: link ? Array.prototype.map.call(
         link.querySelectorAll('.' + LINK_CLASS + '__icon'),
         function (icon) {

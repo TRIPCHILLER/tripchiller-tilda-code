@@ -2641,15 +2641,6 @@ body {
   outline: none !important;
   box-shadow: none !important;
 }
-html.tc-product-return-restoring-scroll .tc-user-photos__photo-link:focus,
-html.tc-product-return-restoring-scroll .tc-user-photos__photo-link:focus-visible,
-body.tc-product-return-restoring-scroll .tc-user-photos__photo-link:focus,
-body.tc-product-return-restoring-scroll .tc-user-photos__photo-link:focus-visible,
-html.tc-product-return-restoring-scroll a:focus,
-body.tc-product-return-restoring-scroll a:focus {
-  outline: none !important;
-  box-shadow: none !important;
-}
 .tc-user-photos.is-dragging { cursor: grabbing; }
 .tc-user-photos.is-dragging .tc-user-photos__photo-link { cursor: grabbing; }
 .tc-user-photos.is-dragging .tc-user-photos__track {
@@ -4002,69 +3993,6 @@ html.tc-catalog-intro-playing #rec2312983111 .t-catalog__card:nth-child(8),
 html.tc-catalog-intro-playing #rec2312983111 .t-catalog__product:nth-child(8),
 html.tc-catalog-intro-playing #rec2312983111 .js-store-product:nth-child(8) { animation-delay: 315ms; }
 
-html.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .t-store__card,
-body.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .t-store__card,
-html.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .t-catalog__card,
-body.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .t-catalog__card,
-html.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .t-catalog__product,
-body.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .t-catalog__product,
-html.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .t-catalog__product-snippet,
-body.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .t-catalog__product-snippet,
-html.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .js-store-product,
-body.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .js-store-product,
-html.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .js-catalog-product,
-body.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .js-catalog-product,
-html.tc-product-return-restoring-scroll #rec2312983111 .t-store__card,
-body.tc-product-return-restoring-scroll #rec2312983111 .t-store__card,
-html.tc-product-return-restoring-scroll #rec2312983111 .t-catalog__card,
-body.tc-product-return-restoring-scroll #rec2312983111 .t-catalog__card,
-html.tc-product-return-restoring-scroll #rec2312983111 .t-catalog__product,
-body.tc-product-return-restoring-scroll #rec2312983111 .t-catalog__product,
-html.tc-product-return-restoring-scroll #rec2312983111 .t-catalog__product-snippet,
-body.tc-product-return-restoring-scroll #rec2312983111 .t-catalog__product-snippet,
-html.tc-product-return-restoring-scroll #rec2312983111 .js-store-product,
-body.tc-product-return-restoring-scroll #rec2312983111 .js-store-product,
-html.tc-product-return-restoring-scroll #rec2312983111 .js-catalog-product,
-body.tc-product-return-restoring-scroll #rec2312983111 .js-catalog-product {
-  opacity: 1 !important;
-  transform: none !important;
-  animation: none !important;
-  transition: none !important;
-}
-
-html.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .t-animate,
-body.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .t-animate,
-html.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .t-animate_started,
-body.tc-product-return-restoring-scroll #allrecords .tc-catalog-record .t-animate_started,
-html.tc-product-return-restoring-scroll #allrecords .tc-catalog-record [data-animate-style],
-body.tc-product-return-restoring-scroll #allrecords .tc-catalog-record [data-animate-style],
-html.tc-product-return-restoring-scroll #rec2312983111 .t-animate,
-body.tc-product-return-restoring-scroll #rec2312983111 .t-animate,
-html.tc-product-return-restoring-scroll #rec2312983111 .t-animate_started,
-body.tc-product-return-restoring-scroll #rec2312983111 .t-animate_started,
-html.tc-product-return-restoring-scroll #rec2312983111 [data-animate-style],
-body.tc-product-return-restoring-scroll #rec2312983111 [data-animate-style] {
-  opacity: 1 !important;
-  transform: none !important;
-  animation: none !important;
-  transition: none !important;
-}
-
-html.tc-product-return-restoring-scroll #rec2312983111,
-body.tc-product-return-restoring-scroll #rec2312983111,
-html.tc-product-return-restoring-scroll .t-popup.t-popup_show,
-body.tc-product-return-restoring-scroll .t-popup.t-popup_show,
-html.tc-product-return-restoring-scroll .t-popup_show,
-body.tc-product-return-restoring-scroll .t-popup_show,
-html.tc-product-return-restoring-scroll .t-store__prod-popup,
-body.tc-product-return-restoring-scroll .t-store__prod-popup,
-html.tc-product-return-restoring-scroll .js-store-prod-popup,
-body.tc-product-return-restoring-scroll .js-store-prod-popup {
-  opacity: 1 !important;
-  animation: none !important;
-  transition: none !important;
-}
-
 /* 6) product page: оставляем один возврат, крестик прячем */
 #allrecords .tc-catalog-record .t-popup__close-icon_cross,
 #allrecords .tc-catalog-record .t-popup__close-icon,
@@ -4228,7 +4156,7 @@ body.tc-product-page-active .tc-product-back-link {
     color: #808080 !important;
     transition:
       color 1s ease,
-      opacity 110ms ease,
+      opacity 650ms ease,
       transform 120ms ease,
       visibility 120ms ease !important;
   }
@@ -4260,6 +4188,76 @@ body.tc-product-page-active .tc-product-back-link {
       color 80ms ease,
       opacity 110ms ease,
       transform 110ms ease !important;
+  }
+
+
+  .t-popup.t-popup_show.tc-product-record,
+  .t-popup.t-popup_show.tc-catalog-record,
+  .t-popup.t-popup_show.tc-product-popup-top,
+  .t-popup.t-popup_show.tc-product-record .t-popup__container,
+  .t-popup.t-popup_show.tc-catalog-record .t-popup__container,
+  .t-popup.t-popup_show.tc-product-popup-top .t-popup__container,
+  .t-popup.t-popup_show.tc-product-record .t-catalog__prod-popup__container,
+  .t-popup.t-popup_show.tc-catalog-record .t-catalog__prod-popup__container,
+  .t-popup.t-popup_show.tc-product-popup-top .t-catalog__prod-popup__container {
+    cursor: pointer;
+  }
+
+  .t-popup.t-popup_show.tc-product-record a,
+  .t-popup.t-popup_show.tc-product-record button,
+  .t-popup.t-popup_show.tc-product-record input,
+  .t-popup.t-popup_show.tc-product-record select,
+  .t-popup.t-popup_show.tc-product-record textarea,
+  .t-popup.t-popup_show.tc-product-record [role="button"],
+  .t-popup.t-popup_show.tc-product-record .t-slds,
+  .t-popup.t-popup_show.tc-product-record .t-slds *,
+  .t-popup.t-popup_show.tc-product-record .t-zoomable,
+  .t-popup.t-popup_show.tc-product-record [data-zoom-target],
+  .t-popup.t-popup_show.tc-product-record [data-img-zoom-url],
+  .t-popup.t-popup_show.tc-product-record .js-catalog-prod-text,
+  .t-popup.t-popup_show.tc-product-record .js-catalog-prod-all-text,
+  .t-popup.t-popup_show.tc-catalog-record a,
+  .t-popup.t-popup_show.tc-catalog-record button,
+  .t-popup.t-popup_show.tc-catalog-record input,
+  .t-popup.t-popup_show.tc-catalog-record select,
+  .t-popup.t-popup_show.tc-catalog-record textarea,
+  .t-popup.t-popup_show.tc-catalog-record [role="button"],
+  .t-popup.t-popup_show.tc-catalog-record .t-slds,
+  .t-popup.t-popup_show.tc-catalog-record .t-slds *,
+  .t-popup.t-popup_show.tc-catalog-record .t-zoomable,
+  .t-popup.t-popup_show.tc-catalog-record [data-zoom-target],
+  .t-popup.t-popup_show.tc-catalog-record [data-img-zoom-url],
+  .t-popup.t-popup_show.tc-catalog-record .js-catalog-prod-text,
+  .t-popup.t-popup_show.tc-catalog-record .js-catalog-prod-all-text,
+  .t-popup.t-popup_show.tc-product-popup-top a,
+  .t-popup.t-popup_show.tc-product-popup-top button,
+  .t-popup.t-popup_show.tc-product-popup-top input,
+  .t-popup.t-popup_show.tc-product-popup-top select,
+  .t-popup.t-popup_show.tc-product-popup-top textarea,
+  .t-popup.t-popup_show.tc-product-popup-top [role="button"],
+  .t-popup.t-popup_show.tc-product-popup-top .t-slds,
+  .t-popup.t-popup_show.tc-product-popup-top .t-slds *,
+  .t-popup.t-popup_show.tc-product-popup-top .t-zoomable,
+  .t-popup.t-popup_show.tc-product-popup-top [data-zoom-target],
+  .t-popup.t-popup_show.tc-product-popup-top [data-img-zoom-url],
+  .t-popup.t-popup_show.tc-product-popup-top .js-catalog-prod-text,
+  .t-popup.t-popup_show.tc-product-popup-top .js-catalog-prod-all-text {
+    cursor: auto;
+  }
+
+  .t-popup.t-popup_show.tc-product-record a,
+  .t-popup.t-popup_show.tc-product-record button,
+  .t-popup.t-popup_show.tc-product-record .t-btn,
+  .t-popup.t-popup_show.tc-product-record .tc-product-back-link,
+  .t-popup.t-popup_show.tc-catalog-record a,
+  .t-popup.t-popup_show.tc-catalog-record button,
+  .t-popup.t-popup_show.tc-catalog-record .t-btn,
+  .t-popup.t-popup_show.tc-catalog-record .tc-product-back-link,
+  .t-popup.t-popup_show.tc-product-popup-top a,
+  .t-popup.t-popup_show.tc-product-popup-top button,
+  .t-popup.t-popup_show.tc-product-popup-top .t-btn,
+  .t-popup.t-popup_show.tc-product-popup-top .tc-product-back-link {
+    cursor: pointer;
   }
 
   .tc-product-back-link__icons {
