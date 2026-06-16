@@ -4211,28 +4211,45 @@ body.tc-product-page-active .tc-product-back-link {
   .tc-product-back-link {
     position: fixed !important;
     left: 50% !important;
-    top: var(--tc-product-back-top, calc(100vh - 96px)) !important;
-    bottom: auto !important;
-    transform: translate3d(-50%, -50%, 0) !important;
+    top: auto !important;
+    bottom: clamp(54px, 8.2vh, 92px) !important;
+    transform: translate3d(-50%, 0, 0) scale(1) !important;
+    transform-origin: 50% 50% !important;
     z-index: 2147483646 !important;
     pointer-events: auto !important;
     font-family: var(--tc-font-main, 'DS VTCorona Cyr', monospace) !important;
-    font-size: 18px !important;
+    font-size: 23px !important;
     line-height: 1.1 !important;
     text-transform: uppercase !important;
     letter-spacing: .04em !important;
-    color: #777777 !important;
-    transition: color .14s ease, opacity .14s ease !important;
+    color: #808080 !important;
+    transition:
+      color 1s ease,
+      opacity 110ms ease,
+      transform 120ms ease !important;
   }
 
-  .tc-product-back-link,
   .tc-product-back-link:hover,
+  .tc-product-back-link:focus-visible {
+    color: #ad0b11 !important;
+    transform: translate3d(-50%, 0, 0) scale(1) !important;
+  }
+
   .tc-product-back-link:active,
-  .tc-product-back-link:focus,
   .tc-product-back-link.tc-ui-pressed,
-  .tc-product-back-link.tc-pressed,
+  .tc-product-back-link.tc-pressed {
+    color: #ad0b11 !important;
+    transform: translate3d(-50%, 0, 0) scale(.965) !important;
+  }
+
   .tc-product-back-link.is-leaving {
-    transform: translate3d(-50%, -50%, 0) !important;
+    color: #ad0b11 !important;
+    opacity: 0 !important;
+    transform: translate3d(-50%, 0, 0) scale(.985) !important;
+    transition:
+      color 80ms ease,
+      opacity 110ms ease,
+      transform 110ms ease !important;
   }
 
   .tc-product-back-link__icons {
@@ -4246,16 +4263,14 @@ body.tc-product-page-active .tc-product-back-link {
 
   .tc-product-back-link__icon {
     display: inline-block !important;
-    width: .72em !important;
-    height: .72em !important;
+    width: .64em !important;
+    height: .64em !important;
     background-color: currentColor !important;
-    -webkit-mask: url("https://cdn.jsdelivr.net/gh/TRIPCHILLER/tripchiller-tilda-code/assets/BackArrow.svg") center / contain no-repeat !important;
-    mask: url("https://cdn.jsdelivr.net/gh/TRIPCHILLER/tripchiller-tilda-code/assets/BackArrow.svg") center / contain no-repeat !important;
     flex: 0 0 auto !important;
   }
 
   .tc-product-back-link__icon + .tc-product-back-link__icon {
-    margin-left: -.04em !important;
+    margin-left: -.08em !important;
   }
 }
 
