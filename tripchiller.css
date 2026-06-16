@@ -4150,8 +4150,9 @@ body.tc-product-return-restoring-scroll .js-store-prod-popup {
   white-space: nowrap;
   cursor: pointer;
   opacity: 1;
+  visibility: visible;
   transform: translateX(-50%) !important;
-  transition: color .14s ease, opacity .14s ease;
+  transition: color .14s ease, opacity .14s ease, visibility .14s ease;
   will-change: opacity;
   -webkit-tap-highlight-color: transparent;
 }
@@ -4216,7 +4217,9 @@ body.tc-product-page-active .tc-product-back-link {
     transform: translate3d(-50%, 0, 0) scale(1) !important;
     transform-origin: 50% 50% !important;
     z-index: 2147483646 !important;
-    pointer-events: auto !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
     font-family: var(--tc-font-main, 'DS VTCorona Cyr', monospace) !important;
     font-size: 23px !important;
     line-height: 1.1 !important;
@@ -4226,7 +4229,14 @@ body.tc-product-page-active .tc-product-back-link {
     transition:
       color 1s ease,
       opacity 110ms ease,
-      transform 120ms ease !important;
+      transform 120ms ease,
+      visibility 120ms ease !important;
+  }
+
+  .tc-product-back-link.is-visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
   }
 
   .tc-product-back-link:hover,
@@ -4253,24 +4263,13 @@ body.tc-product-page-active .tc-product-back-link {
   }
 
   .tc-product-back-link__icons {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0 !important;
-    margin-right: .28em !important;
-    line-height: 1 !important;
-    flex-shrink: 0 !important;
-  }
-
-  .tc-product-back-link__icon {
     display: inline-block !important;
-    width: .64em !important;
-    height: .64em !important;
-    background-color: currentColor !important;
-    flex: 0 0 auto !important;
-  }
-
-  .tc-product-back-link__icon + .tc-product-back-link__icon {
-    margin-left: -.08em !important;
+    margin-right: .34em !important;
+    font-family: var(--tc-font-main, 'DS VTCorona Cyr', monospace) !important;
+    letter-spacing: -.04em !important;
+    line-height: 1 !important;
+    color: currentColor !important;
+    flex-shrink: 0 !important;
   }
 }
 
@@ -4319,6 +4318,13 @@ body.tc-product-page-active .tc-product-back-link {
   }
 }
 
+
+.tc-product-welcome-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
 
 #allrecords .tc-catalog-record .t-catalog__parts-switch-btn,
 #allrecords .tc-catalog-record .t-store__parts-switch-btn,
