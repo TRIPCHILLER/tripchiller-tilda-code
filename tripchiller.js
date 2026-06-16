@@ -7418,7 +7418,7 @@ function setupDesktopAura() {
       escCloseOn: 'keydown',
       escSwallowOn: 'keyup/keypress + shield',
       escShieldMs: 1800,
-      escZoomerGuard: 't-zoomer_show only',
+      escZoomerGuard: 'body t-zoomer__show/t-zoomer__active/t-zoomer__show_fixed',
       icons: link ? Array.prototype.map.call(
         link.querySelectorAll('.' + LINK_CLASS + '__icon'),
         function (icon) {
@@ -7522,11 +7522,19 @@ function setupDesktopAura() {
   var lastProductEscNativeCloseAt = 0;
   var productEscShieldUntil = 0;
 
+  function isTildaZoomerOpen() {
+    return !!(document.body && (
+      document.body.classList.contains('t-zoomer__show') ||
+      document.body.classList.contains('t-zoomer__active') ||
+      document.body.classList.contains('t-zoomer__show_fixed')
+    ));
+  }
+
   function interceptProductEscNativeClose(event) {
     if (!isDesktopProductBackMode()) return;
     if (!event) return;
     if (event.key !== 'Escape' && event.code !== 'Escape' && event.keyCode !== 27) return;
-    if (document.querySelector('.t-zoomer_show')) return;
+    if (isTildaZoomerOpen()) return;
 
     var now = Date.now();
     var popup = getVisibleProductPopup();
