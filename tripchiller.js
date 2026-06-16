@@ -7132,6 +7132,58 @@ function setupDesktopAura() {
     return true;
   }
 
+  function getProductPopupNativeCloseControl() {
+    var popup = getVisibleProductPopup();
+    if (!popup) return null;
+
+    return popup.querySelector('.t-popup__close') ||
+      popup.querySelector('.t-popup__close-wrapper') ||
+      popup.querySelector('.t-popup__close-icon') ||
+      popup.querySelector('[class*="close"]');
+  }
+
+  function dispatchProductCloseMouseEvent(el, type) {
+    if (!el) return false;
+
+    try {
+      if (type.indexOf('pointer') === 0 && window.PointerEvent) {
+        el.dispatchEvent(new PointerEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 1,
+          pointerType: 'mouse',
+          isPrimary: true,
+          button: 0,
+          buttons: type === 'pointerdown' ? 1 : 0
+        }));
+        return true;
+      }
+    } catch (_) {}
+
+    el.dispatchEvent(new MouseEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+      button: 0
+    }));
+
+    return true;
+  }
+
+  function closeProductPopupViaNativeCloseControl() {
+    var closeControl = getProductPopupNativeCloseControl();
+
+    if (!closeControl) {
+      return closeProductPopupViaNativeBackdrop();
+    }
+
+    ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'].forEach(function (type) {
+      dispatchProductCloseMouseEvent(closeControl, type);
+    });
+
+    return true;
+  }
+
   function handleProductBackLinkClick(event) {
     var link = event && event.currentTarget;
     if (!link) return;
@@ -7146,7 +7198,7 @@ function setupDesktopAura() {
       link.classList.add('is-leaving');
       if (typeof window.__TC_MARK_PRODUCT_CLOSE_SKIP_REVEAL__ === 'function') window.__TC_MARK_PRODUCT_CLOSE_SKIP_REVEAL__();
 
-      setTimeout(closeProductPopupViaNativeBackdrop, 120);
+      setTimeout(closeProductPopupViaNativeCloseControl, 120);
       return;
     }
 
@@ -7155,6 +7207,27 @@ function setupDesktopAura() {
 
   function isDesktopProductBackMode() {
     return !!(window.matchMedia && window.matchMedia('(min-width: 981px) and (pointer: fine)').matches);
+  }
+
+  function interceptProductBackLinkNativeClose(event) {
+    if (!isDesktopProductBackMode()) return;
+
+    var target = event && event.target;
+    if (!target || !target.closest) return;
+
+    var link = target.closest('.' + LINK_CLASS);
+    if (!link || !getVisibleProductPopup()) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+
+    link.classList.add('tc-pressed');
+    link.classList.add('is-leaving');
+
+    window.setTimeout(function () {
+      closeProductPopupViaNativeCloseControl();
+    }, 120);
   }
 
   function getProductContentBottom() {
@@ -7338,6 +7411,9 @@ function setupDesktopAura() {
       iconCount: link ? link.querySelectorAll('.' + LINK_CLASS + '__icon').length : 0,
       lastPosition: window.__TC_PRODUCT_BACK_LAST_POSITION__ || null,
       returnScrollDisabled: true,
+      nativeCloseControl: !!getProductPopupNativeCloseControl(),
+      nativeCloseStrategy: 'close-control-mouse-sequence',
+      backLinkIntercept: 'window-capture',
       icons: link ? Array.prototype.map.call(
         link.querySelectorAll('.' + LINK_CLASS + '__icon'),
         function (icon) {
@@ -7406,6 +7482,7 @@ function setupDesktopAura() {
   window.addEventListener('pageshow', scheduleSync);
   window.addEventListener('popstate', scheduleSync);
   window.addEventListener('hashchange', scheduleSync);
+  window.addEventListener('click', interceptProductBackLinkNativeClose, true);
   function isProductPopupInteractiveTarget(target) {
     if (!target || !target.closest) return true;
 
@@ -7437,7 +7514,7 @@ function setupDesktopAura() {
     setTimeout(scheduleSync, 50);
   }, true);
 
-  document.addEventListener('keydown', function (event) {
+  window.addEventListener('keydown', function (event) {
     if (!isProductRoute() || !isDesktopProductBackMode()) return;
     if (!event || event.key !== 'Escape') return;
     if (document.querySelector('.t-zoomer__wrapper, .t-zoomer_show, .t-zoomable__wrapper')) return;
@@ -7445,9 +7522,8 @@ function setupDesktopAura() {
 
     event.preventDefault();
     event.stopPropagation();
-    if (typeof armReturnStabilization === 'function') armReturnStabilization();
-    if (typeof window.__TC_MARK_PRODUCT_CLOSE_SKIP_REVEAL__ === 'function') window.__TC_MARK_PRODUCT_CLOSE_SKIP_REVEAL__();
-    closeProductPopupViaNativeBackdrop();
+    if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+    closeProductPopupViaNativeCloseControl();
   }, true);
 
   var observer = new MutationObserver(function () {
