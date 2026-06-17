@@ -4688,6 +4688,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
     font-size: 16px !important;
     font-weight: 400 !important;
     line-height: 20px !important;
+    opacity: .5 !important;
   }
 
   html.tc-direct-product-normalized .t-catalog__product-popup .t-catalog__prod-popup__btn-wrapper.js-catalog-buttons-wrapper {
