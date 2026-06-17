@@ -4678,7 +4678,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
     font-size: 16px !important;
     font-weight: 300 !important;
     line-height: 24.8px !important;
-    color: rgba(0, 0, 0, .62) !important;
+    color: rgba(0, 0, 0, .5) !important;
     opacity: 1 !important;
   }
 
@@ -4689,7 +4689,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
     font-size: 16px !important;
     font-weight: 400 !important;
     line-height: 20px !important;
-    color: rgba(0, 0, 0, .62) !important;
+    color: rgba(0, 0, 0, .5) !important;
     opacity: 1 !important;
   }
 
