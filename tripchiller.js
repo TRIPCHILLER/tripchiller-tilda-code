@@ -7126,6 +7126,13 @@ function setupDesktopAura() {
       !!document.querySelector('.js-catalog-product.js-product.t-catalog__product-snippet, .js-catalog-product.js-product.t-catalog__product-popup');
   }
 
+  function isDirectProductRefreshMode() {
+    return isDesktopProductBackMode &&
+      isDesktopProductBackMode() &&
+      /\/tproduct\/\d+/.test(window.location.pathname) &&
+      !!document.querySelector('.js-catalog-product.js-product.t-catalog__product-snippet, .tc-direct-product-normalized-surface');
+  }
+
   function getDirectProductSurface() {
     return document.querySelector('.js-catalog-product.js-product.t-catalog__product-snippet, .js-catalog-product.js-product.t-catalog__product-popup');
   }
@@ -7369,6 +7376,11 @@ function setupDesktopAura() {
       event.preventDefault();
       event.stopPropagation();
 
+      if (isDirectProductRefreshMode()) {
+        window.location.assign('/');
+        return;
+      }
+
       if (typeof armReturnStabilization === 'function') armReturnStabilization();
 
       link.classList.add('tc-pressed');
@@ -7398,6 +7410,11 @@ function setupDesktopAura() {
     event.preventDefault();
     event.stopPropagation();
     if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+
+    if (isDirectProductRefreshMode()) {
+      window.location.assign('/');
+      return;
+    }
 
     link.classList.add('tc-pressed');
     link.classList.add('is-leaving');
@@ -7680,6 +7697,8 @@ function setupDesktopAura() {
       shortDescriptionInjected: !!document.querySelector('.tc-product-popup-short-descr'),
       directProductNormalized: !!document.documentElement.classList.contains('tc-direct-product-normalized'),
       directProductSurfaceReady: !!isDirectProductSurfaceReady(getDirectProductSurface()),
+      directProductRefreshMode: isDirectProductRefreshMode(),
+      directBackLinkTarget: isDirectProductRefreshMode() ? '/' : 'native-close-control',
       directShortDescription: getDirectProductDescription(),
       directBuyRestored: !!document.querySelector('.t-catalog__product-popup .t-catalog__prod-popup__btn'),
       directMagnifierReady: !!document.querySelector('.tc-product-magnifier'),
