@@ -7126,11 +7126,29 @@ function setupDesktopAura() {
       !!document.querySelector('.js-catalog-product.js-product.t-catalog__product-snippet, .js-catalog-product.js-product.t-catalog__product-popup');
   }
 
+  function getVisibleTildaProductPopup() {
+    return document.querySelector(
+      '.t-popup.t-popup_show .t-store__prod-popup, ' +
+      '.t-popup.t-popup_show .js-store-prod-popup, ' +
+      '.t-store__prod-popup.t-popup_show'
+    );
+  }
+
+  function isStandaloneDirectProductSurface(surface) {
+    if (!surface || !surface.closest || !surface.classList) return false;
+
+    if (surface.closest('.t-popup, .t-popup_show, .t-store__prod-popup, .js-store-prod-popup')) return false;
+
+    return surface.classList.contains('t-catalog__product-snippet') ||
+      surface.classList.contains('tc-direct-product-normalized-surface');
+  }
+
   function isDirectProductRefreshMode() {
-    return isDesktopProductBackMode &&
-      isDesktopProductBackMode() &&
-      /\/tproduct\/\d+/.test(window.location.pathname) &&
-      !!document.querySelector('.js-catalog-product.js-product.t-catalog__product-snippet, .tc-direct-product-normalized-surface');
+    if (!isDesktopProductBackMode || !isDesktopProductBackMode()) return false;
+    if (!/\/tproduct\/\d+/.test(window.location.pathname)) return false;
+    if (getVisibleTildaProductPopup()) return false;
+
+    return isStandaloneDirectProductSurface(getDirectProductSurface());
   }
 
   function getDirectProductSurface() {
@@ -7589,11 +7607,17 @@ function setupDesktopAura() {
 
   var directProductNormalizeScheduled = false;
 
+  function clearDirectProductNormalizedStateIfNormalPopup() {
+    if (!getVisibleTildaProductPopup()) return;
+
+    document.documentElement.classList.remove('tc-direct-product-normalized');
+  }
+
   function normalizeDirectProductSnippet() {
     if (!isDirectProductSnippetMode()) return false;
 
     var surface = getDirectProductSurface();
-    if (!surface || !isDirectProductSurfaceReady(surface)) return false;
+    if (!isStandaloneDirectProductSurface(surface) || !isDirectProductSurfaceReady(surface)) return false;
 
     surface.classList.add('t-catalog__product-popup');
     surface.classList.add('tc-direct-product-normalized-surface');
@@ -7612,6 +7636,7 @@ function setupDesktopAura() {
 
   function scheduleDirectProductNormalization() {
     if (directProductNormalizeScheduled || !isDirectProductSnippetMode()) return;
+    if (!isStandaloneDirectProductSurface(getDirectProductSurface())) return;
 
     directProductNormalizeScheduled = true;
     [500, 900, 1400, 2200, 3200].forEach(function (delay) {
@@ -7645,11 +7670,13 @@ function setupDesktopAura() {
   }
 
   function scheduleSync() {
+    clearDirectProductNormalizedStateIfNormalPopup();
     syncProductBackLink();
     syncProductPopupShortDescription();
     scheduleDirectProductNormalization();
     [100, 400, 900].forEach(function (delay) {
       setTimeout(function () {
+        clearDirectProductNormalizedStateIfNormalPopup();
         syncProductBackLink();
         syncProductPopupShortDescription();
         scheduleDirectProductNormalization();
