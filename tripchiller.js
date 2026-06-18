@@ -7523,7 +7523,8 @@ function setupDesktopAura() {
       '.js-catalog-prod-all-text, ' +
       '.js-catalog-prod-text, ' +
       '.t-catalog__prod-popup__text, ' +
-      '.t-store__prod-popup__descr'
+      '.t-store__prod-popup__descr, ' +
+      '.t-store__prod-popup__text'
     );
   }
 
@@ -7549,31 +7550,42 @@ function setupDesktopAura() {
   }
 
   function syncMobileProductCloseLink() {
-    if (!isMobileProductBackMode() || !isProductRoute()) return;
+    if (!isMobileProductBackMode() || !isProductRoute()) return false;
 
     var surface = getVisibleProductPopup() || getDirectProductSurface();
-    if (!surface) return;
+    if (!surface) return false;
 
     var text = getMobileProductTextBlock(surface);
-    if (!text || !text.parentNode) return;
+    if (!text || !text.parentNode) return false;
 
     var link = surface.querySelector('.' + MOBILE_CLOSE_LINK_CLASS);
     if (!link) {
       link = document.createElement('a');
       link.href = '#';
       link.className = MOBILE_CLOSE_LINK_CLASS;
-      link.textContent = '<< НАЗАД В ГАЛЕРЕЮ...';
-      link.addEventListener('click', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        if (typeof armReturnStabilization === 'function') armReturnStabilization();
-        closeProductPopupViaNativeBackdrop();
-      });
+      link.textContent = '';
+      link.setAttribute('aria-label', 'Назад в галерею');
     }
+
+    link.classList.remove(NATIVE_HIDDEN_CLASS);
+    link.onclick = function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+      history.back();
+    };
 
     if (text.nextSibling !== link) {
       text.parentNode.insertBefore(link, text.nextSibling);
     }
+
+    return true;
+  }
+
+  function scheduleMobileProductCloseLinkSync() {
+    [300, 700, 1200, 1800, 2600].forEach(function (delay) {
+      window.setTimeout(syncMobileProductCloseLink, delay);
+    });
   }
 
   function isMobileProductSurfaceReady(surface) {
@@ -7838,6 +7850,7 @@ function setupDesktopAura() {
         if (oldDesktopBackLink && oldDesktopBackLink.parentNode) oldDesktopBackLink.parentNode.removeChild(oldDesktopBackLink);
 
         syncMobileProductCloseLink();
+        scheduleMobileProductCloseLinkSync();
         return;
       }
 
@@ -7914,6 +7927,7 @@ function setupDesktopAura() {
       mobileProductBackMode: isMobileProductBackMode(),
       mobileSeparateCloseLinkExists: !!document.querySelector('.' + MOBILE_CLOSE_LINK_CLASS),
       mobileSeparateCloseLinkClass: MOBILE_CLOSE_LINK_CLASS,
+      mobileSeparateCloseLinkScannerSafe: true,
       mobileLegacyBackLinkDisabled: true,
       mobileBackLinkPlacementScheduled: mobileProductBackLinkPlacementScheduled,
       mobileBackLinkRevealScheduled: mobileProductBackLinkRevealScheduled,
