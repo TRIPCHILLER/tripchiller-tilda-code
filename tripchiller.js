@@ -7506,14 +7506,99 @@ function setupDesktopAura() {
     return !!(window.matchMedia && window.matchMedia('(max-width: 980px), (pointer: coarse)').matches);
   }
 
-  function moveMobileProductBackLink(link) {
+  var mobileProductBackLinkPlacementTimer = null;
+  var mobileProductBackLinkPlacementScheduled = false;
+  var mobileProductBackLinkPlaced = false;
+  var mobileProductBackLinkPlacementAttempts = 0;
+  var mobileBackLinkTextFound = false;
+  var mobileBackLinkSurfaceReady = false;
+
+  function getMobileProductTextBlock(surface) {
+    if (!surface) return null;
+
+    return surface.querySelector(
+      '.js-catalog-prod-all-text, ' +
+      '.js-catalog-prod-text, ' +
+      '.t-catalog__prod-popup__text, ' +
+      '.t-store__prod-popup__descr'
+    );
+  }
+
+  function isMobileProductSurfaceReady(surface) {
+    mobileBackLinkTextFound = false;
+    mobileBackLinkSurfaceReady = false;
+
+    if (!surface || !surface.getBoundingClientRect) return false;
+
+    var rect = surface.getBoundingClientRect();
+    if (!rect.width || !rect.height) return false;
+
+    var text = getMobileProductTextBlock(surface);
+    mobileBackLinkTextFound = !!text;
+    if (!text || !text.getBoundingClientRect) return false;
+
+    var textRect = text.getBoundingClientRect();
+    mobileBackLinkSurfaceReady = !!(textRect.width && textRect.height);
+
+    return mobileBackLinkSurfaceReady;
+  }
+
+  function revealMobileProductBackLink(link) {
+    if (!link || !isMobileProductBackMode()) return;
+    revealProductBackLink(link);
+  }
+
+  function scheduleMobileProductBackLinkPlacement(link) {
     if (!link || !isMobileProductBackMode()) return;
 
-    var surface = getVisibleProductPopup() || getDirectProductSurface();
-    var text = surface && surface.querySelector('.js-catalog-prod-all-text, .js-catalog-prod-text, .t-catalog__prod-popup__text, .t-store__prod-popup__descr');
-    if (text && text.parentNode && text.nextSibling !== link) {
-      text.parentNode.insertBefore(link, text.nextSibling);
+    if (mobileProductBackLinkPlacementTimer) {
+      window.clearTimeout(mobileProductBackLinkPlacementTimer);
+      mobileProductBackLinkPlacementTimer = null;
     }
+
+    mobileProductBackLinkPlacementScheduled = true;
+    mobileProductBackLinkPlaced = false;
+    mobileProductBackLinkPlacementAttempts = 0;
+    mobileBackLinkTextFound = false;
+    mobileBackLinkSurfaceReady = false;
+
+    var delays = [250, 500, 900, 1400, 2200];
+
+    function tryPlace() {
+      mobileProductBackLinkPlacementTimer = null;
+      mobileProductBackLinkPlacementAttempts += 1;
+
+      if (!isMobileProductBackMode() || !isProductRoute()) {
+        mobileProductBackLinkPlacementScheduled = false;
+        return;
+      }
+
+      var surface = getVisibleProductPopup() || getDirectProductSurface();
+      if (!isMobileProductSurfaceReady(surface)) {
+        if (mobileProductBackLinkPlacementAttempts < delays.length) {
+          mobileProductBackLinkPlacementTimer = window.setTimeout(tryPlace, delays[mobileProductBackLinkPlacementAttempts]);
+        } else {
+          mobileProductBackLinkPlacementScheduled = false;
+        }
+        return;
+      }
+
+      var text = getMobileProductTextBlock(surface);
+      if (!text || !text.parentNode) {
+        mobileProductBackLinkPlacementScheduled = false;
+        return;
+      }
+
+      if (text.nextSibling !== link) {
+        text.parentNode.insertBefore(link, text.nextSibling);
+      }
+
+      mobileProductBackLinkPlaced = true;
+      mobileProductBackLinkPlacementScheduled = false;
+      revealMobileProductBackLink(link);
+    }
+
+    mobileProductBackLinkPlacementTimer = window.setTimeout(tryPlace, delays[0]);
   }
 
   function removeNativeBackLinkElement(el) {
@@ -7673,8 +7758,8 @@ function setupDesktopAura() {
       var ensuredLink = ensureProductBackLink();
       hideNativeProductBackLinks();
       hideWelcomeOnProductRoute();
-      moveMobileProductBackLink(ensuredLink);
-      revealProductBackLink(ensuredLink);
+      scheduleMobileProductBackLinkPlacement(ensuredLink);
+      if (isDesktopProductBackMode()) revealProductBackLink(ensuredLink);
       applyDesktopBackLinkPosition(ensuredLink);
       return;
     }
@@ -7682,6 +7767,12 @@ function setupDesktopAura() {
     var link = document.querySelector('.' + LINK_CLASS);
     if (link && link.parentNode) link.parentNode.removeChild(link);
     clearNativeHidden();
+    if (mobileProductBackLinkPlacementTimer) {
+      window.clearTimeout(mobileProductBackLinkPlacementTimer);
+      mobileProductBackLinkPlacementTimer = null;
+    }
+    mobileProductBackLinkPlacementScheduled = false;
+    mobileProductBackLinkPlaced = false;
   }
 
   function scheduleSync() {
@@ -7738,6 +7829,12 @@ function setupDesktopAura() {
       shortDescription: getCurrentProductCardShortDescription(),
       shortDescriptionInjected: !!document.querySelector('.tc-product-popup-short-descr'),
       directProductNormalized: !!document.documentElement.classList.contains('tc-direct-product-normalized'),
+      mobileProductBackMode: isMobileProductBackMode(),
+      mobileBackLinkPlacementScheduled: mobileProductBackLinkPlacementScheduled,
+      mobileBackLinkPlaced: mobileProductBackLinkPlaced,
+      mobileBackLinkPlacementAttempts: mobileProductBackLinkPlacementAttempts,
+      mobileBackLinkTextFound: mobileBackLinkTextFound,
+      mobileBackLinkSurfaceReady: mobileBackLinkSurfaceReady,
       directProductSurfaceReady: !!isDirectProductSurfaceReady(getDirectProductSurface()),
       directProductRefreshMode: isDirectProductRefreshMode(),
       directBackLinkTarget: isDirectProductRefreshMode() ? '/' : 'native-close-control',
