@@ -4448,6 +4448,43 @@ body.tc-product-page-active .tc-product-back-link {
     transform: none !important;
   }
 
+
+  html.tc-product-page .tc-mobile-product-close-link,
+  body.tc-product-page .tc-mobile-product-close-link,
+  html.tc-product-page-active .tc-mobile-product-close-link,
+  body.tc-product-page-active .tc-mobile-product-close-link {
+    display: block !important;
+    width: max-content !important;
+    max-width: calc(100vw - 32px) !important;
+    margin: 30px auto 56px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    font-family: var(--tc-font-main, 'DS VTCorona Cyr', monospace) !important;
+    font-size: 14px !important;
+    line-height: 1.25 !important;
+    letter-spacing: .02em !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    text-transform: uppercase !important;
+    color: #777 !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation !important;
+  }
+
+  html.tc-product-page .tc-mobile-product-close-link:active,
+  body.tc-product-page .tc-mobile-product-close-link:active,
+  html.tc-product-page-active .tc-mobile-product-close-link:active,
+  body.tc-product-page-active .tc-mobile-product-close-link:active {
+    color: #ad0b11 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
   html.tc-product-page .t-catalog__prod-popup__slider .t-slds__arrow,
   body.tc-product-page .t-catalog__prod-popup__slider .t-slds__arrow,
   html.tc-product-page-active .t-catalog__prod-popup__slider .t-slds__arrow,
