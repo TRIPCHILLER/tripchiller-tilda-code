@@ -7622,7 +7622,7 @@ function setupDesktopAura() {
 
   function removeNativeBackLinkElement(el) {
     if (!el) return;
-    if (el.closest && el.closest('.' + LINK_CLASS)) return;
+    if (isProductBackLinkOwnedNode(el)) return;
 
     var root =
       (el.closest && (
@@ -7644,6 +7644,13 @@ function setupDesktopAura() {
     if (root.parentNode) root.parentNode.removeChild(root);
   }
 
+  function isProductBackLinkOwnedNode(el) {
+    if (!el) return false;
+    if (el.closest && el.closest('.' + LINK_CLASS)) return true;
+    if (el.querySelector && el.querySelector('.' + LINK_CLASS)) return true;
+    return false;
+  }
+
   function hideNativeProductBackLinks() {
     if (!isProductRoute()) return;
 
@@ -7653,7 +7660,7 @@ function setupDesktopAura() {
 
     document.querySelectorAll('a, button, [role="button"], .tn-atom, .tn-elem, .t396__elem, .t-btn, span, div').forEach(function (el) {
       if (!el || !el.classList) return;
-      if (el.closest && el.closest('.' + LINK_CLASS)) return;
+      if (isProductBackLinkOwnedNode(el)) return;
       if (el.closest && el.closest('script, style, noscript, template')) return;
 
       var text = String(el.textContent || '').replace(/\s+/g, ' ').trim().toUpperCase();
@@ -7681,7 +7688,7 @@ function setupDesktopAura() {
 
     document.querySelectorAll('div, span, p').forEach(function (el) {
       if (!el || !el.textContent) return;
-      if (el.closest && el.closest('.' + LINK_CLASS)) return;
+      if (isProductBackLinkOwnedNode(el)) return;
 
       var text = String(el.textContent || '').replace(/\s+/g, ' ').trim().toUpperCase();
       if (text !== 'WELCOME TO') return;
