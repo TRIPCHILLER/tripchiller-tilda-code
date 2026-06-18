@@ -7507,6 +7507,8 @@ function setupDesktopAura() {
   }
 
   var mobileProductBackLinkPlacementTimer = null;
+  var mobileProductBackLinkRevealTimer = null;
+  var mobileProductBackLinkRevealScheduled = false;
   var mobileProductBackLinkPlacementScheduled = false;
   var mobileProductBackLinkPlaced = false;
   var mobileProductBackLinkPlacementAttempts = 0;
@@ -7545,7 +7547,19 @@ function setupDesktopAura() {
 
   function revealMobileProductBackLink(link) {
     if (!link || !isMobileProductBackMode()) return;
-    revealProductBackLink(link);
+    if (link.classList.contains('is-visible') || mobileProductBackLinkRevealTimer) return;
+
+    link.classList.remove('is-visible');
+    mobileProductBackLinkRevealScheduled = true;
+
+    mobileProductBackLinkRevealTimer = window.setTimeout(function () {
+      mobileProductBackLinkRevealTimer = null;
+      mobileProductBackLinkRevealScheduled = false;
+
+      if (!isMobileProductBackMode() || !isProductRoute()) return;
+
+      link.classList.add('is-visible');
+    }, 2000);
   }
 
   function scheduleMobileProductBackLinkPlacement(link) {
@@ -7555,6 +7569,11 @@ function setupDesktopAura() {
       window.clearTimeout(mobileProductBackLinkPlacementTimer);
       mobileProductBackLinkPlacementTimer = null;
     }
+    if (mobileProductBackLinkRevealTimer) {
+      window.clearTimeout(mobileProductBackLinkRevealTimer);
+      mobileProductBackLinkRevealTimer = null;
+    }
+    mobileProductBackLinkRevealScheduled = false;
 
     mobileProductBackLinkPlacementScheduled = true;
     mobileProductBackLinkPlaced = false;
@@ -7771,6 +7790,11 @@ function setupDesktopAura() {
       window.clearTimeout(mobileProductBackLinkPlacementTimer);
       mobileProductBackLinkPlacementTimer = null;
     }
+    if (mobileProductBackLinkRevealTimer) {
+      window.clearTimeout(mobileProductBackLinkRevealTimer);
+      mobileProductBackLinkRevealTimer = null;
+    }
+    mobileProductBackLinkRevealScheduled = false;
     mobileProductBackLinkPlacementScheduled = false;
     mobileProductBackLinkPlaced = false;
   }
@@ -7831,6 +7855,8 @@ function setupDesktopAura() {
       directProductNormalized: !!document.documentElement.classList.contains('tc-direct-product-normalized'),
       mobileProductBackMode: isMobileProductBackMode(),
       mobileBackLinkPlacementScheduled: mobileProductBackLinkPlacementScheduled,
+      mobileBackLinkRevealScheduled: mobileProductBackLinkRevealScheduled,
+      mobileBackLinkRevealTimerActive: !!mobileProductBackLinkRevealTimer,
       mobileBackLinkPlaced: mobileProductBackLinkPlaced,
       mobileBackLinkPlacementAttempts: mobileProductBackLinkPlacementAttempts,
       mobileBackLinkTextFound: mobileBackLinkTextFound,
