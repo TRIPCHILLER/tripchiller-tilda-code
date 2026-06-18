@@ -4449,19 +4449,38 @@ body.tc-product-page-active .tc-product-back-link {
   }
 
 
-  html.tc-product-page .tc-mobile-product-close-link,
-  body.tc-product-page .tc-mobile-product-close-link,
-  html.tc-product-page-active .tc-mobile-product-close-link,
-  body.tc-product-page-active .tc-mobile-product-close-link {
+  .t-popup.t-popup_show .js-catalog-prod-text,
+  .t-popup.t-popup_show .js-catalog-prod-all-text,
+  .t-popup.t-popup_show .t-catalog__prod-popup__text,
+  .t-popup.t-popup_show .t-store__prod-popup__descr {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: calc(100vw - 52px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+  }
+
+  .tc-mobile-product-close-link {
     display: block !important;
     width: max-content !important;
-    max-width: calc(100vw - 32px) !important;
-    margin: 30px auto 56px !important;
+    max-width: calc(100vw - 52px) !important;
+    margin: 40px auto 64px !important;
     padding: 0 !important;
     border: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
     outline: none !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation !important;
+  }
+
+  .tc-mobile-product-close-link::before {
+    content: '<< НАЗАД В ГАЛЕРЕЮ...' !important;
+    display: inline !important;
     font-family: var(--tc-font-main, 'DS VTCorona Cyr', monospace) !important;
     font-size: 14px !important;
     line-height: 1.25 !important;
@@ -4469,20 +4488,12 @@ body.tc-product-page-active .tc-product-back-link {
     text-align: center !important;
     text-decoration: none !important;
     text-transform: uppercase !important;
-    color: #777 !important;
-    cursor: pointer !important;
-    -webkit-tap-highlight-color: transparent !important;
-    touch-action: manipulation !important;
+    color: #6a6a6a !important;
   }
 
-  html.tc-product-page .tc-mobile-product-close-link:active,
-  body.tc-product-page .tc-mobile-product-close-link:active,
-  html.tc-product-page-active .tc-mobile-product-close-link:active,
-  body.tc-product-page-active .tc-mobile-product-close-link:active {
+  .tc-mobile-product-close-link:active::before,
+  .tc-mobile-product-close-link.tc-pressed::before {
     color: #ad0b11 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    transform: none !important;
   }
 
   html.tc-product-page .t-catalog__prod-popup__slider .t-slds__arrow,
