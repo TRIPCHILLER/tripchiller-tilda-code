@@ -7059,6 +7059,7 @@ function setupDesktopAura() {
   window.__TC_PRODUCT_BACK_LINK_V1__ = true;
 
   var LINK_CLASS = 'tc-product-back-link';
+  var MOBILE_CLOSE_LINK_CLASS = 'tc-mobile-product-close-link';
   var ACTIVE_CLASS = 'tc-product-back-link-active';
   var NATIVE_HIDDEN_CLASS = 'tc-native-product-back-hidden';
 
@@ -7526,6 +7527,55 @@ function setupDesktopAura() {
     );
   }
 
+
+  function clearMobileProductBackLinkTimers() {
+    if (mobileProductBackLinkPlacementTimer) {
+      window.clearTimeout(mobileProductBackLinkPlacementTimer);
+      mobileProductBackLinkPlacementTimer = null;
+    }
+    if (mobileProductBackLinkRevealTimer) {
+      window.clearTimeout(mobileProductBackLinkRevealTimer);
+      mobileProductBackLinkRevealTimer = null;
+    }
+    mobileProductBackLinkRevealScheduled = false;
+    mobileProductBackLinkPlacementScheduled = false;
+    mobileProductBackLinkPlaced = false;
+  }
+
+  function removeMobileProductCloseLinks() {
+    document.querySelectorAll('.' + MOBILE_CLOSE_LINK_CLASS).forEach(function (el) {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    });
+  }
+
+  function syncMobileProductCloseLink() {
+    if (!isMobileProductBackMode() || !isProductRoute()) return;
+
+    var surface = getVisibleProductPopup() || getDirectProductSurface();
+    if (!surface) return;
+
+    var text = getMobileProductTextBlock(surface);
+    if (!text || !text.parentNode) return;
+
+    var link = surface.querySelector('.' + MOBILE_CLOSE_LINK_CLASS);
+    if (!link) {
+      link = document.createElement('a');
+      link.href = '#';
+      link.className = MOBILE_CLOSE_LINK_CLASS;
+      link.textContent = '<< НАЗАД В ГАЛЕРЕЮ...';
+      link.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof armReturnStabilization === 'function') armReturnStabilization();
+        closeProductPopupViaNativeBackdrop();
+      });
+    }
+
+    if (text.nextSibling !== link) {
+      text.parentNode.insertBefore(link, text.nextSibling);
+    }
+  }
+
   function isMobileProductSurfaceReady(surface) {
     mobileBackLinkTextFound = false;
     mobileBackLinkSurfaceReady = false;
@@ -7646,8 +7696,8 @@ function setupDesktopAura() {
 
   function isProductBackLinkOwnedNode(el) {
     if (!el) return false;
-    if (el.closest && el.closest('.' + LINK_CLASS)) return true;
-    if (el.querySelector && el.querySelector('.' + LINK_CLASS)) return true;
+    if (el.closest && (el.closest('.' + LINK_CLASS) || el.closest('.' + MOBILE_CLOSE_LINK_CLASS))) return true;
+    if (el.querySelector && (el.querySelector('.' + LINK_CLASS) || el.querySelector('.' + MOBILE_CLOSE_LINK_CLASS))) return true;
     return false;
   }
 
@@ -7781,10 +7831,20 @@ function setupDesktopAura() {
     if (body) body.classList.toggle(ACTIVE_CLASS, active);
 
     if (active) {
+      if (isMobileProductBackMode()) {
+        clearMobileProductBackLinkTimers();
+
+        var oldDesktopBackLink = document.querySelector('.' + LINK_CLASS);
+        if (oldDesktopBackLink && oldDesktopBackLink.parentNode) oldDesktopBackLink.parentNode.removeChild(oldDesktopBackLink);
+
+        syncMobileProductCloseLink();
+        return;
+      }
+
+      removeMobileProductCloseLinks();
       var ensuredLink = ensureProductBackLink();
       hideNativeProductBackLinks();
       hideWelcomeOnProductRoute();
-      scheduleMobileProductBackLinkPlacement(ensuredLink);
       if (isDesktopProductBackMode()) revealProductBackLink(ensuredLink);
       applyDesktopBackLinkPosition(ensuredLink);
       return;
@@ -7792,18 +7852,9 @@ function setupDesktopAura() {
 
     var link = document.querySelector('.' + LINK_CLASS);
     if (link && link.parentNode) link.parentNode.removeChild(link);
+    removeMobileProductCloseLinks();
     clearNativeHidden();
-    if (mobileProductBackLinkPlacementTimer) {
-      window.clearTimeout(mobileProductBackLinkPlacementTimer);
-      mobileProductBackLinkPlacementTimer = null;
-    }
-    if (mobileProductBackLinkRevealTimer) {
-      window.clearTimeout(mobileProductBackLinkRevealTimer);
-      mobileProductBackLinkRevealTimer = null;
-    }
-    mobileProductBackLinkRevealScheduled = false;
-    mobileProductBackLinkPlacementScheduled = false;
-    mobileProductBackLinkPlaced = false;
+    clearMobileProductBackLinkTimers();
   }
 
   function scheduleSync() {
@@ -7861,6 +7912,9 @@ function setupDesktopAura() {
       shortDescriptionInjected: !!document.querySelector('.tc-product-popup-short-descr'),
       directProductNormalized: !!document.documentElement.classList.contains('tc-direct-product-normalized'),
       mobileProductBackMode: isMobileProductBackMode(),
+      mobileSeparateCloseLinkExists: !!document.querySelector('.' + MOBILE_CLOSE_LINK_CLASS),
+      mobileSeparateCloseLinkClass: MOBILE_CLOSE_LINK_CLASS,
+      mobileLegacyBackLinkDisabled: true,
       mobileBackLinkPlacementScheduled: mobileProductBackLinkPlacementScheduled,
       mobileBackLinkRevealScheduled: mobileProductBackLinkRevealScheduled,
       mobileBackLinkRevealTimerActive: !!mobileProductBackLinkRevealTimer,
