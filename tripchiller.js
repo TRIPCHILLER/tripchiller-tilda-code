@@ -6546,7 +6546,7 @@ function setupDesktopAura() {
   window.__TC_CONTACTS_PAGE_CLASS_V1__ = true;
 
   var normalizedPath = (location.pathname || '/').replace(/\/+$/, '') || '/';
-  if (normalizedPath === '/contacts') {
+  if (normalizedPath === '/about') {
     document.documentElement.classList.add('tc-page-contacts');
   }
 })();
@@ -6633,7 +6633,7 @@ function setupDesktopAura() {
   window.__TC_CONTACTS_TYPEWRITER_V1__ = true;
 
   var normalizedPath = (location.pathname || '/').replace(/\/+$/, '') || '/';
-  if (normalizedPath !== '/contacts') return;
+  if (normalizedPath !== '/about') return;
 
   var line1 = 'цифровые уголки,';
   var line2 = 'где я обитаю:';
