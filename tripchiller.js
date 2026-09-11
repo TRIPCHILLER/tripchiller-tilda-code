@@ -86,7 +86,7 @@
   var TC_HEADER_LINKS = [
     { label: 'ГАЛЕРЕЯ', href: '/', key: 'gallery', side: 'left' },
     { label: 'ДОСТАВКА', href: '/shipping', key: 'shipping', side: 'left' },
-    { label: 'ОБ АВТОРЕ', href: '/about', key: 'contacts', side: 'right' },
+    { label: 'ОБ АВТОРЕ', href: '/about', key: 'about', side: 'right' },
     { label: 'ОТЗЫВЫ', href: 'https://vk.com/topic-187277176_49250444', key: 'reviews', side: 'right', external: true }
   ];
 
@@ -116,8 +116,7 @@
   function isAlwaysVisibleHeaderPage(pathname){
     var path = normalizeHeaderPath(pathname);
     return path === '/shipping'
-      || path === '/contacts'
-      || path === '/contact'
+      || path === '/about'
       || path === '/offer_agreement'
       || path === '/data_processing_policy';
   }
@@ -195,7 +194,7 @@
     if (isLegalHeaderPage(pathname)) return '';
     if (path === '/' || path === '/gallery' || /^\/tproduct(\/|$)/.test(path) || /^\/product(\/|$)/.test(path)) return 'gallery';
     if (path === '/shipping') return 'shipping';
-    if (path === '/contacts' || path === '/contact') return 'contacts';
+    if (path === '/about') return 'about';
 
     for (var i = 0; i < TC_HEADER_LINKS.length; i++) {
       if (!TC_HEADER_LINKS[i].external && getHeaderLinkPath(TC_HEADER_LINKS[i].href) === path) return TC_HEADER_LINKS[i].key;
@@ -395,7 +394,7 @@
   function hideLegacyTildaHeader(){
     if (!document.body || !document.body.classList.contains('tc-custom-header-enabled')) return;
 
-    var labels = ['ГАЛЕРЕЯ', 'ДОСТАВКА', 'КОНТАКТЫ', 'ОТЗЫВЫ'];
+    var labels = ['ГАЛЕРЕЯ', 'ДОСТАВКА', 'ОБ АВТОРЕ', 'ОТЗЫВЫ'];
     var linkSelector = [
       'a',
       'button',
