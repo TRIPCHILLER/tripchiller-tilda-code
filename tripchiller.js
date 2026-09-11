@@ -86,7 +86,7 @@
   var TC_HEADER_LINKS = [
     { label: 'ГАЛЕРЕЯ', href: '/', key: 'gallery', side: 'left' },
     { label: 'ДОСТАВКА', href: '/shipping', key: 'shipping', side: 'left' },
-    { label: 'КОНТАКТЫ', href: '/contacts', key: 'contacts', side: 'right' },
+    { label: 'ОБ АВТОРЕ', href: '/about', key: 'contacts', side: 'right' },
     { label: 'ОТЗЫВЫ', href: 'https://vk.com/topic-187277176_49250444', key: 'reviews', side: 'right', external: true }
   ];
 
