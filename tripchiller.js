@@ -825,6 +825,7 @@
     function select(index){
       sections.forEach(function(section, sectionIndex){
         section.classList.toggle('tc-about-section-hidden', sectionIndex !== index);
+        section.classList.toggle('tc-about-section--active', sectionIndex === index);
         section.setAttribute('aria-hidden', sectionIndex === index ? 'false' : 'true');
       });
       links.forEach(function(link, linkIndex){

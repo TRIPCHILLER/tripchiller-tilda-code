@@ -203,6 +203,10 @@ body.tc-product-page-active .tc-site-header {
 .tc-about-subnav__link--active:hover,
 .tc-about-subnav__link--active:focus-visible { color: #fff; }
 .tc-about-section-hidden { display: none !important; }
+.tc-about-section--active { margin-top: calc(var(--tc-site-header-height) + var(--tc-site-header-height)) !important; }
+
+html.tc-site-header-menu-open .tc-about-subnav,
+body.tc-site-header-menu-open .tc-about-subnav { visibility: hidden; pointer-events: none; }
 
 .tc-site-header__burger {
   display: none;
@@ -353,6 +357,9 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
 }
 
 @media (max-width: 979px) {
+  .tc-about-subnav { top: 56px; height: 56px; }
+  .tc-about-section--active { margin-top: 112px !important; }
+
   .tc-site-header-eye {
     display: none;
   }
