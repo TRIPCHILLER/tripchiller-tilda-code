@@ -800,6 +800,48 @@
 
   ready(initSiteHeader);
 
+  function initAboutSubnav(){
+    if (normalizeHeaderPath(window.location.pathname) !== '/about' || document.querySelector('.tc-about-subnav')) return;
+
+    var sections = ['.uc-about-profile', '.uc-about-services', '.uc-about-contacts'].map(function(selector){
+      return document.querySelector(selector);
+    });
+    if (sections.some(function(section){ return !section; })) return;
+
+    var nav = document.createElement('nav');
+    nav.className = 'tc-about-subnav';
+    nav.setAttribute('aria-label', 'Навигация страницы «Об авторе»');
+    var labels = ['ПРОФИЛЬ', 'УСЛУГИ', 'КОНТАКТЫ'];
+    var links = labels.map(function(label, index){
+      var link = document.createElement('button');
+      link.className = 'tc-about-subnav__link';
+      link.type = 'button';
+      link.textContent = label;
+      link.addEventListener('click', function(){ select(index); });
+      nav.appendChild(link);
+      return link;
+    });
+
+    function select(index){
+      sections.forEach(function(section, sectionIndex){
+        section.classList.toggle('tc-about-section-hidden', sectionIndex !== index);
+        section.setAttribute('aria-hidden', sectionIndex === index ? 'false' : 'true');
+      });
+      links.forEach(function(link, linkIndex){
+        var active = linkIndex === index;
+        link.classList.toggle('tc-about-subnav__link--active', active);
+        if (active) link.setAttribute('aria-current', 'page');
+        else link.removeAttribute('aria-current');
+      });
+    }
+
+    var header = document.querySelector('.tc-site-header');
+    document.body.insertBefore(nav, header ? header.nextSibling : document.body.firstChild);
+    select(0);
+  }
+
+  ready(initAboutSubnav);
+
   function restoreHeroBaseVisibility(reason){
     if (!document.body) return;
 
@@ -8527,6 +8569,8 @@ function setupDesktopAura() {
   function scheduleClean(){
     cleanStoreUi(document);
 
+    initAboutSubnav();
+
     ensureMenuEyeLogo();
     initMenuEyeParallax();
     safeHideLegacyTildaHeader();
@@ -8572,6 +8616,7 @@ function setupDesktopAura() {
   }
 
   var observer = new MutationObserver(function(){
+    initAboutSubnav();
     ensureMenuEyeLogo();
     safeHideLegacyTildaHeader();
     safeSyncSiteHeaderReveal();
