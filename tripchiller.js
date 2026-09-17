@@ -243,6 +243,12 @@
   }
 
   function syncSiteHeaderReveal() {
+    if (normalizeHeaderPath(window.location.pathname) === '/about') {
+      setHeaderGlobalClass('tc-site-header-product-suppressed', false);
+      setHeaderGlobalClass('tc-site-header-visible', true);
+      return;
+    }
+
     if (isSiteHeaderProductMode()) {
       setHeaderGlobalClass('tc-site-header-product-suppressed', true);
       setHeaderGlobalClass('tc-site-header-visible', false);
