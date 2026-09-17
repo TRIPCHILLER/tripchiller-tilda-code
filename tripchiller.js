@@ -801,7 +801,9 @@
   ready(initSiteHeader);
 
   function initAboutSubnav(){
-    if (normalizeHeaderPath(window.location.pathname) !== '/about' || document.querySelector('.tc-about-subnav')) return;
+    if (normalizeHeaderPath(window.location.pathname) !== '/about') return;
+    document.documentElement.classList.add('tc-about-page');
+    if (document.querySelector('.tc-about-subnav')) return;
 
     var sections = ['.uc-about-profile', '.uc-about-services', '.uc-about-contacts'].map(function(selector){
       return document.querySelector(selector);
@@ -825,7 +827,6 @@
     function select(index){
       sections.forEach(function(section, sectionIndex){
         section.classList.toggle('tc-about-section-hidden', sectionIndex !== index);
-        section.classList.toggle('tc-about-section--active', sectionIndex === index);
         section.setAttribute('aria-hidden', sectionIndex === index ? 'false' : 'true');
       });
       links.forEach(function(link, linkIndex){
