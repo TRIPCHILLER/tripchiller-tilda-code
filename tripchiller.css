@@ -2086,6 +2086,16 @@ html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
   filter: contrast(1.04) brightness(0.92);
 }
 
+/* /about: фон проявляется из белого, а не из чёрного */
+html.tc-page-contacts #tc-fixed-bg .tc-bg-bw {
+  opacity: 0;
+  transition: opacity 1000ms ease;
+}
+
+html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
+  opacity: 1;
+}
+
 #allrecords {
   position: relative;
   z-index: 1;
