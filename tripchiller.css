@@ -2055,6 +2055,16 @@ body {
 /* Только для /about: фон проявляется из белого */
 html.tc-page-contacts #tc-fixed-bg {
   background: #fff;
+  opacity: 1;
+}
+
+html.tc-page-contacts #tc-fixed-bg .tc-bg-bw {
+  opacity: 0;
+  transition: opacity 1000ms ease;
+}
+
+html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
+  opacity: 1;
 }
 
 #tc-fixed-bg.is-visible {
