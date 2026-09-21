@@ -2052,6 +2052,11 @@ body {
   --mobile-band-opacity: 0;
 }
 
+/* Только для /about: фон проявляется из белого */
+html.tc-page-contacts #tc-fixed-bg {
+  background: #fff;
+}
+
 #tc-fixed-bg.is-visible {
   opacity: 1;
 }
