@@ -204,13 +204,20 @@ body.tc-product-page-active .tc-site-header {
 .tc-about-subnav__link--active:focus-visible { color: #fff; }
 .tc-about-section-hidden { display: none !important; }
 
-html.tc-about-page .tc-site-header,
+html.tc-about-page .tc-site-header {
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 100000;
+}
+
 html.tc-about-page .tc-about-subnav {
   position: relative;
   top: auto;
   left: auto;
-  z-index: auto;
+  z-index: 99999;
 }
+
 html.tc-about-page .tc-site-header {
   opacity: 1;
   transform: none;
