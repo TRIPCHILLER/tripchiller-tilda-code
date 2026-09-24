@@ -4015,8 +4015,7 @@ eyeUnlockTimer = setTimeout(function(){
     return (
       mobileMedia.matches ||
       window.innerWidth <= 980 ||
-      document.documentElement.clientWidth <= 980 ||
-      (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)
+      document.documentElement.clientWidth <= 980
     );
   }
 
@@ -4208,11 +4207,19 @@ eyeUnlockTimer = setTimeout(function(){
     const debugBg = document.getElementById("tc-fixed-bg");
     const bw = debugBg ? debugBg.querySelector(".tc-bg-bw") : null;
     const color = debugBg ? debugBg.querySelector(".tc-bg-color") : null;
+    const bgStyle = debugBg ? getComputedStyle(debugBg) : null;
+    const bwStyle = bw ? getComputedStyle(bw) : null;
 
     return {
       path: location.pathname,
       runtimeMobile: shouldUseMobileBg(),
       sourceMode: window.__TC_BG_LAST_SOURCE_MODE__ || "",
+      viewport: { width: innerWidth, height: innerHeight, devicePixelRatio: window.devicePixelRatio },
+      media: { desktop: desktopMedia.matches, mobile: mobileMedia.matches },
+      maxTouchPoints: navigator.maxTouchPoints || 0,
+      fixedBgSize: bgStyle ? { width: bgStyle.width, height: bgStyle.height } : null,
+      backgroundSize: bwStyle ? bwStyle.backgroundSize : null,
+      backgroundPosition: bwStyle ? bwStyle.backgroundPosition : null,
       bwUrl: window.__TC_BG_LAST_BW_URL__ || "",
       colorUrl: window.__TC_BG_LAST_COLOR_URL__ || "",
       zoomWbMobileUrl: "https://static.tildacdn.com/tild6134-6335-4565-b965-663238326534/TRIP_BG_MOBILE_WB.webp",
