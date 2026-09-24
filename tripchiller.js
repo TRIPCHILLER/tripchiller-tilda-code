@@ -4015,12 +4015,16 @@ eyeUnlockTimer = setTimeout(function(){
     return (
       mobileMedia.matches ||
       window.innerWidth <= 980 ||
-      document.documentElement.clientWidth <= 980
+      document.documentElement.clientWidth <= 980 ||
+      (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)
     );
   }
 
   function shouldUseMobileBg() {
-    return isMobileRuntime();
+    return (
+      window.innerWidth <= 980 ||
+      document.documentElement.clientWidth <= 980
+    );
   }
 
   if (document.getElementById("tc-fixed-bg")) return;
@@ -4212,7 +4216,8 @@ eyeUnlockTimer = setTimeout(function(){
 
     return {
       path: location.pathname,
-      runtimeMobile: shouldUseMobileBg(),
+      runtimeMobile: isMobileRuntime(),
+      sourceMobile: shouldUseMobileBg(),
       sourceMode: window.__TC_BG_LAST_SOURCE_MODE__ || "",
       viewport: { width: innerWidth, height: innerHeight, devicePixelRatio: window.devicePixelRatio },
       media: { desktop: desktopMedia.matches, mobile: mobileMedia.matches },
