@@ -19,14 +19,14 @@
   }
 
   function tcApplyProductRouteClassesEarly() {
-    if (!tcIsProductRouteEarly()) return;
-    document.documentElement.classList.add(
+    var method = tcIsProductRouteEarly() ? 'add' : 'remove';
+    document.documentElement.classList[method](
       'tc-product-page',
       'tc-product-page-active',
       'tc-site-header-product-suppressed'
     );
     if (document.body) {
-      document.body.classList.add(
+      document.body.classList[method](
         'tc-product-page',
         'tc-product-page-active',
         'tc-site-header-product-suppressed'
@@ -7032,11 +7032,16 @@ function setupDesktopAura() {
   }
 
   function activateProductRouteMode() {
-    if (!isProductRoute()) return false;
-
     var html = document.documentElement;
     var body = document.body;
     var rec = document.querySelector('#rec2312983111');
+
+    if (!isProductRoute()) {
+      html.classList.remove('tc-product-page', 'tc-product-page-active');
+      if (body) body.classList.remove('tc-product-page', 'tc-product-page-active');
+      if (rec) rec.classList.remove('tc-product-record');
+      return false;
+    }
 
     html.classList.add(
       'tc-product-page',
@@ -8589,8 +8594,6 @@ function setupDesktopAura() {
   function scheduleClean(){
     cleanStoreUi(document);
 
-    initAboutSubnav();
-
     ensureMenuEyeLogo();
     initMenuEyeParallax();
     safeHideLegacyTildaHeader();
@@ -8636,7 +8639,6 @@ function setupDesktopAura() {
   }
 
   var observer = new MutationObserver(function(){
-    initAboutSubnav();
     ensureMenuEyeLogo();
     safeHideLegacyTildaHeader();
     safeSyncSiteHeaderReveal();
