@@ -5325,6 +5325,9 @@ function setupDesktopAura() {
     '#allrecords .t-catalog__product'
   ].join(',');
   var activeExpandKey = '';
+  var returnState = null;
+  var restoreToken = 0;
+  var lastRestore = null;
 
   function getCatalogKey() {
     return (location.pathname || '/') + (location.search || '');
@@ -5517,6 +5520,123 @@ function setupDesktopAura() {
     } catch (_) {}
   }
 
+  function isProductRoute() {
+    return /^\/(?:tproduct|product)(?:\/|$)/.test(location.pathname || '');
+  }
+
+  function getScrollY() {
+    return window.pageYOffset || document.documentElement.scrollTop || 0;
+  }
+
+  function getProductLink(target) {
+    if (!target || !target.closest) return null;
+    return target.closest('a[href*="/tproduct/"], a[href*="#!/tproduct/"], .js-product-url[href]');
+  }
+
+  function getSourceCard(link) {
+    return link && link.closest(CATALOG_CARD_SELECTOR + ', #tc-user-photos-root');
+  }
+
+  function saveReturnPosition(event) {
+    if (!event || event.button > 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || isProductRoute()) return;
+
+    var link = getProductLink(event.target);
+    if (!link) return;
+
+    var card = getSourceCard(link);
+    var rect = card && card.getBoundingClientRect();
+    var href = link.getAttribute('href') || '';
+    restoreToken += 1;
+    returnState = {
+      savedAt: Date.now(),
+      scrollY: getScrollY(),
+      productHref: href,
+      productId: (href.match(/tproduct\/([^?#]+)/) || [])[1] || '',
+      sourceCard: card || null,
+      sourceCardTop: rect ? rect.top : null,
+      awaitingReturn: true
+    };
+    lastRestore = null;
+  }
+
+  function findSourceCard(state) {
+    if (state.sourceCard && document.documentElement.contains(state.sourceCard)) return state.sourceCard;
+
+    var links = document.querySelectorAll('a[href*="/tproduct/"], a[href*="#!/tproduct/"]');
+    for (var i = 0; i < links.length; i += 1) {
+      if (state.productId && (links[i].getAttribute('href') || '').indexOf(state.productId) !== -1) {
+        return getSourceCard(links[i]);
+      }
+    }
+    return null;
+  }
+
+  function hasVisibleProductPopup() {
+    var popup = document.querySelector('.t-popup.t-popup_show, .t-store__prod-popup.t-popup_show');
+    return !!(popup && popup.getClientRects().length);
+  }
+
+  function isScrollLocked() {
+    var bodyStyle = document.body && getComputedStyle(document.body);
+    var htmlStyle = getComputedStyle(document.documentElement);
+    return (bodyStyle && (bodyStyle.overflow === 'hidden' || bodyStyle.position === 'fixed')) ||
+      htmlStyle.overflow === 'hidden';
+  }
+
+  function armReturnRestore() {
+    if (!returnState || !returnState.awaitingReturn) return;
+
+    var token = ++restoreToken;
+    var checks = 0;
+
+    function finish(result) {
+      if (token !== restoreToken || !returnState) return;
+      returnState.awaitingReturn = false;
+      lastRestore = result;
+    }
+
+    function restore() {
+      if (token !== restoreToken || !returnState) return;
+      checks += 1;
+
+      if (isProductRoute() || hasVisibleProductPopup() || isScrollLocked()) {
+        if (checks < 90) requestAnimationFrame(restore);
+        else finish({ status: 'popup-did-not-close', checks: checks });
+        return;
+      }
+
+      var card = findSourceCard(returnState);
+      var targetY = returnState.scrollY;
+      if (card && returnState.sourceCardTop !== null) {
+        targetY += card.getBoundingClientRect().top - returnState.sourceCardTop;
+      }
+      targetY = Math.max(0, Math.min(targetY, document.documentElement.scrollHeight - window.innerHeight));
+      window.scrollTo(0, targetY);
+      finish({
+        status: 'restored',
+        targetY: targetY,
+        actualY: getScrollY(),
+        usedSourceCard: !!card,
+        sourceCardTop: card ? card.getBoundingClientRect().top : null,
+        checks: checks
+      });
+
+      setTimeout(function () {
+        if (token !== restoreToken || !returnState || Math.abs(getScrollY() - targetY) > 80) return;
+        var latestCard = findSourceCard(returnState);
+        if (!latestCard || returnState.sourceCardTop === null) return;
+        var correction = latestCard.getBoundingClientRect().top - returnState.sourceCardTop;
+        if (Math.abs(correction) < 2) return;
+        window.scrollTo(0, getScrollY() + correction);
+        lastRestore.correctedBy = correction;
+        lastRestore.actualY = getScrollY();
+        lastRestore.sourceCardTop = latestCard.getBoundingClientRect().top;
+      }, 350);
+    }
+
+    requestAnimationFrame(restore);
+  }
+
   function saveLoadMoreFromEvent(e) {
     if (!e || !e.target || !e.target.closest) return;
     if (!e.target.closest(LOAD_MORE_SELECTOR)) return;
@@ -5537,11 +5657,32 @@ function setupDesktopAura() {
 
   window.__TC_PRODUCT_RETURN_SCROLL_STATE__ = function () {
     return {
-      disabled: true,
-      reason: 'native-tilda-popup-close'
+      savedPosition: returnState ? returnState.scrollY : null,
+      sourceProduct: returnState ? {
+        href: returnState.productHref,
+        id: returnState.productId,
+        cardTop: returnState.sourceCardTop
+      } : null,
+      awaitingReturn: !!(returnState && returnState.awaitingReturn),
+      lastRestore: lastRestore,
+      currentScrollY: getScrollY()
     };
   };
 
+  window.__TC_ARM_PRODUCT_RETURN_SCROLL__ = armReturnRestore;
+  document.addEventListener('pointerdown', saveReturnPosition, true);
+  document.addEventListener('click', saveReturnPosition, true);
+  window.addEventListener('popstate', function () {
+    if (!isProductRoute()) armReturnRestore();
+  });
+  window.addEventListener('hashchange', function () {
+    if (!isProductRoute()) armReturnRestore();
+  });
+  ['pointerdown', 'wheel', 'touchstart', 'keydown'].forEach(function (type) {
+    window.addEventListener(type, function () {
+      if (lastRestore && lastRestore.status === 'restored') restoreToken += 1;
+    }, true);
+  });
   document.addEventListener('click', saveLoadMoreFromEvent, true);
 })();
 
@@ -5613,11 +5754,14 @@ function setupDesktopAura() {
   }
 
   function armReturnStabilization() {
-    // Product return scroll restore intentionally disabled.
+    if (typeof window.__TC_ARM_PRODUCT_RETURN_SCROLL__ === 'function') {
+      window.__TC_ARM_PRODUCT_RETURN_SCROLL__();
+    }
   }
 
   function hasProductReturnState() {
-    return false;
+    var state = window.__TC_PRODUCT_RETURN_SCROLL_STATE__ && window.__TC_PRODUCT_RETURN_SCROLL_STATE__();
+    return !!(state && state.awaitingReturn);
   }
 
   function markCatalogRecord() {
@@ -7961,7 +8105,7 @@ function setupDesktopAura() {
       linkText: link ? link.textContent.replace(/\s+/g, ' ').trim() : '',
       iconCount: link ? link.querySelectorAll('.' + LINK_CLASS + '__icon').length : 0,
       lastPosition: window.__TC_PRODUCT_BACK_LAST_POSITION__ || null,
-      returnScrollDisabled: true,
+      returnScrollDisabled: false,
       nativeCloseControl: !!getProductPopupNativeCloseControl(),
       nativeCloseStrategy: 'close-control-mouse-sequence',
       backLinkIntercept: 'window-capture',
@@ -8082,7 +8226,7 @@ function setupDesktopAura() {
         !isProductPopupInteractiveTarget(event.target)) {
         event.preventDefault();
         event.stopPropagation();
-        if (typeof armReturnStabilization === 'function') armReturnStabilization();
+        if (typeof window.__TC_ARM_PRODUCT_RETURN_SCROLL__ === 'function') window.__TC_ARM_PRODUCT_RETURN_SCROLL__();
         closeProductPopupViaNativeBackdrop();
         return;
       }
