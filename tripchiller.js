@@ -5539,6 +5539,7 @@ function setupDesktopAura() {
 
   function saveReturnPosition(event) {
     if (!event || event.button > 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || isProductRoute()) return;
+    if (event.type === 'click' && event.detail !== 0 && returnState) return;
 
     var link = getProductLink(event.target);
     if (!link) return;
@@ -5608,7 +5609,7 @@ function setupDesktopAura() {
       var card = findSourceCard(returnState);
       var targetY = returnState.scrollY;
       if (card && returnState.sourceCardTop !== null) {
-        targetY += card.getBoundingClientRect().top - returnState.sourceCardTop;
+        targetY = getScrollY() + card.getBoundingClientRect().top - returnState.sourceCardTop;
       }
       targetY = Math.max(0, Math.min(targetY, document.documentElement.scrollHeight - window.innerHeight));
       window.scrollTo(0, targetY);
@@ -5678,10 +5679,22 @@ function setupDesktopAura() {
   window.addEventListener('hashchange', function () {
     if (!isProductRoute()) armReturnRestore();
   });
-  ['pointerdown', 'wheel', 'touchstart', 'keydown'].forEach(function (type) {
-    window.addEventListener(type, function () {
-      if (lastRestore && lastRestore.status === 'restored') restoreToken += 1;
-    }, true);
+  function cancelReturnRestore(event) {
+    if (event.type === 'keydown' && !/^(?:ArrowUp|ArrowDown|PageUp|PageDown|Home|End| )$/.test(event.key || '')) return;
+    if (event.type === 'keydown' && event.target && event.target.closest && event.target.closest('a, button, input, textarea, select')) return;
+    if (!returnState || (!returnState.awaitingReturn && !(lastRestore && lastRestore.status === 'restored'))) return;
+
+    restoreToken += 1;
+    if (returnState.awaitingReturn) {
+      returnState.awaitingReturn = false;
+      lastRestore = { status: 'cancelled-by-user', input: event.type };
+    } else {
+      lastRestore.correctionCancelledBy = event.type;
+    }
+  }
+
+  ['wheel', 'touchmove', 'keydown'].forEach(function (type) {
+    window.addEventListener(type, cancelReturnRestore, true);
   });
   document.addEventListener('click', saveLoadMoreFromEvent, true);
 })();
@@ -5754,14 +5767,11 @@ function setupDesktopAura() {
   }
 
   function armReturnStabilization() {
-    if (typeof window.__TC_ARM_PRODUCT_RETURN_SCROLL__ === 'function') {
-      window.__TC_ARM_PRODUCT_RETURN_SCROLL__();
-    }
+    // Product return scroll restore is driven by the product close lifecycle.
   }
 
   function hasProductReturnState() {
-    var state = window.__TC_PRODUCT_RETURN_SCROLL_STATE__ && window.__TC_PRODUCT_RETURN_SCROLL_STATE__();
-    return !!(state && state.awaitingReturn);
+    return false;
   }
 
   function markCatalogRecord() {
@@ -7610,8 +7620,6 @@ function setupDesktopAura() {
         return;
       }
 
-      if (typeof armReturnStabilization === 'function') armReturnStabilization();
-
       link.classList.add('tc-pressed');
       link.classList.add('is-leaving');
       if (typeof window.__TC_MARK_PRODUCT_CLOSE_SKIP_REVEAL__ === 'function') window.__TC_MARK_PRODUCT_CLOSE_SKIP_REVEAL__();
@@ -7647,6 +7655,7 @@ function setupDesktopAura() {
 
     link.classList.add('tc-pressed');
     link.classList.add('is-leaving');
+    if (typeof window.__TC_ARM_PRODUCT_RETURN_SCROLL__ === 'function') window.__TC_ARM_PRODUCT_RETURN_SCROLL__();
 
     window.setTimeout(function () {
       closeProductPopupViaNativeCloseControl();
