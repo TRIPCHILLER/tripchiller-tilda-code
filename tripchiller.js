@@ -5327,6 +5327,7 @@ function setupDesktopAura() {
   var activeExpandKey = '';
   var returnState = null;
   var restoreToken = 0;
+  var restoreActive = false;
   var lastRestore = null;
 
   function getCatalogKey() {
@@ -5557,6 +5558,7 @@ function setupDesktopAura() {
       sourceCardTop: rect ? rect.top : null,
       awaitingReturn: true
     };
+    restoreActive = false;
     lastRestore = null;
   }
 
@@ -5589,9 +5591,11 @@ function setupDesktopAura() {
 
     var token = ++restoreToken;
     var checks = 0;
+    restoreActive = true;
 
     function finish(result) {
       if (token !== restoreToken || !returnState) return;
+      restoreActive = false;
       returnState.awaitingReturn = false;
       lastRestore = result;
     }
@@ -5665,6 +5669,7 @@ function setupDesktopAura() {
         cardTop: returnState.sourceCardTop
       } : null,
       awaitingReturn: !!(returnState && returnState.awaitingReturn),
+      restoreActive: restoreActive,
       lastRestore: lastRestore,
       currentScrollY: getScrollY()
     };
@@ -5682,10 +5687,12 @@ function setupDesktopAura() {
   function cancelReturnRestore(event) {
     if (event.type === 'keydown' && !/^(?:ArrowUp|ArrowDown|PageUp|PageDown|Home|End| )$/.test(event.key || '')) return;
     if (event.type === 'keydown' && event.target && event.target.closest && event.target.closest('a, button, input, textarea, select')) return;
-    if (!returnState || (!returnState.awaitingReturn && !(lastRestore && lastRestore.status === 'restored'))) return;
+    if (!returnState || (!restoreActive && !(lastRestore && lastRestore.status === 'restored'))) return;
+    if (restoreActive && (isProductRoute() || hasVisibleProductPopup())) return;
 
     restoreToken += 1;
-    if (returnState.awaitingReturn) {
+    if (restoreActive) {
+      restoreActive = false;
       returnState.awaitingReturn = false;
       lastRestore = { status: 'cancelled-by-user', input: event.type };
     } else {
