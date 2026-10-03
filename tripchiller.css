@@ -1615,6 +1615,12 @@ html.tc-product-page body {
   min-height: 100%;
 }
 
+/* Keep the catalog scroll range while Tilda compensates the popup scrollbar. */
+body.tc-product-return-preserved {
+  height: auto !important;
+  min-height: var(--tc-product-catalog-height, 100vh) !important;
+}
+
 html.tc-product-page body {
   background-color: #fff !important;
 }
