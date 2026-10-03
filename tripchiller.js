@@ -5592,7 +5592,7 @@ function setupDesktopAura() {
     var bodyStyle = document.body && getComputedStyle(document.body);
     var htmlStyle = getComputedStyle(document.documentElement);
     return (bodyStyle && (bodyStyle.overflow === 'hidden' || bodyStyle.position === 'fixed')) ||
-      htmlStyle.overflow === 'hidden';
+      (htmlStyle.overflow === 'hidden' && !document.documentElement.classList.contains('tc-product-return-preserved'));
   }
 
   function armReturnRestore() {
