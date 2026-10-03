@@ -5567,6 +5567,7 @@ function setupDesktopAura() {
     if (event.type === 'click' && document.body) {
       document.body.style.setProperty('--tc-product-catalog-height', document.documentElement.scrollHeight + 'px');
       document.body.classList.add('tc-product-return-preserved');
+      document.documentElement.classList.add('tc-product-return-preserved');
     }
   }
 
@@ -5622,6 +5623,7 @@ function setupDesktopAura() {
 
       if (document.body) {
         document.body.classList.remove('tc-product-return-preserved');
+        document.documentElement.classList.remove('tc-product-return-preserved');
         document.body.style.removeProperty('--tc-product-catalog-height');
       }
       if (token !== restoreToken) return;
