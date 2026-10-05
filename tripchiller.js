@@ -5698,6 +5698,17 @@ function setupDesktopAura() {
   document.addEventListener('click', saveReturnPosition, true);
   document.addEventListener('catalog:popupClosed', armReturnRestore, true);
   window.addEventListener('popstate', function () {
+    if (!window.matchMedia || !window.matchMedia('(max-width: 980px), (pointer: coarse)').matches) return;
+    if (!returnState || !returnState.awaitingReturn || isProductRoute()) return;
+
+    var popup = document.querySelector('.t-popup.t-popup_show, .t-store__prod-popup.t-popup_show');
+    var close = popup && popup.querySelector('.t-popup__close');
+    if (!close) return;
+
+    // Replace only Tilda's history close; the close control reinstalls its catalog routing.
+    window.onpopstate = function () { close.click(); };
+  }, true);
+  window.addEventListener('popstate', function () {
     if (!isProductRoute()) armReturnRestore();
   });
   window.addEventListener('hashchange', function () {
