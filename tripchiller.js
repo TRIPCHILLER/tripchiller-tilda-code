@@ -5706,7 +5706,11 @@ function setupDesktopAura() {
     if (!close) return;
 
     // Replace only Tilda's history close; the close control reinstalls its catalog routing.
-    window.onpopstate = function () { close.click(); };
+    window.onpopstate = function () {
+      close.click();
+      if (typeof window.__TC_FORCE_PRODUCT_ROUTE_MODE__ === 'function') window.__TC_FORCE_PRODUCT_ROUTE_MODE__();
+      if (typeof window.__TC_SYNC_SITE_HEADER_REVEAL__ === 'function') window.__TC_SYNC_SITE_HEADER_REVEAL__();
+    };
   }, true);
   window.addEventListener('popstate', function () {
     if (!isProductRoute()) armReturnRestore();
