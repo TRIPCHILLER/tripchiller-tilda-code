@@ -7221,7 +7221,7 @@ function setupDesktopAura() {
     if (!window.matchMedia('(min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
     var button = event.target.closest('.t-slds__arrow');
     if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return;
-    if (!button.closest('#allrecords .t-catalog__prod-popup__slider, #allrecords .t-store__prod-popup__slider')) return;
+    if (!button.closest('#allrecords .t-catalog__prod-popup__slider, #allrecords .t-store__prod-popup__slider, #allrecords .uc-custom-grid .t778__product-full .t778__col_left')) return;
 
     clearTimeout(button.__tcGalleryArrowPressTimer);
     button.classList.remove('tc-gallery-arrow-pressed');
