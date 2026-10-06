@@ -5021,3 +5021,40 @@ body.tc-product-page-active .tc-menu-eye-logo {
     border-radius: 0 !important;
   }
 }
+
+/* Desktop product gallery: blend the wrapper so arrows can invert the photo. */
+@media (min-width: 981px) and (pointer: fine) {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_wrapper {
+    mix-blend-mode: difference;
+  }
+
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow,
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow * {
+    cursor: pointer !important;
+  }
+
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow {
+    display: grid !important;
+    place-items: center;
+    background: #fff !important;
+    border-radius: 50% !important;
+    color: #000 !important;
+    opacity: .75;
+    font-family: var(--tc-font-main) !important;
+    font-size: 24px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+  }
+
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_body {
+    display: none !important;
+  }
+
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow-left::before {
+    content: '<';
+  }
+
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow-right::before {
+    content: '>';
+  }
+}
