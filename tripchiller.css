@@ -3244,19 +3244,19 @@ button.t778__showmore.tc-loadmore-pressed,
 
 @media (min-width: 981px) and (pointer: fine) {
   /* Let photo shadows escape; the main/container still clip the slide track. */
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds {
     overflow: visible !important;
   }
 
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__main {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__main {
     box-shadow: 0 2px 4px rgba(0,0,0,.20), 0 8px 18px rgba(0,0,0,.18) !important;
   }
 
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__thumbsbullet {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet {
     box-shadow: 0 1px 2px rgba(0,0,0,.28), 0 3px 6px rgba(0,0,0,.22) !important;
   }
 
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__thumbsbullet-wrapper {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet-wrapper {
     margin-top: 14px !important;
     padding-top: 0 !important;
   }
@@ -5005,18 +5005,32 @@ body.tc-product-page-active .tc-menu-eye-logo {
   }
 }
 
+/* Archive T778 uses native slides but has no catalog rounding settings. */
+#allrecords .uc-custom-grid .t778__product-full .t778__col_left .t-slds__thumbsbullet,
+#allrecords .uc-custom-grid .t778__product-full .t778__col_left .t-slds__thumbsbullet-border {
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+@media (min-width: 981px) {
+  #allrecords .uc-custom-grid .t778__product-full .t778__col_left .t-slds__main {
+    border-radius: 25px;
+    overflow: hidden;
+  }
+}
+
 /* Desktop product gallery: blend the controls; paint black shadows separately. */
 @media (min-width: 981px) and (pointer: fine) {
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_wrapper {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_wrapper {
     mix-blend-mode: difference;
   }
 
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container {
     --tc-gallery-arrow-size: 40px;
   }
 
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container::before,
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container::after {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container::before,
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container::after {
     content: none;
     position: absolute;
     top: 50%;
@@ -5031,22 +5045,22 @@ body.tc-product-page-active .tc-menu-eye-logo {
   }
 
   /* Tilda hides end arrows with inline display/opacity; hide their shadows too. */
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container:has(.t-slds__arrow_wrapper-left:not([style*="display: none"]):not([style*="opacity: 0"]))::before {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container:has(.t-slds__arrow_wrapper-left:not([style*="display: none"]):not([style*="opacity: 0"]))::before {
     content: '';
     left: 30px;
   }
 
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container:has(.t-slds__arrow_wrapper-right:not([style*="display: none"]):not([style*="opacity: 0"]))::after {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container:has(.t-slds__arrow_wrapper-right:not([style*="display: none"]):not([style*="opacity: 0"]))::after {
     content: '';
     right: 30px;
   }
 
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow,
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow * {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow,
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow * {
     cursor: pointer !important;
   }
 
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow {
     display: grid !important;
     place-items: center;
     width: var(--tc-gallery-arrow-size) !important;
@@ -5062,15 +5076,15 @@ body.tc-product-page-active .tc-menu-eye-logo {
     line-height: 1 !important;
   }
 
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_body {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_body {
     display: none !important;
   }
 
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow-left::before {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow-left::before {
     content: '<';
   }
 
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow-right::before {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow-right::before {
     content: '>';
   }
 }
@@ -5081,9 +5095,9 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 @media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow.tc-gallery-arrow-pressed,
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container:has(.t-slds__arrow-left.tc-gallery-arrow-pressed)::before,
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container:has(.t-slds__arrow-right.tc-gallery-arrow-pressed)::after {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow.tc-gallery-arrow-pressed,
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container:has(.t-slds__arrow-left.tc-gallery-arrow-pressed)::before,
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container:has(.t-slds__arrow-right.tc-gallery-arrow-pressed)::after {
     animation: tcProductGalleryArrowPress .36s ease-in-out;
   }
 }
