@@ -3243,38 +3243,21 @@ button.t778__showmore.tc-loadmore-pressed,
 }
 
 @media (min-width: 981px) and (pointer: fine) {
-  .t-store__prod-popup.t-popup_show .t-slds__imgwrapper,
-  .t-store__prod-popup.t-popup_show .t-slds__bgimg-wrapper,
-  .t-store__prod-popup.t-popup_show .t-slds__bgimg,
-  .t-store__prod-popup.t-popup_show .t-bgimg,
-  .t-store__prod-popup.t-popup_show .js-product-img,
-  .t-popup_show .t-store__prod-popup .t-slds__imgwrapper,
-  .t-popup_show .t-store__prod-popup .t-slds__bgimg-wrapper,
-  .t-popup_show .t-store__prod-popup .t-slds__bgimg,
-  .t-popup_show .t-store__prod-popup .t-bgimg,
-  .t-popup_show .t-store__prod-popup .js-product-img {
-    box-shadow: 0 14px 28px rgba(0,0,0,.28), 0 3px 8px rgba(0,0,0,.22) !important;
-    filter: drop-shadow(0 10px 14px rgba(0,0,0,.18));
+  /* Let photo shadows escape; the main/container still clip the slide track. */
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds {
+    overflow: visible !important;
   }
 
-  .t-store__prod-popup.t-popup_show .t-slds__thumbsbullet,
-  .t-store__prod-popup.t-popup_show .t-slds__thumbsbullet img,
-  .t-store__prod-popup.t-popup_show .t-slds__thumbsbullet-wrapper,
-  .t-store__prod-popup.t-popup_show .t-slds__thumbsbullet-wrapper img,
-  .t-popup_show .t-store__prod-popup .t-slds__thumbsbullet,
-  .t-popup_show .t-store__prod-popup .t-slds__thumbsbullet img,
-  .t-popup_show .t-store__prod-popup .t-slds__thumbsbullet-wrapper,
-  .t-popup_show .t-store__prod-popup .t-slds__thumbsbullet-wrapper img {
-    box-shadow: 0 7px 14px rgba(0,0,0,.24), 0 2px 4px rgba(0,0,0,.18) !important;
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__main {
+    box-shadow: 0 2px 4px rgba(0,0,0,.20), 0 8px 18px rgba(0,0,0,.18) !important;
   }
 
-  .t-store__prod-popup.t-popup_show .t-slds__thumbs,
-  .t-store__prod-popup.t-popup_show .t-slds__thumbsbullet-wrapper,
-  .t-store__prod-popup.t-popup_show .t-slds__thumbs-wrapper,
-  .t-popup_show .t-store__prod-popup .t-slds__thumbs,
-  .t-popup_show .t-store__prod-popup .t-slds__thumbsbullet-wrapper,
-  .t-popup_show .t-store__prod-popup .t-slds__thumbs-wrapper {
-    margin-top: 18px !important;
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__thumbsbullet {
+    box-shadow: 0 1px 2px rgba(0,0,0,.28), 0 3px 6px rgba(0,0,0,.22) !important;
+  }
+
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__thumbsbullet-wrapper {
+    margin-top: 14px !important;
     padding-top: 0 !important;
   }
 
@@ -5040,6 +5023,8 @@ body.tc-product-page-active .tc-menu-eye-logo {
     border-radius: 50% !important;
     color: #000 !important;
     opacity: .75;
+    /* White becomes an adaptive dark/light shadow inside the difference group. */
+    box-shadow: 0 1px 2px rgba(255,255,255,.48), 0 2px 4px rgba(255,255,255,.26) !important;
     font-family: var(--tc-font-main) !important;
     font-size: 24px !important;
     font-weight: 400 !important;
