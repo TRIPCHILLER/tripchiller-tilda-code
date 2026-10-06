@@ -7219,9 +7219,9 @@ function setupDesktopAura() {
   document.addEventListener('click', function (event) {
     if (event.button !== 0 || !event.target || !event.target.closest) return;
     if (!window.matchMedia('(min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
-    var button = event.target.closest('.t-slds__arrow');
+    var button = event.target.closest('.t-slds__arrow, .t-carousel__zoomer__control, .t-zoomer__scale, .t-zoomer__close');
     if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return;
-    if (!button.closest('#allrecords .t-catalog__prod-popup__slider, #allrecords .t-store__prod-popup__slider, #allrecords .uc-custom-grid .t778__product-full .t778__col_left')) return;
+    if (!button.closest('#allrecords .t-catalog__prod-popup__slider, #allrecords .t-store__prod-popup__slider, #allrecords .uc-custom-grid .t778__product-full .t778__col_left, body.tc-product-popup-open .t-zoomer__wrapper')) return;
 
     clearTimeout(button.__tcGalleryArrowPressTimer);
     button.classList.remove('tc-gallery-arrow-pressed');
