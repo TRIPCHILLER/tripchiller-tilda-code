@@ -5027,9 +5027,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
 
 /* Desktop product gallery: blend the controls; paint black shadows separately. */
 @media (min-width: 981px) and (pointer: fine) {
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_wrapper,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_wrapper {
     mix-blend-mode: difference;
   }
 
@@ -5136,7 +5134,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
   transform: translateY(-50%) scale(1.1) !important;
 }
 
-/* Fullscreen product photos: reuse gallery controls, inset by 15% of the viewport. */
+/* Fullscreen product photos: reuse gallery controls, inset by 7.5% of the viewport. */
 @media (min-width: 981px) and (pointer: fine) {
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control {
     top: 50%;
@@ -5150,13 +5148,13 @@ body.tc-product-page-active .tc-menu-eye-logo {
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control_left,
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::before {
-    left: 15vw !important;
+    left: 7.5vw !important;
     right: auto !important;
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control_right,
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::after {
-    right: 15vw !important;
+    right: 7.5vw !important;
     left: auto !important;
   }
 
@@ -5199,7 +5197,23 @@ body.tc-product-page-active .tc-menu-eye-logo {
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper .t-zoomer__scale > svg {
-    filter: none !important;
+    display: none !important;
+  }
+
+  /* Read Tilda's native zoom state; keep its click/scale handler unchanged. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__scale::before {
+    content: '';
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    -webkit-mask: url('./assets/zoom-in.svg') center / contain no-repeat;
+    mask: url('./assets/zoom-in.svg') center / contain no-repeat;
+    pointer-events: none;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper.scale-active .t-zoomer__scale::before {
+    -webkit-mask-image: url('./assets/zoom-out.svg');
+    mask-image: url('./assets/zoom-out.svg');
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper .t-zoomer__close::before {
@@ -5232,5 +5246,19 @@ body.tc-product-page-active .tc-menu-eye-logo {
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container:has(.t-zoomer__scale.tc-gallery-arrow-pressed)::before,
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container:has(.t-zoomer__close.tc-gallery-arrow-pressed)::after {
     animation: tcProductGalleryArrowPress .36s ease-in-out;
+  }
+}
+
+/* Filter the real backdrop, including the page outside the fullscreen photo. */
+@media (min-width: 981px) and (pointer: fine) {
+  body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) > .t-zoomer__ui-item {
+    background: transparent !important;
+    color: #fff !important;
+    -webkit-backdrop-filter: invert(1);
+    backdrop-filter: invert(1);
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-item::before {
+    mix-blend-mode: difference;
   }
 }
