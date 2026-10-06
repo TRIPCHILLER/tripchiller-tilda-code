@@ -5014,3 +5014,10 @@ body.tc-product-page-active .tc-menu-eye-logo {
     line-height: 19.6px !important;
   }
 }
+
+/* Mobile product viewer: square main photo, keep rounded thumbnails. */
+@media (max-width: 980px) {
+  #allrecords .t-catalog__prod-popup__slider .t-slds__main {
+    border-radius: 0 !important;
+  }
+}
