@@ -5005,8 +5005,42 @@ body.tc-product-page-active .tc-menu-eye-logo {
   }
 }
 
-/* Desktop product gallery: invert the photo inside the circle, not its shadow. */
+/* Desktop product gallery: blend the controls; paint black shadows separately. */
 @media (min-width: 981px) and (pointer: fine) {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_wrapper {
+    mix-blend-mode: difference;
+  }
+
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container {
+    --tc-gallery-arrow-size: 40px;
+  }
+
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container::before,
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container::after {
+    content: none;
+    position: absolute;
+    top: 50%;
+    width: var(--tc-gallery-arrow-size);
+    height: var(--tc-gallery-arrow-size);
+    transform: translateY(-50%);
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,.48), 0 2px 4px rgba(0,0,0,.26);
+    opacity: .75;
+    pointer-events: none;
+    z-index: 8;
+  }
+
+  /* Tilda hides end arrows with inline display/opacity; hide their shadows too. */
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container:has(.t-slds__arrow_wrapper-left:not([style*="display: none"]):not([style*="opacity: 0"]))::before {
+    content: '';
+    left: 30px;
+  }
+
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container:has(.t-slds__arrow_wrapper-right:not([style*="display: none"]):not([style*="opacity: 0"]))::after {
+    content: '';
+    right: 30px;
+  }
+
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow,
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow * {
     cursor: pointer !important;
@@ -5015,21 +5049,17 @@ body.tc-product-page-active .tc-menu-eye-logo {
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow {
     display: grid !important;
     place-items: center;
-    background: transparent !important;
-    -webkit-backdrop-filter: invert(1);
-    backdrop-filter: invert(1);
+    width: var(--tc-gallery-arrow-size) !important;
+    height: var(--tc-gallery-arrow-size) !important;
+    background: #fff !important;
     border-radius: 50% !important;
-    color: #fff !important;
+    color: #000 !important;
     opacity: .75;
-    box-shadow: 0 1px 2px rgba(0,0,0,.48), 0 2px 4px rgba(0,0,0,.26) !important;
+    box-shadow: none !important;
     font-family: var(--tc-font-main) !important;
     font-size: 24px !important;
     font-weight: 400 !important;
     line-height: 1 !important;
-  }
-
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow::before {
-    mix-blend-mode: difference;
   }
 
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_body {
@@ -5046,12 +5076,14 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 @keyframes tcProductGalleryArrowPress {
-  0%, 100% { translate: 0 0; }
-  35% { translate: 0 2px; }
+  0%, 100% { scale: 1; }
+  35% { scale: .94; }
 }
 
 @media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow.tc-gallery-arrow-pressed {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow.tc-gallery-arrow-pressed,
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container:has(.t-slds__arrow-left.tc-gallery-arrow-pressed)::before,
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_container:has(.t-slds__arrow-right.tc-gallery-arrow-pressed)::after {
     animation: tcProductGalleryArrowPress .36s ease-in-out;
   }
 }
