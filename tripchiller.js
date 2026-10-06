@@ -8280,7 +8280,7 @@ function setupDesktopAura() {
     if (!target || !target.closest) return true;
 
     return !!target.closest([
-      '.' + LINK_CLASS, 'a', 'button', 'input', 'select', 'textarea',
+      '.' + LINK_CLASS, 'a', 'button', 'input', 'select', 'textarea', 'label',
       '[role="button"]', '.t-btn', '.t-catalog__prod-popup__btn',
       '.t-slds__main', '.t-slds__arrow', '.t-slds__arrow_wrapper',
       '.t-slds__thumbsbullet', '.t-slds__thumbsbullet-wrapper',
