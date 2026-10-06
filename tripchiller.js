@@ -7211,6 +7211,29 @@ function setupDesktopAura() {
   observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
 
+/* Desktop product gallery: a repeatable press without changing native navigation. */
+(function () {
+  if (window.__TC_PRODUCT_GALLERY_ARROW_PRESS__) return;
+  window.__TC_PRODUCT_GALLERY_ARROW_PRESS__ = true;
+
+  document.addEventListener('click', function (event) {
+    if (event.button !== 0 || !event.target || !event.target.closest) return;
+    if (!window.matchMedia('(min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
+    var button = event.target.closest('.t-slds__arrow');
+    if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return;
+    if (!button.closest('#allrecords .t-catalog__prod-popup__slider, #allrecords .t-store__prod-popup__slider')) return;
+
+    clearTimeout(button.__tcGalleryArrowPressTimer);
+    button.classList.remove('tc-gallery-arrow-pressed');
+    void button.offsetWidth; // Restart the pulse even during rapid clicks.
+    button.classList.add('tc-gallery-arrow-pressed');
+    button.__tcGalleryArrowPressTimer = setTimeout(function () {
+      button.classList.remove('tc-gallery-arrow-pressed');
+      button.__tcGalleryArrowPressTimer = null;
+    }, 400);
+  }, true);
+})();
+
 (function () {
   if (window.__TC_PRODUCT_ROUTE_ISOLATION_V2__) return;
   window.__TC_PRODUCT_ROUTE_ISOLATION_V2__ = true;
