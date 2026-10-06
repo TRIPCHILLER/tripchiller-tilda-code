@@ -7076,7 +7076,7 @@ function setupDesktopAura() {
   function isActionControl(node) {
     if (!node || !node.closest) return false;
     return !!node.closest(
-      '.t-popup__close, .t-store__prod-popup__close, .t-zoomer__close, .t-zoomer__control, .t-zoomer__scale, .t-zoomer__minus, .t-zoomer__plus, .t-zoomer__prev, .t-zoomer__next, .t-slds__arrow_wrapper, .t-slds__arrow, .t-slds__bullet, .t-slds__counter, .t-slds__thumbs, .t-slds__thumbsbullet, .t-slds__thumbsbullet-wrapper'
+      '.t-popup__close, .t-store__prod-popup__close, .t-zoomer__close, .t-zoomer__control, .t-zoomer__scale, .t-zoomer__minus, .t-zoomer__plus, .t-zoomer__prev, .t-zoomer__next, .t-product__option-item, .t-slds__arrow_wrapper, .t-slds__arrow, .t-slds__bullet, .t-slds__counter, .t-slds__thumbs, .t-slds__thumbsbullet, .t-slds__thumbsbullet-wrapper'
     );
   }
 
@@ -8280,7 +8280,7 @@ function setupDesktopAura() {
     if (!target || !target.closest) return true;
 
     return !!target.closest([
-      '.' + LINK_CLASS, 'a', 'button', 'input', 'select', 'textarea',
+      '.' + LINK_CLASS, 'a', 'button', 'input', 'select', 'textarea', 'label',
       '[role="button"]', '.t-btn', '.t-catalog__prod-popup__btn',
       '.t-slds__main', '.t-slds__arrow', '.t-slds__arrow_wrapper',
       '.t-slds__thumbsbullet', '.t-slds__thumbsbullet-wrapper',

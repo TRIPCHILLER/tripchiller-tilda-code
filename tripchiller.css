@@ -3256,6 +3256,12 @@ button.t778__showmore.tc-loadmore-pressed,
     box-shadow: 0 1px 2px rgba(0,0,0,.28), 0 3px 6px rgba(0,0,0,.22) !important;
   }
 
+  /* Thumbnail photos stay clickable even when the main-photo magnifier hides its cursor. */
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet,
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet * {
+    cursor: pointer !important;
+  }
+
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet-wrapper {
     margin-top: 14px !important;
     padding-top: 0 !important;
@@ -5100,4 +5106,10 @@ body.tc-product-page-active .tc-menu-eye-logo {
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container:has(.t-slds__arrow-right.tc-gallery-arrow-pressed)::after {
     animation: tcProductGalleryArrowPress .36s ease-in-out;
   }
+}
+
+/* Selected variant: black inner dot, 10% larger; keep Tilda's outer ring and center. */
+#allrecords :is(.t-catalog__product-popup, .t-store__prod-popup, .uc-custom-grid .t778__product-full) .t-product__option-item_radio .t-product__option-input:checked + .t-product__option-checkmark::after {
+  background-color: #000 !important;
+  transform: translateY(-50%) scale(1.1) !important;
 }
