@@ -5005,12 +5005,8 @@ body.tc-product-page-active .tc-menu-eye-logo {
   }
 }
 
-/* Desktop product gallery: blend the wrapper so arrows can invert the photo. */
+/* Desktop product gallery: invert the photo inside the circle, not its shadow. */
 @media (min-width: 981px) and (pointer: fine) {
-  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_wrapper {
-    mix-blend-mode: difference;
-  }
-
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow,
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow * {
     cursor: pointer !important;
@@ -5019,16 +5015,21 @@ body.tc-product-page-active .tc-menu-eye-logo {
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow {
     display: grid !important;
     place-items: center;
-    background: #fff !important;
+    background: transparent !important;
+    -webkit-backdrop-filter: invert(1);
+    backdrop-filter: invert(1);
     border-radius: 50% !important;
-    color: #000 !important;
+    color: #fff !important;
     opacity: .75;
-    /* White becomes an adaptive dark/light shadow inside the difference group. */
-    box-shadow: 0 1px 2px rgba(255,255,255,.48), 0 2px 4px rgba(255,255,255,.26) !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,.48), 0 2px 4px rgba(0,0,0,.26) !important;
     font-family: var(--tc-font-main) !important;
     font-size: 24px !important;
     font-weight: 400 !important;
     line-height: 1 !important;
+  }
+
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow::before {
+    mix-blend-mode: difference;
   }
 
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow_body {
@@ -5041,5 +5042,16 @@ body.tc-product-page-active .tc-menu-eye-logo {
 
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow-right::before {
     content: '>';
+  }
+}
+
+@keyframes tcProductGalleryArrowPress {
+  0%, 100% { translate: 0 0; }
+  35% { translate: 0 2px; }
+}
+
+@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider) .t-slds__arrow.tc-gallery-arrow-pressed {
+    animation: tcProductGalleryArrowPress .36s ease-in-out;
   }
 }
