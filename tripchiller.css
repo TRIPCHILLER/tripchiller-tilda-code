@@ -5120,8 +5120,8 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 @keyframes tcProductGalleryArrowPress {
-  0%, 100% { transform: translateY(-50%) scale(1); }
-  35% { transform: translateY(-50%) scale(.90); }
+  0%, 100% { transform: translateY(-50%) rotate(var(--tc-gallery-shape-turn, 0deg)) scale(1); }
+  35% { transform: translateY(-50%) rotate(var(--tc-gallery-shape-turn, 0deg)) scale(.90); }
 }
 
 @media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
@@ -5143,6 +5143,14 @@ body.tc-product-page-active .tc-menu-eye-logo {
 
 /* Fullscreen product photos: reuse gallery controls, inset by 7.5% of the viewport. */
 @media (min-width: 981px) and (pointer: fine) {
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides {
+    --tc-gallery-arrow-size: 46px; /* 40px × 1.15; top controls keep 40px. */
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__img {
+    box-shadow: 0 2px 4px rgba(0,0,0,.20), 0 8px 18px rgba(0,0,0,.18);
+  }
+
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control {
     top: 50%;
     bottom: auto;
@@ -5172,7 +5180,8 @@ body.tc-product-page-active .tc-menu-eye-logo {
     padding: 0;
     border: 0;
     opacity: var(--tc-fullscreen-control-opacity, .75);
-    transform: translateY(-50%);
+    font-size: 27.6px !important;
+    transform: translateY(-50%) rotate(var(--tc-gallery-shape-turn, 0deg));
   }
 }
 
@@ -5201,6 +5210,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper > .t-zoomer__ui-item {
     padding: 0;
     border: 0;
+    transform: rotate(var(--tc-gallery-shape-turn, 0deg));
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper .t-zoomer__scale > svg {
@@ -5241,8 +5251,8 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 @keyframes tcFullscreenControlPress {
-  0%, 100% { transform: scale(1); }
-  35% { transform: scale(.90); }
+  0%, 100% { transform: rotate(var(--tc-gallery-shape-turn, 0deg)) scale(1); }
+  35% { transform: rotate(var(--tc-gallery-shape-turn, 0deg)) scale(.90); }
 }
 
 @media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
@@ -5263,9 +5273,26 @@ body.tc-product-page-active .tc-menu-eye-logo {
     color: #fff !important;
     -webkit-backdrop-filter: invert(1);
     backdrop-filter: invert(1);
+    border-radius: 0 !important;
+    -webkit-mask: url('./assets/black_icon_circle.svg') center / contain no-repeat;
+    mask: url('./assets/black_icon_circle.svg') center / contain no-repeat;
+  }
+
+  /* Fixed quarter turns diversify the silhouette; counter-rotate only the glyph. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control_right > .t-zoomer__ui-item {
+    --tc-gallery-shape-turn: 90deg;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__scale {
+    --tc-gallery-shape-turn: 180deg;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__close {
+    --tc-gallery-shape-turn: 270deg;
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-item::before {
     mix-blend-mode: difference;
+    transform: rotate(calc(-1 * var(--tc-gallery-shape-turn, 0deg)));
   }
 }
