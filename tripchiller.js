@@ -7266,6 +7266,7 @@ function setupDesktopAura() {
 
   function animateGalleryPress(event) {
     if (event.button !== 0 || !event.target || !event.target.closest) return;
+    if (photoZoom && event.type === 'click' && event.target.closest('.t-carousel__zoomer__control, .t-zoomer__close') && photoZoom.wrapper.contains(event.target)) clearPhotoZoom();
     var desktop = window.matchMedia('(min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches;
     var touchViewer = window.matchMedia('(max-width: 980px) and (prefers-reduced-motion: no-preference)').matches && event.target.closest('body.tc-product-popup-open .t-zoomer__wrapper');
     if (!desktop && !touchViewer) return;
@@ -7289,6 +7290,123 @@ function setupDesktopAura() {
 
   document.addEventListener('click', animateGalleryPress, true);
   document.addEventListener('pointerdown', animateGalleryPress, true);
+
+  // Touch pinch transforms only the active img; leave the viewer and controls untouched.
+  var photoZoom = null;
+  var photoGesture = null;
+
+  function clearPhotoZoom() {
+    if (photoZoom) {
+      var img = photoZoom.img;
+      img.style.transform = photoZoom.transform;
+      img.style.transformOrigin = photoZoom.origin;
+      img.style.transition = photoZoom.transition;
+    }
+    photoZoom = null;
+    photoGesture = null;
+  }
+
+  function touchGeometry(touches) {
+    var first = touches[0], second = touches[1] || first;
+    return {
+      x: (first.clientX + second.clientX) / 2,
+      y: (first.clientY + second.clientY) / 2,
+      distance: Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY)
+    };
+  }
+
+  function rebasePhotoGesture(touches, blockNative) {
+    var point = touchGeometry(touches);
+    photoGesture = {
+      pinch: touches.length > 1,
+      blockNative: blockNative,
+      x: point.x, y: point.y,
+      distance: point.distance,
+      scale: photoZoom.scale,
+      tx: photoZoom.x, ty: photoZoom.y
+    };
+  }
+
+  function startPhotoGesture(event) {
+    if (!window.matchMedia('(max-width: 980px)').matches || !event.target.closest) return;
+    var wrapper = event.target.closest('body.tc-product-popup-open .t-zoomer__wrapper');
+    if (!wrapper) return;
+    var img = wrapper.querySelector('.t-carousel__zoomer__item.active .t-carousel__zoomer__img');
+    if (!img || !img.contains(event.target) || !img.complete || !img.naturalWidth) return;
+    if (photoZoom && photoZoom.img !== img) clearPhotoZoom();
+    if (event.touches.length < 2 && (!photoZoom || photoZoom.scale === 1)) return;
+
+    if (!photoZoom) {
+      // A native double-tap zoom must return to its fitted image before a pinch starts.
+      if (wrapper.classList.contains('scale-active') && typeof window.t_zoom_unscale === 'function') {
+        window.t_zoom_unscale();
+      }
+      var rect = img.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      photoZoom = {
+        img: img, wrapper: wrapper,
+        width: rect.width, height: rect.height,
+        cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2,
+        scale: 1, x: 0, y: 0,
+        transform: img.style.transform,
+        origin: img.style.transformOrigin,
+        transition: img.style.transition
+      };
+      img.style.transformOrigin = '50% 50%';
+      img.style.transition = 'none';
+    }
+    // First pinch reaches Hammer with both touches, so its one-finger swipes do not fire.
+    // A later one-finger drag of the zoomed img is ours from touchstart through touchend.
+    var blockNative = !!(photoGesture && photoGesture.blockNative) || event.touches.length === 1;
+    rebasePhotoGesture(event.touches, blockNative);
+    if (event.cancelable) event.preventDefault();
+    if (blockNative) event.stopPropagation();
+  }
+
+  function movePhotoGesture(event) {
+    if (!photoZoom || !photoGesture || !event.touches.length) return;
+    if (!photoZoom.img.isConnected || !window.matchMedia('(max-width: 980px)').matches) {
+      clearPhotoZoom();
+      return;
+    }
+    if (event.cancelable) event.preventDefault();
+    if (photoGesture.blockNative) event.stopPropagation();
+    var point = touchGeometry(event.touches);
+    var start = photoGesture;
+    if (start.pinch && event.touches.length > 1 && start.distance > 0) {
+      photoZoom.scale = Math.max(1, Math.min(4, start.scale * point.distance / start.distance));
+      // Keep the same image point under the midpoint of the two fingers.
+      var ratio = photoZoom.scale / start.scale;
+      photoZoom.x = point.x - photoZoom.cx - (start.x - photoZoom.cx - start.tx) * ratio;
+      photoZoom.y = point.y - photoZoom.cy - (start.y - photoZoom.cy - start.ty) * ratio;
+    } else {
+      photoZoom.x = start.tx + point.x - start.x;
+      photoZoom.y = start.ty + point.y - start.y;
+    }
+    var limitX = Math.max(0, (photoZoom.width * photoZoom.scale - window.innerWidth) / 2);
+    var limitY = Math.max(0, (photoZoom.height * photoZoom.scale - window.innerHeight) / 2);
+    photoZoom.x = Math.max(-limitX, Math.min(limitX, photoZoom.x));
+    photoZoom.y = Math.max(-limitY, Math.min(limitY, photoZoom.y));
+    photoZoom.img.style.transform = 'translate(' + photoZoom.x + 'px, ' + photoZoom.y + 'px) scale(' + photoZoom.scale + ')';
+  }
+
+  function endPhotoGesture(event) {
+    if (!photoZoom || !photoGesture) return;
+    if (photoGesture.blockNative) event.stopPropagation();
+    if (event.touches.length && event.type !== 'touchcancel') {
+      rebasePhotoGesture(event.touches, photoGesture.blockNative);
+    } else {
+      photoGesture = null;
+      if (photoZoom.scale === 1) clearPhotoZoom();
+    }
+  }
+
+  document.addEventListener('touchstart', startPhotoGesture, { capture: true, passive: false });
+  document.addEventListener('touchmove', movePhotoGesture, { capture: true, passive: false });
+  document.addEventListener('touchend', endPhotoGesture, { capture: true });
+  document.addEventListener('touchcancel', endPhotoGesture, { capture: true });
+  document.addEventListener('zoom:close', clearPhotoZoom, true);
+  window.addEventListener('resize', clearPhotoZoom);
 })();
 
 (function () {
