@@ -3251,11 +3251,11 @@ button.t778__showmore.tc-loadmore-pressed,
   }
 
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__main {
-    box-shadow: 0 2px 4px rgba(0,0,0,.20), 0 8px 18px rgba(0,0,0,.18) !important;
+    box-shadow: 0 5px 10px rgba(0,0,0,.22), 0 14px 30px rgba(0,0,0,.22) !important;
   }
 
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet {
-    box-shadow: 0 1px 2px rgba(0,0,0,.28), 0 3px 6px rgba(0,0,0,.22) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,.28), 0 6px 12px rgba(0,0,0,.24) !important;
   }
 
   /* Thumbnail photos stay clickable even when the main-photo magnifier hides its cursor. */
@@ -5056,10 +5056,10 @@ body.tc-product-page-active .tc-menu-eye-logo {
     height: var(--tc-gallery-arrow-size);
     transform: translateY(-50%);
     border-radius: 50%;
-    box-shadow: 0 1px 2px rgba(0,0,0,.48), 0 2px 4px rgba(0,0,0,.26);
+    box-shadow: 0 2px 3px rgba(0,0,0,.38), 0 4px 7px rgba(0,0,0,.24);
     opacity: var(--tc-fullscreen-control-opacity, .75);
     pointer-events: none;
-    z-index: 8;
+    z-index: 100; /* Paint after the controls so invert() cannot sample the shadow. */
   }
 
   /* Tilda hides end arrows with inline display/opacity; hide their shadows too. */
@@ -5148,10 +5148,11 @@ body.tc-product-page-active .tc-menu-eye-logo {
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__img {
-    box-shadow: 0 2px 4px rgba(0,0,0,.20), 0 8px 18px rgba(0,0,0,.18);
+    box-shadow: 0 5px 10px rgba(0,0,0,.22), 0 14px 30px rgba(0,0,0,.22);
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control {
+    z-index: 99 !important;
     top: 50%;
     bottom: auto;
     width: var(--tc-gallery-arrow-size);
@@ -5205,6 +5206,11 @@ body.tc-product-page-active .tc-menu-eye-logo {
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container::before,
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container::after {
     transition: opacity var(--tc-fullscreen-control-fade) ease;
+  }
+
+  /* Native UI uses a very high z-index; keep its sibling shadows above it. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper {
+    z-index: 99 !important;
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper > .t-zoomer__ui-item {
