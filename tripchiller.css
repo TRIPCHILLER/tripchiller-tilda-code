@@ -5147,6 +5147,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
 @media (max-width: 980px) {
   body.tc-product-popup-open .t-zoomer__wrapper {
     --tc-gallery-arrow-size: 40px;
+    touch-action: none !important; /* Only this viewer owns the photo pinch gesture. */
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper),
