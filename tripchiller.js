@@ -373,7 +373,12 @@
     }
 
     if (!siteHeaderProductObserver && window.MutationObserver && document.documentElement) {
-      siteHeaderProductObserver = new MutationObserver(scheduleSiteHeaderSync);
+      siteHeaderProductObserver = new MutationObserver(function (mutations) {
+        if (mutations.every(function (mutation) {
+          return mutation.target.classList && mutation.target.classList.contains('tc-product-magnifier');
+        })) return;
+        scheduleSiteHeaderSync();
+      });
       siteHeaderProductObserver.observe(document.documentElement, {
         attributes: true,
         attributeFilter: ['class', 'style'],
@@ -3983,7 +3988,12 @@ eyeUnlockTimer = setTimeout(function(){
   document.addEventListener("keydown", scheduleUpdate, true);
 
   if (window.MutationObserver) {
-    var observer = new MutationObserver(scheduleUpdate);
+    var observer = new MutationObserver(function (mutations) {
+      if (mutations.every(function (mutation) {
+        return mutation.target.classList && mutation.target.classList.contains('tc-product-magnifier');
+      })) return;
+      scheduleUpdate();
+    });
 
     observer.observe(document.documentElement, {
       childList: true,
@@ -5291,7 +5301,10 @@ function setupDesktopAura() {
   window.addEventListener('load', scheduleMark);
 
   if (window.MutationObserver) {
-    var observer = new MutationObserver(function () {
+    var observer = new MutationObserver(function (mutations) {
+      if (mutations.every(function (mutation) {
+        return mutation.target.classList && mutation.target.classList.contains('tc-product-magnifier');
+      })) return;
       scheduleMark();
     });
 
@@ -6947,7 +6960,10 @@ function setupDesktopAura() {
   var lens = null;
   var lastDebugSrc = '';
   var imageMetaCache = {};
-  var lensUpdateSeq = 0;
+  var lensSrc = '';
+  var pendingPointer = null;
+  var pendingImage = null;
+  var lensFrame = 0;
 
   function debugLog() {
     if (!window.__TC_DEBUG_PRODUCT_MAGNIFIER || !window.console || !console.log) return;
@@ -6957,16 +6973,37 @@ function setupDesktopAura() {
   function ensureLens() {
     if (lens && lens.parentNode) return lens;
     lens = document.createElement('div');
+    lensSrc = '';
     lens.className = 'tc-product-magnifier';
     lens.setAttribute('aria-hidden', 'true');
     document.body.appendChild(lens);
     return lens;
   }
 
+  function setLensVisible(visible) {
+    var html = document.documentElement;
+    if (html.classList.contains('tc-product-magnifier-active') !== visible) {
+      html.classList.toggle('tc-product-magnifier-active', visible);
+    }
+    if (lens && lens.classList.contains('is-visible') !== visible) {
+      lens.classList.toggle('is-visible', visible);
+    }
+  }
+
   function hideLens() {
-    document.documentElement.classList.remove('tc-product-magnifier-active');
-    if (!lens) return;
-    lens.classList.remove('is-visible');
+    if (lensFrame) cancelAnimationFrame(lensFrame);
+    lensFrame = 0;
+    pendingPointer = null;
+    pendingImage = null;
+    setLensVisible(false);
+  }
+
+  function scheduleLensUpdate() {
+    if (lensFrame) return;
+    lensFrame = requestAnimationFrame(function () {
+      lensFrame = 0;
+      if (pendingPointer && pendingImage) updateLensPosition(pendingPointer, pendingImage);
+    });
   }
 
   function getBgUrlFromNode(node) {
@@ -7052,7 +7089,7 @@ function setupDesktopAura() {
     imageMetaCache[src] = { loading: true, loaded: false, callbacks: [callback] };
 
     var img = new Image();
-    img.onload = function () {
+    function imageReady() {
       var meta = {
         loaded: true,
         loading: false,
@@ -7062,12 +7099,20 @@ function setupDesktopAura() {
       var callbacks = imageMetaCache[src].callbacks || [];
       imageMetaCache[src] = meta;
       callbacks.forEach(function (cb) { cb(meta); });
-    };
+    }
 
     img.onerror = function () {
       var callbacks = imageMetaCache[src].callbacks || [];
       imageMetaCache[src] = { loaded: true, loading: false, width: 0, height: 0, failed: true };
       callbacks.forEach(function (cb) { cb(null); });
+    };
+
+    img.onload = function () {
+      if (typeof img.decode === 'function') {
+        img.decode().then(imageReady, img.onerror);
+      } else {
+        imageReady();
+      }
     };
 
     img.src = src;
@@ -7108,6 +7153,10 @@ function setupDesktopAura() {
   }
 
   function updateLensPosition(event, imageNode) {
+    if (!imageNode.isConnected) {
+      hideLens();
+      return;
+    }
     var src = getImageSource(imageNode);
     if (!src) {
       hideLens();
@@ -7123,52 +7172,43 @@ function setupDesktopAura() {
       return;
     }
 
+    var meta = imageMetaCache[src];
+    if (!meta || !meta.loaded) {
+      setLensVisible(false);
+      // Subscribe once per source; movements during loading only replace the latest pointer.
+      if (!meta) getImageMeta(src, function (loadedMeta) {
+        if (!loadedMeta || !pendingPointer || !pendingImage) return;
+        if (getImageSource(pendingImage) === src) scheduleLensUpdate();
+      });
+      return;
+    }
+    if (meta.failed || !meta.width || !meta.height) {
+      setLensVisible(false);
+      return;
+    }
+
     var px = event.clientX - rect.left;
     var py = event.clientY - rect.top;
+    var coverScale = Math.max(rect.width / meta.width, rect.height / meta.height);
+    var displayW = meta.width * coverScale;
+    var displayH = meta.height * coverScale;
+    var offsetX = (rect.width - displayW) / 2;
+    var offsetY = (rect.height - displayH) / 2;
+    var imageX = Math.max(0, Math.min(1, (px - offsetX) / displayW));
+    var imageY = Math.max(0, Math.min(1, (py - offsetY) / displayH));
 
     var lensEl = ensureLens();
-    lensEl.style.left = (event.clientX - LENS_SIZE / 2) + 'px';
-    lensEl.style.top = (event.clientY - LENS_SIZE / 2) + 'px';
-    lensEl.style.backgroundImage = 'url("' + src + '")';
-
-    var x = px / rect.width;
-    var y = py / rect.height;
-    lensEl.style.backgroundSize = (rect.width * LENS_ZOOM) + 'px ' + (rect.height * LENS_ZOOM) + 'px';
+    lensEl.style.transform = 'translate3d(' + (event.clientX - LENS_SIZE / 2) + 'px, ' + (event.clientY - LENS_SIZE / 2) + 'px, 0)';
+    if (lensSrc !== src) {
+      lensEl.style.backgroundImage = 'url("' + src + '")';
+      lensSrc = src;
+    }
+    var backgroundSize = (displayW * LENS_ZOOM) + 'px ' + (displayH * LENS_ZOOM) + 'px';
+    if (lensEl.style.backgroundSize !== backgroundSize) lensEl.style.backgroundSize = backgroundSize;
     lensEl.style.backgroundPosition =
-      (-(x * rect.width * LENS_ZOOM - LENS_SIZE / 2)) + 'px ' +
-      (-(y * rect.height * LENS_ZOOM - LENS_SIZE / 2)) + 'px';
-
-    lensUpdateSeq += 1;
-    var updateSeq = lensUpdateSeq;
-
-    getImageMeta(src, function (meta) {
-      if (updateSeq !== lensUpdateSeq) return;
-      if (!lens || !lens.classList.contains('is-visible')) return;
-      if (lens.style.backgroundImage.indexOf(src) === -1) return;
-      if (!meta || !meta.width || !meta.height) return;
-
-      var naturalW = meta.width;
-      var naturalH = meta.height;
-      var coverScale = Math.max(rect.width / naturalW, rect.height / naturalH);
-      var displayW = naturalW * coverScale;
-      var displayH = naturalH * coverScale;
-      var offsetX = (rect.width - displayW) / 2;
-      var offsetY = (rect.height - displayH) / 2;
-
-      var imageX = (px - offsetX) / displayW;
-      var imageY = (py - offsetY) / displayH;
-
-      imageX = Math.max(0, Math.min(1, imageX));
-      imageY = Math.max(0, Math.min(1, imageY));
-
-      lensEl.style.backgroundSize = (displayW * LENS_ZOOM) + 'px ' + (displayH * LENS_ZOOM) + 'px';
-      lensEl.style.backgroundPosition =
-        (-(imageX * displayW * LENS_ZOOM - LENS_SIZE / 2)) + 'px ' +
-        (-(imageY * displayH * LENS_ZOOM - LENS_SIZE / 2)) + 'px';
-    });
-
-    lensEl.classList.add('is-visible');
-    document.documentElement.classList.add('tc-product-magnifier-active');
+      (-(imageX * displayW * LENS_ZOOM - LENS_SIZE / 2)) + 'px ' +
+      (-(imageY * displayH * LENS_ZOOM - LENS_SIZE / 2)) + 'px';
+    setLensVisible(true);
 
     if (window.__TC_DEBUG_PRODUCT_MAGNIFIER && src !== lastDebugSrc) {
       lastDebugSrc = src;
@@ -7182,11 +7222,19 @@ function setupDesktopAura() {
       hideLens();
       return;
     }
-    updateLensPosition(event, imageNode);
+    if (pendingImage !== imageNode) hideLens();
+    pendingPointer = { clientX: event.clientX, clientY: event.clientY };
+    pendingImage = imageNode;
+    scheduleLensUpdate();
   }, true);
 
-  document.addEventListener('pointerleave', hideLens, true);
-  document.addEventListener('mouseleave', hideLens, true);
+  function onLensLeave(event) {
+    if (getViewerImageFromTarget(event.relatedTarget)) return;
+    hideLens();
+  }
+
+  document.addEventListener('pointerleave', onLensLeave, true);
+  document.addEventListener('mouseleave', onLensLeave, true);
 
   document.addEventListener('pointerdown', function (event) {
     if (!CAN_USE_MAGNIFIER) return;
@@ -7204,7 +7252,7 @@ function setupDesktopAura() {
   }, true);
 
   var observer = new MutationObserver(function () {
-    var visiblePopup = document.querySelector('.t-store__prod-popup.t-popup_show, .t-popup_show .t-store__prod-popup, .t-popup_show .js-store-prod-popup, .t-catalog__product-popup');
+    var visiblePopup = document.querySelector('.t-store__prod-popup.t-popup_show, .t-popup_show .t-store__prod-popup, .t-popup_show .js-store-prod-popup, .t-catalog__product-popup, .t-popup_show .t778__product-full');
     if (!visiblePopup) hideLens();
   });
 
