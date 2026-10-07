@@ -3223,11 +3223,13 @@ button.t778__showmore.tc-loadmore-pressed,
 
 .tc-product-magnifier {
   position: fixed;
+  left: 0;
+  top: 0;
   z-index: 9999999;
   width: 230px;
   height: 230px;
   pointer-events: none;
-  display: none;
+  visibility: hidden;
   border: 0;
   border-radius: 0;
   box-shadow:
@@ -3239,7 +3241,7 @@ button.t778__showmore.tc-loadmore-pressed,
 }
 
 .tc-product-magnifier.is-visible {
-  display: block;
+  visibility: visible;
 }
 
 @media (min-width: 981px) and (pointer: fine) {
