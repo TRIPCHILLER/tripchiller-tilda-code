@@ -5029,6 +5029,11 @@ body.tc-product-page-active .tc-menu-eye-logo {
 
 /* Desktop product gallery: blend the controls; paint black shadows separately. */
 @media (min-width: 981px) and (pointer: fine) {
+  /* Embedded photo uses thumbnails; hide arrows and their separate shadows. */
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container {
+    display: none !important;
+  }
+
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_wrapper {
     mix-blend-mode: difference;
   }
