@@ -3244,7 +3244,7 @@ button.t778__showmore.tc-loadmore-pressed,
   visibility: visible;
 }
 
-@media (min-width: 981px) and (pointer: fine) {
+@media (min-width: 981px) and (pointer: fine), (max-width: 980px) {
   /* Let photo shadows escape; the main/container still clip the slide track. */
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds {
     overflow: visible !important;
@@ -3257,7 +3257,9 @@ button.t778__showmore.tc-loadmore-pressed,
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet {
     box-shadow: 0 2px 4px rgba(0,0,0,.28), 0 6px 12px rgba(0,0,0,.24) !important;
   }
+}
 
+@media (min-width: 981px) and (pointer: fine) {
   /* Thumbnail photos stay clickable even when the main-photo magnifier hides its cursor. */
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet,
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet * {
@@ -5047,8 +5049,8 @@ body.tc-product-page-active .tc-menu-eye-logo {
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container::after,
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::before,
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::after,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container::before,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container::after {
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::after {
     content: none;
     position: absolute;
     top: 50%;
@@ -5124,7 +5126,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
   35% { transform: translateY(-50%) rotate(var(--tc-gallery-shape-turn, 0deg)) scale(.90); }
 }
 
-@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference), (max-width: 980px) and (prefers-reduced-motion: no-preference) {
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow.tc-gallery-arrow-pressed,
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container:has(.t-slds__arrow-left.tc-gallery-arrow-pressed)::before,
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container:has(.t-slds__arrow-right.tc-gallery-arrow-pressed)::after,
@@ -5141,8 +5143,78 @@ body.tc-product-page-active .tc-menu-eye-logo {
   transform: translateY(-50%) scale(1.1) !important;
 }
 
+/* Touch viewer: reuse fullscreen styling without desktop hover-to-hide behavior. */
+@media (max-width: 980px) {
+  body.tc-product-popup-open .t-zoomer__wrapper {
+    --tc-gallery-arrow-size: 40px;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper),
+  body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) > .t-zoomer__ui-item {
+    display: grid !important;
+    place-items: center;
+    width: var(--tc-gallery-arrow-size) !important;
+    height: var(--tc-gallery-arrow-size) !important;
+    opacity: var(--tc-fullscreen-control-opacity, .75) !important;
+    box-shadow: none !important;
+    font-family: var(--tc-font-main) !important;
+    font-size: 24px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control > .t-zoomer__ui-item > svg,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper > .t-zoomer__close > svg {
+    display: none !important;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control_left > .t-zoomer__ui-item::before {
+    content: '<';
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control_right > .t-zoomer__ui-item::before {
+    content: '>';
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::after,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::after {
+    content: none;
+    position: absolute;
+    top: 50%;
+    width: var(--tc-gallery-arrow-size);
+    height: var(--tc-gallery-arrow-size);
+    transform: translateY(-50%);
+    border-radius: 50%;
+    box-shadow: 0 2px 3px rgba(0,0,0,.38), 0 4px 7px rgba(0,0,0,.24);
+    opacity: var(--tc-fullscreen-control-opacity, .75);
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides:has(.t-carousel__zoomer__control_left:not([style*="display: none"]):not([style*="opacity: 0"]))::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides:has(.t-carousel__zoomer__control_right:not([style*="display: none"]):not([style*="opacity: 0"]))::after {
+    content: '';
+  }
+
+  /* Pinch zoom remains native; remove only its redundant button and shadow. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper > .t-zoomer__scale {
+    display: none !important;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::before {
+    content: none !important;
+  }
+}
+
 /* Fullscreen product photos: reuse gallery controls, inset by 7.5% of the viewport. */
-@media (min-width: 981px) and (pointer: fine) {
+@media (min-width: 981px) and (pointer: fine), (max-width: 980px) {
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides {
     --tc-gallery-arrow-size: 46px; /* 40px × 1.15; top controls keep 40px. */
   }
@@ -5187,29 +5259,23 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 /* Native idle fade plus photo/control hover; keep the black shadows in sync. */
-@media (min-width: 981px) and (pointer: fine) {
+@media (min-width: 981px) and (pointer: fine), (max-width: 980px) {
   body.tc-product-popup-open .t-zoomer__wrapper {
     --tc-fullscreen-control-opacity: .75;
     --tc-fullscreen-control-fade: .5s;
   }
 
-  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__ui-item.t-zoomer__hide-animation),
-  body.tc-product-popup-open .t-zoomer__wrapper:not(:has(.t-carousel__zoomer__img:hover, .t-carousel__zoomer__control:hover, .t-zoomer__ui-wrapper:hover)),
-  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__container--on-close) {
-    --tc-fullscreen-control-opacity: 0;
-    --tc-fullscreen-control-fade: 1s;
-  }
-
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-item,
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::before,
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::after,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container::before,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container::after {
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::after {
     transition: opacity var(--tc-fullscreen-control-fade) ease;
   }
 
-  /* Native UI uses a very high z-index; keep its sibling shadows above it. */
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper {
+  /* Keep the native top toolbar above the photo; paint its shadows after the buttons. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper > .t-zoomer__ui-item {
+    position: relative;
     z-index: 99 !important;
   }
 
@@ -5243,16 +5309,25 @@ body.tc-product-page-active .tc-menu-eye-logo {
     content: 'X';
   }
 
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container:has(> .t-zoomer__ui-wrapper > .t-zoomer__scale:not([style*="display: none"]))::before {
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper:has(> .t-zoomer__scale:not([style*="display: none"]))::before {
     content: '';
-    top: 33px;
-    right: 63px;
+    top: 50%;
+    right: 50px;
   }
 
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container:has(> .t-zoomer__ui-wrapper > .t-zoomer__close:not([style*="display: none"]))::after {
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper:has(> .t-zoomer__close:not([style*="display: none"]))::after {
     content: '';
-    top: 33px;
-    right: 13px;
+    top: 50%;
+    right: 0;
+  }
+}
+
+@media (min-width: 981px) and (pointer: fine) {
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__ui-item.t-zoomer__hide-animation),
+  body.tc-product-popup-open .t-zoomer__wrapper:not(:has(.t-carousel__zoomer__img:hover, .t-carousel__zoomer__control:hover, .t-zoomer__ui-wrapper:hover)),
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__container--on-close) {
+    --tc-fullscreen-control-opacity: 0;
+    --tc-fullscreen-control-fade: 1s;
   }
 }
 
@@ -5261,19 +5336,19 @@ body.tc-product-page-active .tc-menu-eye-logo {
   35% { transform: rotate(var(--tc-gallery-shape-turn, 0deg)) scale(.90); }
 }
 
-@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference), (max-width: 980px) and (prefers-reduced-motion: no-preference) {
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper > .tc-gallery-arrow-pressed {
     animation: tcFullscreenControlPress .36s ease-in-out;
   }
 
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container:has(.t-zoomer__scale.tc-gallery-arrow-pressed)::before,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container:has(.t-zoomer__close.tc-gallery-arrow-pressed)::after {
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper:has(.t-zoomer__scale.tc-gallery-arrow-pressed)::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper:has(.t-zoomer__close.tc-gallery-arrow-pressed)::after {
     animation: tcProductGalleryArrowPress .36s ease-in-out;
   }
 }
 
 /* Filter the real backdrop, including the page outside the fullscreen photo. */
-@media (min-width: 981px) and (pointer: fine) {
+@media (min-width: 981px) and (pointer: fine), (max-width: 980px) {
   body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) > .t-zoomer__ui-item {
     background: transparent !important;
     color: #fff !important;
