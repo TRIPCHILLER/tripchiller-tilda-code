@@ -5150,6 +5150,28 @@ body.tc-product-page-active .tc-menu-eye-logo {
     touch-action: none !important; /* Only this viewer owns the photo pinch gesture. */
   }
 
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__img {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  body.tc-product-popup-open .tc-product-magnifier.tc-mobile-photo-lens {
+    display: block !important;
+    z-index: 2147483647;
+    width: min(180px, 45vw);
+    height: min(180px, 45vw);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .18s ease, visibility 0s linear .18s;
+  }
+
+  body.tc-product-popup-open .tc-product-magnifier.tc-mobile-photo-lens.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity .18s ease;
+  }
+
   body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper),
   body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) * {
     -webkit-tap-highlight-color: transparent;
@@ -5211,6 +5233,12 @@ body.tc-product-page-active .tc-menu-eye-logo {
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::before {
     content: none !important;
+  }
+}
+
+@media (max-width: 980px) and (prefers-reduced-motion: reduce) {
+  body.tc-product-popup-open .tc-product-magnifier.tc-mobile-photo-lens {
+    transition: none;
   }
 }
 
