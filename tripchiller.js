@@ -7259,17 +7259,23 @@ function setupDesktopAura() {
   observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
 
-/* Desktop product gallery: a repeatable press without changing native navigation. */
+/* Product gallery: desktop clicks and touch fullscreen presses; native navigation stays intact. */
 (function () {
   if (window.__TC_PRODUCT_GALLERY_ARROW_PRESS__) return;
   window.__TC_PRODUCT_GALLERY_ARROW_PRESS__ = true;
 
-  document.addEventListener('click', function (event) {
+  function animateGalleryPress(event) {
     if (event.button !== 0 || !event.target || !event.target.closest) return;
-    if (!window.matchMedia('(min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
+    var desktop = window.matchMedia('(min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches;
+    var touchViewer = window.matchMedia('(max-width: 980px) and (prefers-reduced-motion: no-preference)').matches && event.target.closest('body.tc-product-popup-open .t-zoomer__wrapper');
+    if (!desktop && !touchViewer) return;
+    if (event.type === 'pointerdown' && !touchViewer) return;
     var button = event.target.closest('.t-slds__arrow, .t-carousel__zoomer__control, .t-zoomer__scale, .t-zoomer__close');
     if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return;
     if (!button.closest('#allrecords .t-catalog__prod-popup__slider, #allrecords .t-store__prod-popup__slider, #allrecords .uc-custom-grid .t778__product-full .t778__col_left, body.tc-product-popup-open .t-zoomer__wrapper')) return;
+
+    // The compatibility click follows pointerdown; avoid replaying the same pulse.
+    if (event.type === 'click' && touchViewer && button.classList.contains('tc-gallery-arrow-pressed')) return;
 
     clearTimeout(button.__tcGalleryArrowPressTimer);
     button.classList.remove('tc-gallery-arrow-pressed');
@@ -7279,7 +7285,10 @@ function setupDesktopAura() {
       button.classList.remove('tc-gallery-arrow-pressed');
       button.__tcGalleryArrowPressTimer = null;
     }, 400);
-  }, true);
+  }
+
+  document.addEventListener('click', animateGalleryPress, true);
+  document.addEventListener('pointerdown', animateGalleryPress, true);
 })();
 
 (function () {
