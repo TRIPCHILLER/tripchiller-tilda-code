@@ -3259,6 +3259,15 @@ button.t778__showmore.tc-loadmore-pressed,
   }
 }
 
+@media (max-width: 980px) {
+  /* Give mobile thumbnails room below the photo shadow; keep native item spacing. */
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet-wrapper {
+    margin-top: 28px !important;
+    padding-top: 0 !important;
+    text-align: center !important;
+  }
+}
+
 @media (min-width: 981px) and (pointer: fine) {
   /* Thumbnail photos stay clickable even when the main-photo magnifier hides its cursor. */
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet,
