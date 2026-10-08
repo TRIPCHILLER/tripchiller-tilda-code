@@ -5418,6 +5418,15 @@ body.tc-product-page-active .tc-menu-eye-logo {
 
 /* Desktop fullscreen: blend the complete white shape + black glyph once. */
 @media (min-width: 981px) and (pointer: fine) {
+  /* Do not isolate arrows from the viewer backdrop in a transparent stacking context. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container {
+    z-index: auto;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__bg {
+    z-index: -1; /* Keep the native sibling backdrop behind the photo. */
+  }
+
   body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) {
     mix-blend-mode: difference;
   }
@@ -5456,13 +5465,14 @@ body.tc-product-page-active .tc-menu-eye-logo {
     position: absolute;
     width: calc(var(--tc-gallery-arrow-size) * 2054 / 1254);
     height: calc(var(--tc-gallery-arrow-size) * 2054 / 1254);
-    background: url('./assets/black_icon_circle_shadow.svg') center / contain no-repeat;
+    background: url('./assets/black_icon_circle_shadow.svg#turn-0') center / contain no-repeat;
     border-radius: 0;
     box-shadow: none;
     filter: none;
     mix-blend-mode: normal;
     opacity: var(--tc-fullscreen-control-opacity, .75);
-    transform: translateY(-50%) rotate(var(--tc-gallery-shape-turn, 0deg));
+    --tc-gallery-shape-turn: 0deg; /* Shadow orientation is baked before blur, not after. */
+    transform: translateY(-50%);
     pointer-events: none;
     transition: opacity var(--tc-fullscreen-control-fade, .5s) ease;
   }
@@ -5473,7 +5483,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::after {
     margin-right: calc(var(--tc-gallery-arrow-size) * -400 / 1254);
-    --tc-gallery-shape-turn: 90deg;
+    background-image: url('./assets/black_icon_circle_shadow.svg#turn-90');
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper::before,
@@ -5487,13 +5497,13 @@ body.tc-product-page-active .tc-menu-eye-logo {
   body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__ui-wrapper > .t-zoomer__scale:not(.t-zoomer__scale--disabled):not([style*="display: none"]))::before {
     content: '';
     right: 63px; /* 13px toolbar inset + 40px close + 10px gap. */
-    --tc-gallery-shape-turn: 180deg;
+    background-image: url('./assets/black_icon_circle_shadow.svg#turn-180');
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__ui-wrapper > .t-zoomer__close:not([style*="display: none"]))::after {
     content: '';
     right: 13px;
-    --tc-gallery-shape-turn: 270deg;
+    background-image: url('./assets/black_icon_circle_shadow.svg#turn-270');
   }
 
   /* Keep the accepted photo geometry; strengthen only its downward shadows. */
