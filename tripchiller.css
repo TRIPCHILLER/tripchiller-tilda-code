@@ -5416,52 +5416,87 @@ body.tc-product-page-active .tc-menu-eye-logo {
   }
 }
 
-/* Desktop fullscreen: invert only the silhouette, blend the glyph above it. */
+/* Desktop fullscreen: blend the complete white shape + black glyph once. */
 @media (min-width: 981px) and (pointer: fine) {
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-item {
-    /* Native will-change/opacity and our mask isolated the glyph's backdrop. */
-    opacity: 1 !important;
-    will-change: auto;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    -webkit-mask: none;
-    mask: none;
+  body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) {
+    mix-blend-mode: difference;
   }
 
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-item::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    -webkit-backdrop-filter: invert(1);
-    backdrop-filter: invert(1);
-    -webkit-mask: url('./assets/black_icon_circle.svg') center / contain no-repeat;
-    mask: url('./assets/black_icon_circle.svg') center / contain no-repeat;
-    opacity: var(--tc-fullscreen-control-opacity, .75);
-    pointer-events: none;
-    transition: opacity var(--tc-fullscreen-control-fade, .5s) ease;
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper {
+    z-index: 2147483646; /* Root-level black shadows paint after this blended group. */
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) > .t-zoomer__ui-item {
+    background: #fff !important;
+    color: #000 !important;
+    opacity: var(--tc-fullscreen-control-opacity, .75) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-item::before {
-    position: relative;
-    z-index: 1;
-    /* Full-strength glyph at .75 silhouette opacity; fade both to zero. */
-    opacity: min(1, calc(var(--tc-fullscreen-control-opacity, .75) / .75));
-    transition: opacity var(--tc-fullscreen-control-fade, .5s) ease;
+    mix-blend-mode: normal;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__scale::before {
+    background: #000;
+  }
+
+  /* No circular shadow or residual filtered silhouette inside the toolbar. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::after {
+    content: none !important;
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::before,
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::after,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::before,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::after {
-    mix-blend-mode: normal;
+  body.tc-product-popup-open .t-zoomer__wrapper::before,
+  body.tc-product-popup-open .t-zoomer__wrapper::after {
+    /* 400px padding on each side of the original 1254px SVG gives 2054px. */
+    position: absolute;
+    width: calc(var(--tc-gallery-arrow-size) * 2054 / 1254);
+    height: calc(var(--tc-gallery-arrow-size) * 2054 / 1254);
+    background: url('./assets/black_icon_circle_shadow.svg') center / contain no-repeat;
+    border-radius: 0;
+    box-shadow: none;
     filter: none;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    box-shadow: 0 2px 3px rgba(0,0,0,.38), 0 4px 7px rgba(0,0,0,.24);
+    mix-blend-mode: normal;
+    opacity: var(--tc-fullscreen-control-opacity, .75);
+    transform: translateY(-50%) rotate(var(--tc-gallery-shape-turn, 0deg));
+    pointer-events: none;
+    transition: opacity var(--tc-fullscreen-control-fade, .5s) ease;
   }
 
-  /* Leave room for the downward shadow; native scaled-photo pan stays clipped. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::before {
+    margin-left: calc(var(--tc-gallery-arrow-size) * -400 / 1254);
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::after {
+    margin-right: calc(var(--tc-gallery-arrow-size) * -400 / 1254);
+    --tc-gallery-shape-turn: 90deg;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper::before,
+  body.tc-product-popup-open .t-zoomer__wrapper::after {
+    content: none;
+    top: 33px; /* Native toolbar top 13px + half of its 40px button. */
+    margin-right: calc(var(--tc-gallery-arrow-size) * -400 / 1254);
+    z-index: 2147483647;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__ui-wrapper > .t-zoomer__scale:not(.t-zoomer__scale--disabled):not([style*="display: none"]))::before {
+    content: '';
+    right: 63px; /* 13px toolbar inset + 40px close + 10px gap. */
+    --tc-gallery-shape-turn: 180deg;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__ui-wrapper > .t-zoomer__close:not([style*="display: none"]))::after {
+    content: '';
+    right: 13px;
+    --tc-gallery-shape-turn: 270deg;
+  }
+
+  /* Keep the accepted photo geometry; strengthen only its downward shadows. */
   body.tc-product-popup-open .t-zoomer__wrapper:not(.scale-active) .t-carousel__zoomer__inner {
     top: 40px;
     bottom: 50px;
@@ -5471,6 +5506,13 @@ body.tc-product-page-active .tc-menu-eye-logo {
   body.tc-product-popup-open .t-zoomer__wrapper:not(.scale-active) .t-carousel__zoomer__img {
     max-height: calc(100vh - 90px);
     max-width: calc(100vw - 90px);
-    box-shadow: 0 8px 12px -6px rgba(0,0,0,.22), 0 22px 30px -12px rgba(0,0,0,.30);
+    box-shadow: 0 8px 12px -6px rgba(0,0,0,.30), 0 22px 30px -12px rgba(0,0,0,.40);
+  }
+}
+
+@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__scale.tc-gallery-arrow-pressed)::before,
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__close.tc-gallery-arrow-pressed)::after {
+    animation: tcProductGalleryArrowPress .36s ease-in-out;
   }
 }
