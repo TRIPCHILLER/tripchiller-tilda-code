@@ -5917,6 +5917,7 @@ function setupDesktopAura() {
       grid.classList.add('tc-entry-filters');
       filterTimer = setTimeout(function () {
         filterTimer = 0;
+        if (grid.classList.contains('tc-entry-playing')) grid.classList.add('tc-entry-content-only');
         grid.classList.remove('tc-entry-filters');
       }, 1000);
     }
