@@ -2887,6 +2887,29 @@ html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
 
 }
 
+/* ПК: непрозрачные боковые фото и кнопки в середине видимых промежутков. */
+@media (min-width: 981px) and (pointer: fine) {
+  .tc-user-photos:not(.is-empty) .tc-user-photos__slide {
+    opacity: 1 !important;
+    filter: brightness(.55) saturate(.65);
+  }
+  .tc-user-photos:not(.is-empty) .tc-user-photos__slide--active,
+  .tc-user-photos.is-sliding-next .tc-user-photos__slide--next,
+  .tc-user-photos.is-sliding-prev .tc-user-photos__slide--prev {
+    filter: brightness(1) saturate(1);
+  }
+  .tc-user-photos.is-sliding-next .tc-user-photos__slide--active,
+  .tc-user-photos.is-sliding-prev .tc-user-photos__slide--active {
+    filter: brightness(.55) saturate(.65);
+  }
+  .tc-user-photos__nav--prev {
+    left: var(--tc-user-nav-prev, calc(50% - min(42vw, 700px) / 2 - clamp(80px, 10vw, 180px) / 2 - 27px));
+  }
+  .tc-user-photos__nav--next {
+    right: var(--tc-user-nav-next, calc(50% - min(42vw, 700px) / 2 - clamp(80px, 10vw, 180px) / 2 - 27px));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tc-user-photos__track,
   .tc-user-photos__img { transition: none !important; animation: none !important; }
