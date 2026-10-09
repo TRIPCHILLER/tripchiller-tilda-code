@@ -7264,18 +7264,59 @@ function setupDesktopAura() {
   if (window.__TC_PRODUCT_GALLERY_ARROW_PRESS__) return;
   window.__TC_PRODUCT_GALLERY_ARROW_PRESS__ = true;
 
-  // Keep Tilda's native desktop zoom available even when the original fits the viewport.
+  // Keep native controls/cursors, with at least 2x zoom for small desktop originals.
   function enableFittedDesktopZoom() {
     var nativeCheck = window.t_zoom_checkToScaleInit;
+    var nativePosition = window.t_zoom_desktopZoomPositioningInit;
+    var nativeUnscale = window.t_zoom_unscale;
+    var enlargedImage = null;
+
     window.t_zoom_checkToScaleInit = function (img) {
-      var result = nativeCheck.apply(this, arguments);
       var viewer = img && img.closest('body.tc-product-popup-open .t-zoomer__wrapper');
-      if (viewer && img.naturalWidth && viewer.classList.contains('zoomer-no-scale') &&
-          window.matchMedia('(min-width: 981px) and (pointer: fine)').matches) {
+      var desktop = viewer && window.matchMedia('(min-width: 981px) and (pointer: fine)').matches;
+      if (desktop && !viewer.classList.contains('scale-active')) {
+        img.__tcDesktopFitWidth = img.getBoundingClientRect().width;
+      }
+      var result = nativeCheck.apply(this, arguments);
+      if (desktop && img.naturalWidth && viewer.classList.contains('zoomer-no-scale')) {
         viewer.classList.remove('zoomer-no-scale');
         window.t_zoom_scale_init();
       }
       return result;
+    };
+
+    window.t_zoom_desktopZoomPositioningInit = function (img, event) {
+      var viewer = img && img.closest('body.tc-product-popup-open .t-zoomer__wrapper');
+      var width = (img && img.__tcDesktopFitWidth || 0) * 2;
+      if (!viewer || !window.matchMedia('(min-width: 981px) and (pointer: fine)').matches ||
+          !width || img.naturalWidth >= width) {
+        return nativePosition.apply(this, arguments);
+      }
+
+      enlargedImage = { img: img, width: img.style.width, height: img.style.height };
+      img.style.width = width + 'px';
+      img.style.height = 'auto';
+      function positionPhoto(point) {
+        var w = window.innerWidth, h = window.innerHeight;
+        var x = Math.max(0, Math.min(1, point.clientX / w));
+        var y = Math.max(0, Math.min(1, point.clientY / h));
+        img.style.left = ((w - img.offsetWidth) * (img.offsetWidth > w ? x : 0.5)) + 'px';
+        img.style.top = ((h - img.offsetHeight) * (img.offsetHeight > h ? y : 0.5)) + 'px';
+      }
+      // Toolbar clicks start centered; moving over the photo pans as in native zoom.
+      positionPhoto(event.target.closest('.t-zoomer__scale') ?
+        { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } : event);
+      img.onmousemove = positionPhoto;
+    };
+
+    window.t_zoom_unscale = function () {
+      if (enlargedImage) {
+        enlargedImage.img.style.width = enlargedImage.width;
+        enlargedImage.img.style.height = enlargedImage.height;
+        enlargedImage.img.onmousemove = null;
+        enlargedImage = null;
+      }
+      return nativeUnscale.apply(this, arguments);
     };
   }
 
@@ -7284,6 +7325,23 @@ function setupDesktopAura() {
   } else if (typeof window.t_onFuncLoad === 'function') {
     window.t_onFuncLoad('t_zoom_checkToScaleInit', enableFittedDesktopZoom);
   }
+
+  // Empty space closes only the full-screen photo, before Tilda's wrapper zoom click.
+  window.addEventListener('click', function (event) {
+    if (event.button !== 0 || !event.target || !event.target.closest ||
+        !window.matchMedia('(min-width: 981px) and (pointer: fine)').matches) return;
+    var viewer = event.target.closest('body.tc-product-popup-open .t-zoomer__wrapper');
+    if (!viewer || event.target.closest('.t-zoomer__ui-wrapper, .t-carousel__zoomer__control')) return;
+    var img = viewer.querySelector('.t-carousel__zoomer__item.active .t-carousel__zoomer__img');
+    if (!img || typeof window.t_zoom_close !== 'function') return;
+    var rect = img.getBoundingClientRect();
+    if (event.clientX >= rect.left && event.clientX <= rect.right &&
+        event.clientY >= rect.top && event.clientY <= rect.bottom) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    window.t_zoom_close();
+  }, true);
 
   function animateGalleryPress(event) {
     if (event.button !== 0 || !event.target || !event.target.closest) return;
@@ -8511,7 +8569,7 @@ function setupDesktopAura() {
       escCloseOn: 'keydown',
       escSwallowOn: 'keyup/keypress + shield',
       escShieldMs: 1800,
-      escZoomerGuard: 'body t-zoomer__show/t-zoomer__active/t-zoomer__show_fixed',
+      escZoomerGuard: 'native photo-only close; swallow keydown/keyup/keypress',
       icons: link ? Array.prototype.map.call(
         link.querySelectorAll('.' + LINK_CLASS + '__icon'),
         function (icon) {
@@ -8634,6 +8692,7 @@ function setupDesktopAura() {
 
   var lastProductEscNativeCloseAt = 0;
   var productEscShieldUntil = 0;
+  var productPhotoEscHeld = false;
 
   function isTildaZoomerOpen() {
     return !!(document.body && (
@@ -8647,7 +8706,20 @@ function setupDesktopAura() {
     if (!isDesktopProductBackMode()) return;
     if (!event) return;
     if (event.key !== 'Escape' && event.code !== 'Escape' && event.keyCode !== 27) return;
-    if (isTildaZoomerOpen()) return;
+    // Consume the whole key sequence so the product-route handler cannot navigate home.
+    if (isTildaZoomerOpen() || productPhotoEscHeld) {
+      if (typeof window.t_zoom_close !== 'function') return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+      if (event.type === 'keydown' && !productPhotoEscHeld) {
+        productPhotoEscHeld = true;
+        window.t_zoom_close();
+      } else if (event.type === 'keyup') {
+        productPhotoEscHeld = false;
+      }
+      return;
+    }
 
     var now = Date.now();
     var popup = getVisibleProductPopup();
