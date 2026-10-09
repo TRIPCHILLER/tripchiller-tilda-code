@@ -2,6 +2,23 @@
   "use strict";
 
   window.__TC_EXTERNAL_CODE_VERSION__ = 'shop-hardfix-2026-06-11-v2';
+  // Gate only the desktop home entrance; back/forward restores its existing view.
+  window.__TC_DESKTOP_ENTRY_PENDING__ = location.pathname === '/' &&
+    window.matchMedia('(min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches &&
+    ((performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {}).type !== 'back_forward';
+  if (window.__TC_DESKTOP_ENTRY_PENDING__) {
+    document.documentElement.classList.add('tc-desktop-entry-pending');
+    setTimeout(function () {
+      if (!window.__TC_DESKTOP_ENTRY_PENDING__) return;
+      if (window.__TC_FINISH_DESKTOP_ENTRY__) window.__TC_FINISH_DESKTOP_ENTRY__();
+      else {
+        window.__TC_DESKTOP_ENTRY_PENDING__ = false;
+        document.documentElement.classList.remove('tc-desktop-entry-pending');
+        window.dispatchEvent(new CustomEvent('tc:catalog-entry-start'));
+        window.dispatchEvent(new CustomEvent('tc:catalog-entry-ready'));
+      }
+    }, 3500);
+  }
   if (window.__TC_DEBUG_CORE__) {
     console.log('[TRIPCHILLER_CORE]', window.__TC_EXTERNAL_CODE_VERSION__);
   }
@@ -1176,7 +1193,9 @@ if (flowerEl){
       }
 
 requestAnimationFrame(animate);
-runIntroRoll();
+if (window.__TC_DESKTOP_ENTRY_PENDING__) {
+  window.addEventListener('tc:catalog-entry-ready', runReturnIntroRoll, { once: true });
+} else runIntroRoll();
 
 function runReturnIntroRoll(){
   introDone = false;
@@ -4020,6 +4039,7 @@ eyeUnlockTimer = setTimeout(function(){
 
   const isDesktop = desktopMedia.matches;
   const isMobile = mobileMedia.matches;
+  const isDesktopHome = isDesktop && location.pathname === '/';
 
   function isMobileRuntime() {
     return (
@@ -4080,6 +4100,30 @@ eyeUnlockTimer = setTimeout(function(){
 
   let colorLoaded = false;
   let applySourcesRaf = 0;
+  let desktopAssetsReady = !isDesktopHome;
+  let desktopAssetsReadyAt = 0;
+  let desktopEntryStarted = false;
+
+  function revealDesktopBackground() {
+    desktopEntryStarted = true;
+    if (desktopAssetsReady) bg.classList.add('is-visible');
+  }
+  window.addEventListener('tc:catalog-entry-start', revealDesktopBackground, { once: true });
+  if (isDesktopHome) {
+    Promise.all([BG_BW_DESKTOP, BG_COLOR_EYES_DESKTOP, BG_COLOR_CLEAN_DESKTOP, BG_COLOR_RED].map(function (url) {
+      const image = new Image();
+      image.src = url;
+      return image.decode ? image.decode().catch(function () {}) : new Promise(function (resolve) {
+        if (image.complete) resolve();
+        else image.onload = image.onerror = resolve;
+      });
+    })).then(function () {
+      desktopAssetsReady = true;
+      desktopAssetsReadyAt = performance.now();
+      loadColorLayer();
+      if (desktopEntryStarted) bg.classList.add('is-visible');
+    });
+  }
 
   function applyBackgroundImageSources() {
     const useMobile = shouldUseMobileBg();
@@ -4123,6 +4167,7 @@ eyeUnlockTimer = setTimeout(function(){
   }
 
   function loadColorLayer() {
+    if (isDesktopHome && (!desktopAssetsReady || colorLoaded)) return;
     colorLoaded = true;
     applyBackgroundImageSources();
   }
@@ -4134,7 +4179,9 @@ eyeUnlockTimer = setTimeout(function(){
 
   window.addEventListener("load", function () {
     setTimeout(function () {
-      bg.classList.add("is-visible");
+      if (isDesktop) {
+        if (!window.__TC_DESKTOP_ENTRY_PENDING__) revealDesktopBackground();
+      } else bg.classList.add("is-visible");
     }, 1000);
 
     if (isDesktop || isMobile) {
@@ -4552,9 +4599,9 @@ function setupDesktopAura() {
   }
 
   function getPageWarmupPower(time) {
-    if (!pageLoadTime) return 0;
+    if (!pageLoadTime || !desktopAssetsReady || !bg.classList.contains('is-visible')) return 0;
 
-    const elapsed = time - pageLoadTime;
+    const elapsed = time - Math.max(pageLoadTime, desktopAssetsReadyAt);
 
     if (elapsed <= PAGE_EFFECT_DELAY) {
       return 0;
@@ -4825,8 +4872,9 @@ function setupDesktopAura() {
   window.addEventListener("blur", disableRedMode);
 
   window.addEventListener("resize", function () {
-    targetX = window.innerWidth / 2;
-    targetY = window.innerHeight / 2;
+    // Tilda also sends synthetic resize events while loading/reflowing blocks.
+    targetX = Math.max(0, Math.min(targetX, window.innerWidth));
+    targetY = Math.max(0, Math.min(targetY, window.innerHeight));
 
     if (isActive) {
       startRender();
@@ -5103,11 +5151,13 @@ function setupDesktopAura() {
 
   function setProductSection(name) {
     var isCustom = name === 'custom';
+    var changed = !document.body.classList.contains(isCustom ? 'tc-section-custom' : 'tc-section-shop');
 
     document.body.classList.toggle('tc-section-shop', !isCustom);
     document.body.classList.toggle('tc-section-custom', isCustom);
 
     refreshTildaLayout();
+    if (changed) window.dispatchEvent(new CustomEvent('tc:catalog-section', { detail: name }));
   }
 
   function setActiveRow(name, updateHash) {
@@ -5776,6 +5826,70 @@ function setupDesktopAura() {
   var introStarted = false;
   var suppressedByNavigation = false;
   var cleanupTimer = 0;
+  var entryGrid = null;
+  var entryCards = [];
+  var entryTimer = 0;
+  var filterTimer = 0;
+
+  function clearDesktopCards() {
+    clearTimeout(entryTimer);
+    clearTimeout(filterTimer);
+    entryCards.forEach(function (card) {
+      card.classList.remove('tc-entry-card');
+      card.style.removeProperty('--tc-entry-delay');
+      card.style.removeProperty('--tc-entry-rise');
+    });
+    if (entryGrid) entryGrid.classList.remove('tc-entry-playing', 'tc-entry-filters');
+    entryCards = [];
+    entryGrid = null;
+  }
+
+  function releaseDesktopEntry() {
+    if (!window.__TC_DESKTOP_ENTRY_PENDING__) return;
+    window.__TC_DESKTOP_ENTRY_PENDING__ = false;
+    var wasWaiting = document.documentElement.classList.contains('tc-desktop-entry-pending');
+    document.documentElement.classList.remove('tc-desktop-entry-pending');
+    if (wasWaiting) window.dispatchEvent(new CustomEvent('tc:catalog-entry-start'));
+    window.dispatchEvent(new CustomEvent('tc:catalog-entry-ready'));
+  }
+
+  function finishDesktopEntry() {
+    clearDesktopCards();
+    releaseDesktopEntry();
+  }
+  window.__TC_FINISH_DESKTOP_ENTRY__ = finishDesktopEntry;
+
+  function startDesktopEntry() {
+    if (!isDesktopProductBackMode() || location.pathname !== '/' || isProductRoute() ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+    var grid = document.querySelector(document.body.classList.contains('tc-section-custom') ? '.uc-custom-grid' : '.uc-shop-grid');
+    if (!grid) return false;
+    var cards = Array.prototype.filter.call(grid.querySelectorAll('.t-catalog__card, .t-store__card, .t-catalog__product, .t778__col'), function (card) {
+      return card.getClientRects().length && !card.closest('.t-popup, .t-store__prod-popup, .t778__product-full');
+    }).slice(0, 3);
+    if (!cards.length) return false;
+    clearDesktopCards();
+    introStarted = true;
+    entryGrid = grid;
+    entryCards = cards;
+    cards.forEach(function (card, index) {
+      card.style.setProperty('--tc-entry-delay', index * 90 + 'ms');
+      card.style.setProperty('--tc-entry-rise', Math.max(24, window.innerHeight - card.getBoundingClientRect().top + 24) + 'px');
+      card.classList.add('tc-entry-card');
+    });
+    void grid.offsetWidth; // Replay only the first row, including rapid section changes.
+    grid.classList.add('tc-entry-playing');
+    document.documentElement.classList.remove('tc-desktop-entry-pending');
+    window.dispatchEvent(new CustomEvent('tc:catalog-entry-start'));
+    entryTimer = setTimeout(function () {
+      clearDesktopCards();
+      grid.classList.add('tc-entry-filters');
+      entryGrid = grid;
+      filterTimer = setTimeout(clearDesktopCards, 1000);
+      releaseDesktopEntry();
+    }, 500 + (cards.length - 1) * 90 + 32);
+    return true;
+  }
 
   function getCatalogKey() {
     return (location.pathname || '/') + (location.search || '');
@@ -5847,6 +5961,7 @@ function setupDesktopAura() {
   }
 
   function stopIntro() {
+    finishDesktopEntry();
     document.documentElement.classList.remove(INTRO_CLASS);
     if (cleanupTimer) {
       clearTimeout(cleanupTimer);
@@ -5884,6 +5999,9 @@ function setupDesktopAura() {
   }
 
   function startIntro() {
+    if (isDesktopProductBackMode()) {
+      return window.__TC_DESKTOP_ENTRY_PENDING__ && !suppressedByNavigation && !isProductRoute() ? startDesktopEntry() : false;
+    }
     if (!shouldStartIntro()) {
       hasProductReturnState();
       return false;
@@ -5898,6 +6016,12 @@ function setupDesktopAura() {
   }
 
   function scheduleInitialIntro() {
+    if (isDesktopProductBackMode()) {
+      [1000, 1120, 1350, 1700, 2200, 2800].forEach(function (delay) {
+        setTimeout(function () { if (!introStarted) startIntro(); }, delay);
+      });
+      return;
+    }
     if (startIntro()) return;
     [80, 220, 520, 900].forEach(function (delay) {
       setTimeout(function () {
@@ -5925,6 +6049,19 @@ function setupDesktopAura() {
   });
   window.addEventListener('popstate', suppressAfterNavigation);
   window.addEventListener('hashchange', suppressAfterNavigation);
+  window.addEventListener('tc:catalog-section', function () {
+    if (!window.__TC_DESKTOP_ENTRY_PENDING__) startDesktopEntry();
+  });
+  window.addEventListener('scroll', function () {
+    if (window.pageYOffset > 32) finishDesktopEntry();
+  }, { passive: true });
+  ['pointerdown', 'click', 'keydown'].forEach(function (type) {
+    window.addEventListener(type, function (event) {
+      if (event.type === 'keydown' ? event.key === 'Tab' : event.target.closest && event.target.closest('a[href*="/tproduct/"], .js-product-url')) {
+        finishDesktopEntry();
+      }
+    }, true);
+  });
 
   document.addEventListener('keydown', function (event) {
     if (event && event.key === 'Escape') armReturnStabilization();
