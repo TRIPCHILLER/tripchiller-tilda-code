@@ -5843,6 +5843,23 @@ function setupDesktopAura() {
   var entryCards = [];
   var entryTimer = 0;
   var filterTimer = 0;
+  var catalogAction = null;
+  var DESKTOP_CARD_SELECTOR = '.t-catalog__card, .t-store__card, .t-catalog__product, .t778__col';
+
+  function desktopEntryEnabled() {
+    return isDesktopProductBackMode() && location.pathname === '/' && !isProductRoute() &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function visibleDesktopCards(grid) {
+    return Array.prototype.filter.call(grid.querySelectorAll(DESKTOP_CARD_SELECTOR), function (card) {
+      return card.getClientRects().length && !card.closest('.t-popup, .t-store__prod-popup, .t778__product-full');
+    });
+  }
+
+  function desktopCardKey(card) {
+    return card.getAttribute('data-product-gen-uid') || card.getAttribute('data-product-url') || card.getAttribute('data-product-uid') || card;
+  }
 
   function clearDesktopCards(keepFilters) {
     clearTimeout(entryTimer);
@@ -5853,7 +5870,7 @@ function setupDesktopAura() {
       card.style.removeProperty('--tc-entry-rise');
     });
     if (entryGrid) {
-      entryGrid.classList.remove('tc-entry-playing');
+      entryGrid.classList.remove('tc-entry-playing', 'tc-entry-content-only');
       if (!keepFilters) entryGrid.classList.remove('tc-entry-filters');
     }
     entryCards = [];
@@ -5870,46 +5887,50 @@ function setupDesktopAura() {
   }
 
   function finishDesktopEntry() {
+    catalogAction = null;
     clearDesktopCards();
     releaseDesktopEntry();
   }
   window.__TC_FINISH_DESKTOP_ENTRY__ = finishDesktopEntry;
 
-  function startDesktopEntry(replayFilters) {
-    if (!isDesktopProductBackMode() || location.pathname !== '/' || isProductRoute() ||
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  function startDesktopEntry(replayFilters, addedCards, contentOnly) {
+    if (!desktopEntryEnabled()) return false;
     var grid = document.querySelector(document.body.classList.contains('tc-section-custom') ? '.uc-custom-grid' : '.uc-shop-grid');
     if (!grid) return false;
-    var cards = Array.prototype.filter.call(grid.querySelectorAll('.t-catalog__card, .t-store__card, .t-catalog__product, .t778__col'), function (card) {
-      return card.getClientRects().length && !card.closest('.t-popup, .t-store__prod-popup, .t778__product-full');
-    }).slice(0, 3);
+    var cards = addedCards || visibleDesktopCards(grid);
     if (!cards.length) return false;
     clearDesktopCards();
     introStarted = true;
     entryGrid = grid;
     entryCards = cards;
+    var delayStep = Math.min(90, 720 / Math.max(1, cards.length - 1));
+    var positions = cards.map(function (card) { return card.getBoundingClientRect().top; });
     cards.forEach(function (card, index) {
-      card.style.setProperty('--tc-entry-delay', index * 90 + 'ms');
-      card.style.setProperty('--tc-entry-rise', Math.max(24, window.innerHeight - card.getBoundingClientRect().top + 24) + 'px');
+      card.style.setProperty('--tc-entry-delay', Math.round(index * delayStep) + 'ms');
+      card.style.setProperty('--tc-entry-rise', Math.min(window.innerHeight + 24, Math.max(24, window.innerHeight - positions[index] + 24)) + 'px');
       card.classList.add('tc-entry-card');
     });
-    void grid.offsetWidth; // Replay only the first row, including rapid section changes.
+    void grid.offsetWidth; // Read all positions before writing styles; restart the batch together.
     grid.classList.add('tc-entry-playing');
+    if (contentOnly) grid.classList.add('tc-entry-content-only');
     if (replayFilters) {
       grid.classList.add('tc-entry-filters');
-      filterTimer = setTimeout(clearDesktopCards, 1000);
+      filterTimer = setTimeout(function () {
+        filterTimer = 0;
+        grid.classList.remove('tc-entry-filters');
+      }, 1000);
     }
     document.documentElement.classList.remove('tc-desktop-entry-pending');
     window.dispatchEvent(new CustomEvent('tc:catalog-entry-start'));
     entryTimer = setTimeout(function () {
       clearDesktopCards(replayFilters);
-      if (!replayFilters) {
+      if (!replayFilters && !contentOnly) {
         grid.classList.add('tc-entry-filters');
         entryGrid = grid;
         filterTimer = setTimeout(clearDesktopCards, 1000);
       }
       releaseDesktopEntry();
-    }, 500 + (cards.length - 1) * 90 + 32);
+    }, 500 + Math.round((cards.length - 1) * delayStep) + 32);
     return true;
   }
 
@@ -6072,10 +6093,35 @@ function setupDesktopAura() {
   window.addEventListener('popstate', suppressAfterNavigation);
   window.addEventListener('hashchange', suppressAfterNavigation);
   window.addEventListener('tc:catalog-section', function () {
+    catalogAction = null;
     if (!window.__TC_DESKTOP_ENTRY_PENDING__) startDesktopEntry(true);
   });
+  window.addEventListener('click', function (event) {
+    if (!desktopEntryEnabled() || !event.target.closest) return;
+    var control = event.target.closest('.js-catalog-load-more-btn, .js-store-load-more-btn, .t-store__load-more-btn, .js-catalog-parts-switcher, .t-catalog__parts-switch-btn, .t-store__parts-switch-btn, .tc-safe-filter-item');
+    var grid = control && control.closest('.uc-shop-grid, .uc-custom-grid');
+    if (!grid || !grid.getClientRects().length || control.classList.contains('t-catalog__parts-disabled')) return;
+    finishDesktopEntry();
+    catalogAction = {
+      grid: grid,
+      append: !!control.closest('.js-catalog-load-more-btn, .js-store-load-more-btn, .t-store__load-more-btn'),
+      before: new Set(visibleDesktopCards(grid).map(desktopCardKey))
+    };
+  }, true);
+  document.addEventListener('tStoreRendered', function (event) {
+    var action = catalogAction;
+    var grid = event.target.closest && event.target.closest('.uc-shop-grid, .uc-custom-grid');
+    if (!action || grid !== action.grid || !desktopEntryEnabled() || !grid.getClientRects().length) return;
+    catalogAction = null;
+    var cards = visibleDesktopCards(grid);
+    if (action.append) cards = cards.filter(function (card) { return !action.before.has(desktopCardKey(card)); });
+    startDesktopEntry(false, cards, true);
+  });
   window.addEventListener('scroll', function () {
-    if (window.pageYOffset > 32) finishDesktopEntry();
+    if (window.pageYOffset > 32) {
+      clearDesktopCards();
+      releaseDesktopEntry();
+    }
   }, { passive: true });
   ['pointerdown', 'click', 'keydown'].forEach(function (type) {
     window.addEventListener(type, function (event) {
