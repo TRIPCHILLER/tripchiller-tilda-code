@@ -7287,33 +7287,66 @@ function setupDesktopAura() {
 
     window.t_zoom_desktopZoomPositioningInit = function (img, event) {
       var viewer = img && img.closest('body.tc-product-popup-open .t-zoomer__wrapper');
-      var width = (img && img.__tcDesktopFitWidth || 0) * 2;
-      if (!viewer || !window.matchMedia('(min-width: 981px) and (pointer: fine)').matches ||
-          !width || img.naturalWidth >= width) {
+      if (!viewer || !window.matchMedia('(min-width: 981px) and (pointer: fine)').matches) {
         return nativePosition.apply(this, arguments);
       }
 
-      enlargedImage = { img: img, width: img.style.width, height: img.style.height };
-      img.style.width = width + 'px';
-      img.style.height = 'auto';
-      function positionPhoto(point) {
+      var width = (img.__tcDesktopFitWidth || 0) * 2;
+      var pan = { img: img, width: img.style.width, height: img.style.height,
+        willChange: img.style.willChange, frame: 0, point: null };
+      enlargedImage = pan;
+      var left, top;
+      if (width && img.naturalWidth < width) {
+        img.style.width = width + 'px';
+        img.style.height = 'auto';
+      } else {
+        nativePosition.apply(this, arguments);
+        left = parseFloat(img.style.left);
+        top = parseFloat(img.style.top);
+      }
+      // Read dimensions once, then move only a composited image, once per paint.
+      var photoWidth = img.offsetWidth, photoHeight = img.offsetHeight;
+      function paintPhoto(point) {
         var w = window.innerWidth, h = window.innerHeight;
         var x = Math.max(0, Math.min(1, point.clientX / w));
         var y = Math.max(0, Math.min(1, point.clientY / h));
-        img.style.left = ((w - img.offsetWidth) * (img.offsetWidth > w ? x : 0.5)) + 'px';
-        img.style.top = ((h - img.offsetHeight) * (img.offsetHeight > h ? y : 0.5)) + 'px';
+        var dx = (w - photoWidth) * (photoWidth > w ? x : 0.5);
+        var dy = (h - photoHeight) * (photoHeight > h ? y : 0.5);
+        img.style.transform = 'translate3d(' + dx + 'px, ' + dy + 'px, 0)';
       }
-      // Toolbar clicks start centered; moving over the photo pans as in native zoom.
-      positionPhoto(event.target.closest('.t-zoomer__scale') ?
-        { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } : event);
-      img.onmousemove = positionPhoto;
+
+      // Tilda's opening copy hides the actual slide; finish it before zoom/pan.
+      document.querySelectorAll('.t_zoomer__animated-wrapper').forEach(function (copy) { copy.remove(); });
+      img.style.left = '0px';
+      img.style.top = '0px';
+      img.style.willChange = 'transform';
+      if (isFinite(left) && isFinite(top)) {
+        img.style.transform = 'translate3d(' + left + 'px, ' + top + 'px, 0)';
+      } else {
+        paintPhoto(event.target.closest('.t-zoomer__scale') ?
+          { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } : event);
+      }
+      img.onmousemove = function (point) {
+        pan.point = { clientX: point.clientX, clientY: point.clientY };
+        if (pan.frame) return;
+        pan.frame = requestAnimationFrame(function () {
+          pan.frame = 0;
+          if (enlargedImage === pan && viewer.classList.contains('scale-active') && img.isConnected) {
+            paintPhoto(pan.point);
+          }
+        });
+      };
     };
 
     window.t_zoom_unscale = function () {
       if (enlargedImage) {
+        cancelAnimationFrame(enlargedImage.frame);
         enlargedImage.img.style.width = enlargedImage.width;
         enlargedImage.img.style.height = enlargedImage.height;
+        enlargedImage.img.style.willChange = enlargedImage.willChange;
         enlargedImage.img.onmousemove = null;
+        // Close removes the img before native unscale can find and reset it.
+        enlargedImage.img.style.transform = '';
         enlargedImage = null;
       }
       return nativeUnscale.apply(this, arguments);
