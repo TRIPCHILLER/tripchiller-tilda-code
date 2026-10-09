@@ -5831,17 +5831,20 @@ function setupDesktopAura() {
   var entryTimer = 0;
   var filterTimer = 0;
 
-  function clearDesktopCards() {
+  function clearDesktopCards(keepFilters) {
     clearTimeout(entryTimer);
-    clearTimeout(filterTimer);
+    if (!keepFilters) clearTimeout(filterTimer);
     entryCards.forEach(function (card) {
       card.classList.remove('tc-entry-card');
       card.style.removeProperty('--tc-entry-delay');
       card.style.removeProperty('--tc-entry-rise');
     });
-    if (entryGrid) entryGrid.classList.remove('tc-entry-playing', 'tc-entry-filters');
+    if (entryGrid) {
+      entryGrid.classList.remove('tc-entry-playing');
+      if (!keepFilters) entryGrid.classList.remove('tc-entry-filters');
+    }
     entryCards = [];
-    entryGrid = null;
+    if (!keepFilters) entryGrid = null;
   }
 
   function releaseDesktopEntry() {
@@ -5859,7 +5862,7 @@ function setupDesktopAura() {
   }
   window.__TC_FINISH_DESKTOP_ENTRY__ = finishDesktopEntry;
 
-  function startDesktopEntry() {
+  function startDesktopEntry(replayFilters) {
     if (!isDesktopProductBackMode() || location.pathname !== '/' || isProductRoute() ||
         window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
     var grid = document.querySelector(document.body.classList.contains('tc-section-custom') ? '.uc-custom-grid' : '.uc-shop-grid');
@@ -5879,13 +5882,19 @@ function setupDesktopAura() {
     });
     void grid.offsetWidth; // Replay only the first row, including rapid section changes.
     grid.classList.add('tc-entry-playing');
+    if (replayFilters) {
+      grid.classList.add('tc-entry-filters');
+      filterTimer = setTimeout(clearDesktopCards, 1000);
+    }
     document.documentElement.classList.remove('tc-desktop-entry-pending');
     window.dispatchEvent(new CustomEvent('tc:catalog-entry-start'));
     entryTimer = setTimeout(function () {
-      clearDesktopCards();
-      grid.classList.add('tc-entry-filters');
-      entryGrid = grid;
-      filterTimer = setTimeout(clearDesktopCards, 1000);
+      clearDesktopCards(replayFilters);
+      if (!replayFilters) {
+        grid.classList.add('tc-entry-filters');
+        entryGrid = grid;
+        filterTimer = setTimeout(clearDesktopCards, 1000);
+      }
       releaseDesktopEntry();
     }, 500 + (cards.length - 1) * 90 + 32);
     return true;
@@ -6050,7 +6059,7 @@ function setupDesktopAura() {
   window.addEventListener('popstate', suppressAfterNavigation);
   window.addEventListener('hashchange', suppressAfterNavigation);
   window.addEventListener('tc:catalog-section', function () {
-    if (!window.__TC_DESKTOP_ENTRY_PENDING__) startDesktopEntry();
+    if (!window.__TC_DESKTOP_ENTRY_PENDING__) startDesktopEntry(true);
   });
   window.addEventListener('scroll', function () {
     if (window.pageYOffset > 32) finishDesktopEntry();
