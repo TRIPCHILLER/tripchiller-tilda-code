@@ -4053,7 +4053,7 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
   }
   html:not(.tc-external-code-loaded) :is(.uc-shop-grid, .uc-custom-grid) :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item),
   html.tc-desktop-entry-pending :is(.uc-shop-grid, .uc-custom-grid) :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item),
-  .tc-entry-playing :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item) {
+  .tc-entry-playing:not(.tc-entry-filters) :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item) {
     opacity: 0 !important;
     visibility: hidden;
   }
