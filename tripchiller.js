@@ -7286,6 +7286,33 @@ function setupDesktopAura() {
   if (window.__TC_PRODUCT_GALLERY_ARROW_PRESS__) return;
   window.__TC_PRODUCT_GALLERY_ARROW_PRESS__ = true;
 
+  // On mobile, Back closes the photo layer before the product's history entry.
+  var mobilePhotoHistory = null;
+  document.addEventListener('zoom:open', function (event) {
+    if (mobilePhotoHistory || !window.matchMedia('(max-width: 980px), (pointer: coarse)').matches ||
+        !event.target.matches('.t-zoomer__wrapper') ||
+        !document.body.classList.contains('tc-product-popup-open')) return;
+    var state = Object.assign({}, history.state);
+    state.__tcProductPhoto = Date.now();
+    mobilePhotoHistory = { id: state.__tcProductPhoto, href: location.href, closing: false };
+    try { history.pushState(state, '', location.href); }
+    catch (_) { mobilePhotoHistory = null; }
+  }, true);
+  document.addEventListener('zoom:close', function () {
+    if (!mobilePhotoHistory) return;
+    if (history.state && history.state.__tcProductPhoto === mobilePhotoHistory.id) {
+      mobilePhotoHistory.closing = true;
+      history.back();
+    } else mobilePhotoHistory = null;
+  }, true);
+  window.addEventListener('popstate', function (event) {
+    if (!mobilePhotoHistory) return;
+    var photo = mobilePhotoHistory;
+    mobilePhotoHistory = null;
+    if (location.href === photo.href) event.stopImmediatePropagation();
+    if (!photo.closing && typeof window.t_zoom_close === 'function') window.t_zoom_close();
+  }, true);
+
   // Keep native controls/cursors, with at least 2x zoom for small desktop originals.
   function enableFittedDesktopZoom() {
     var nativeCheck = window.t_zoom_checkToScaleInit;
