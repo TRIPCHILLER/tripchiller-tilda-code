@@ -4065,6 +4065,10 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
   .tc-entry-filters :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item) {
     animation: tcDesktopFilterEntry 1000ms ease both;
   }
+  .tc-entry-filters-out :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item) {
+    animation: tcDesktopFilterExit 1000ms ease both !important;
+    pointer-events: none;
+  }
 }
 @keyframes tcDesktopCardEntry {
   from { opacity: 0; transform: translate3d(0, var(--tc-entry-rise), 0); }
@@ -4073,6 +4077,10 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
 @keyframes tcDesktopFilterEntry {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+@keyframes tcDesktopFilterExit {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 @keyframes tcCatalogCardIntro {
