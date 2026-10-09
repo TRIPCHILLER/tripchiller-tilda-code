@@ -7264,6 +7264,27 @@ function setupDesktopAura() {
   if (window.__TC_PRODUCT_GALLERY_ARROW_PRESS__) return;
   window.__TC_PRODUCT_GALLERY_ARROW_PRESS__ = true;
 
+  // Keep Tilda's native desktop zoom available even when the original fits the viewport.
+  function enableFittedDesktopZoom() {
+    var nativeCheck = window.t_zoom_checkToScaleInit;
+    window.t_zoom_checkToScaleInit = function (img) {
+      var result = nativeCheck.apply(this, arguments);
+      var viewer = img && img.closest('body.tc-product-popup-open .t-zoomer__wrapper');
+      if (viewer && img.naturalWidth && viewer.classList.contains('zoomer-no-scale') &&
+          window.matchMedia('(min-width: 981px) and (pointer: fine)').matches) {
+        viewer.classList.remove('zoomer-no-scale');
+        window.t_zoom_scale_init();
+      }
+      return result;
+    };
+  }
+
+  if (typeof window.t_zoom_checkToScaleInit === 'function') {
+    enableFittedDesktopZoom();
+  } else if (typeof window.t_onFuncLoad === 'function') {
+    window.t_onFuncLoad('t_zoom_checkToScaleInit', enableFittedDesktopZoom);
+  }
+
   function animateGalleryPress(event) {
     if (event.button !== 0 || !event.target || !event.target.closest) return;
     if (photoZoom && event.type === 'click' && event.target.closest('.t-carousel__zoomer__control, .t-zoomer__close') && photoZoom.wrapper.contains(event.target)) clearPhotoZoom();
