@@ -5149,15 +5149,28 @@ function setupDesktopAura() {
     return 'shop';
   }
 
+  var sectionFadeTimer = 0;
   function setProductSection(name) {
     var isCustom = name === 'custom';
     var changed = !document.body.classList.contains(isCustom ? 'tc-section-custom' : 'tc-section-shop');
-
-    document.body.classList.toggle('tc-section-shop', !isCustom);
-    document.body.classList.toggle('tc-section-custom', isCustom);
-
-    refreshTildaLayout();
-    if (changed) window.dispatchEvent(new CustomEvent('tc:catalog-section', { detail: name }));
+    var shop = document.querySelector('.uc-shop-grid');
+    clearTimeout(sectionFadeTimer);
+    if (shop) shop.classList.remove('tc-entry-filters-out');
+    function applySection() {
+      if (shop) shop.classList.remove('tc-entry-filters-out');
+      document.body.classList.toggle('tc-section-shop', !isCustom);
+      document.body.classList.toggle('tc-section-custom', isCustom);
+      refreshTildaLayout();
+      if (changed) window.dispatchEvent(new CustomEvent('tc:catalog-section', { detail: name }));
+    }
+    if (changed && isCustom && shop && location.pathname === '/' &&
+        !window.__TC_DESKTOP_ENTRY_PENDING__ &&
+        window.matchMedia('(min-width:981px) and (pointer:fine) and (prefers-reduced-motion:no-preference)').matches &&
+        shop.querySelector('.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item')) {
+      void shop.offsetWidth;
+      shop.classList.add('tc-entry-filters-out');
+      sectionFadeTimer = setTimeout(applySection, 1000);
+    } else applySection();
   }
 
   function setActiveRow(name, updateHash) {
