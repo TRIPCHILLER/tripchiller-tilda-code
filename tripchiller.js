@@ -7259,17 +7259,136 @@ function setupDesktopAura() {
   observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
 
-/* Desktop product gallery: a repeatable press without changing native navigation. */
+/* Product gallery: desktop clicks and touch fullscreen presses; native navigation stays intact. */
 (function () {
   if (window.__TC_PRODUCT_GALLERY_ARROW_PRESS__) return;
   window.__TC_PRODUCT_GALLERY_ARROW_PRESS__ = true;
 
-  document.addEventListener('click', function (event) {
+  // Keep native controls/cursors, with at least 2x zoom for small desktop originals.
+  function enableFittedDesktopZoom() {
+    var nativeCheck = window.t_zoom_checkToScaleInit;
+    var nativePosition = window.t_zoom_desktopZoomPositioningInit;
+    var nativeUnscale = window.t_zoom_unscale;
+    var enlargedImage = null;
+
+    window.t_zoom_checkToScaleInit = function (img) {
+      var viewer = img && img.closest('body.tc-product-popup-open .t-zoomer__wrapper');
+      var desktop = viewer && window.matchMedia('(min-width: 981px) and (pointer: fine)').matches;
+      if (desktop && !viewer.classList.contains('scale-active')) {
+        img.__tcDesktopFitWidth = img.getBoundingClientRect().width;
+      }
+      var result = nativeCheck.apply(this, arguments);
+      if (desktop && img.naturalWidth && viewer.classList.contains('zoomer-no-scale')) {
+        viewer.classList.remove('zoomer-no-scale');
+        window.t_zoom_scale_init();
+      }
+      return result;
+    };
+
+    window.t_zoom_desktopZoomPositioningInit = function (img, event) {
+      var viewer = img && img.closest('body.tc-product-popup-open .t-zoomer__wrapper');
+      if (!viewer || !window.matchMedia('(min-width: 981px) and (pointer: fine)').matches) {
+        return nativePosition.apply(this, arguments);
+      }
+
+      var width = (img.__tcDesktopFitWidth || 0) * 2;
+      var pan = { img: img, width: img.style.width, height: img.style.height,
+        willChange: img.style.willChange, frame: 0, point: null };
+      enlargedImage = pan;
+      var left, top;
+      if (width && img.naturalWidth < width) {
+        img.style.width = width + 'px';
+        img.style.height = 'auto';
+      } else {
+        nativePosition.apply(this, arguments);
+        left = parseFloat(img.style.left);
+        top = parseFloat(img.style.top);
+      }
+      // Read dimensions once, then move only a composited image, once per paint.
+      var photoWidth = img.offsetWidth, photoHeight = img.offsetHeight;
+      function paintPhoto(point) {
+        var w = window.innerWidth, h = window.innerHeight;
+        var x = Math.max(0, Math.min(1, point.clientX / w));
+        var y = Math.max(0, Math.min(1, point.clientY / h));
+        var dx = (w - photoWidth) * (photoWidth > w ? x : 0.5);
+        var dy = (h - photoHeight) * (photoHeight > h ? y : 0.5);
+        img.style.transform = 'translate3d(' + dx + 'px, ' + dy + 'px, 0)';
+      }
+
+      // Tilda's opening copy hides the actual slide; finish it before zoom/pan.
+      document.querySelectorAll('.t_zoomer__animated-wrapper').forEach(function (copy) { copy.remove(); });
+      img.style.left = '0px';
+      img.style.top = '0px';
+      img.style.willChange = 'transform';
+      if (isFinite(left) && isFinite(top)) {
+        img.style.transform = 'translate3d(' + left + 'px, ' + top + 'px, 0)';
+      } else {
+        paintPhoto(event.target.closest('.t-zoomer__scale') ?
+          { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } : event);
+      }
+      img.onmousemove = function (point) {
+        pan.point = { clientX: point.clientX, clientY: point.clientY };
+        if (pan.frame) return;
+        pan.frame = requestAnimationFrame(function () {
+          pan.frame = 0;
+          if (enlargedImage === pan && viewer.classList.contains('scale-active') && img.isConnected) {
+            paintPhoto(pan.point);
+          }
+        });
+      };
+    };
+
+    window.t_zoom_unscale = function () {
+      if (enlargedImage) {
+        cancelAnimationFrame(enlargedImage.frame);
+        enlargedImage.img.style.width = enlargedImage.width;
+        enlargedImage.img.style.height = enlargedImage.height;
+        enlargedImage.img.style.willChange = enlargedImage.willChange;
+        enlargedImage.img.onmousemove = null;
+        // Close removes the img before native unscale can find and reset it.
+        enlargedImage.img.style.transform = '';
+        enlargedImage = null;
+      }
+      return nativeUnscale.apply(this, arguments);
+    };
+  }
+
+  if (typeof window.t_zoom_checkToScaleInit === 'function') {
+    enableFittedDesktopZoom();
+  } else if (typeof window.t_onFuncLoad === 'function') {
+    window.t_onFuncLoad('t_zoom_checkToScaleInit', enableFittedDesktopZoom);
+  }
+
+  // Empty space closes only the full-screen photo, before Tilda's wrapper zoom click.
+  window.addEventListener('click', function (event) {
+    if (event.button !== 0 || !event.target || !event.target.closest ||
+        !window.matchMedia('(min-width: 981px) and (pointer: fine)').matches) return;
+    var viewer = event.target.closest('body.tc-product-popup-open .t-zoomer__wrapper');
+    if (!viewer || event.target.closest('.t-zoomer__ui-wrapper, .t-carousel__zoomer__control')) return;
+    var img = viewer.querySelector('.t-carousel__zoomer__item.active .t-carousel__zoomer__img');
+    if (!img || typeof window.t_zoom_close !== 'function') return;
+    var rect = img.getBoundingClientRect();
+    if (event.clientX >= rect.left && event.clientX <= rect.right &&
+        event.clientY >= rect.top && event.clientY <= rect.bottom) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    window.t_zoom_close();
+  }, true);
+
+  function animateGalleryPress(event) {
     if (event.button !== 0 || !event.target || !event.target.closest) return;
-    if (!window.matchMedia('(min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return;
+    if (photoZoom && event.type === 'click' && event.target.closest('.t-carousel__zoomer__control, .t-zoomer__close') && photoZoom.wrapper.contains(event.target)) clearPhotoZoom();
+    var desktop = window.matchMedia('(min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches;
+    var touchViewer = window.matchMedia('(max-width: 980px) and (prefers-reduced-motion: no-preference)').matches && event.target.closest('body.tc-product-popup-open .t-zoomer__wrapper');
+    if (!desktop && !touchViewer) return;
+    if (event.type === 'pointerdown' && !touchViewer) return;
     var button = event.target.closest('.t-slds__arrow, .t-carousel__zoomer__control, .t-zoomer__scale, .t-zoomer__close');
     if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return;
     if (!button.closest('#allrecords .t-catalog__prod-popup__slider, #allrecords .t-store__prod-popup__slider, #allrecords .uc-custom-grid .t778__product-full .t778__col_left, body.tc-product-popup-open .t-zoomer__wrapper')) return;
+
+    // The compatibility click follows pointerdown; avoid replaying the same pulse.
+    if (event.type === 'click' && touchViewer && button.classList.contains('tc-gallery-arrow-pressed')) return;
 
     clearTimeout(button.__tcGalleryArrowPressTimer);
     button.classList.remove('tc-gallery-arrow-pressed');
@@ -7279,7 +7398,257 @@ function setupDesktopAura() {
       button.classList.remove('tc-gallery-arrow-pressed');
       button.__tcGalleryArrowPressTimer = null;
     }, 400);
+  }
+
+  document.addEventListener('click', animateGalleryPress, true);
+  document.addEventListener('pointerdown', animateGalleryPress, true);
+
+  // Touch pinch transforms only the active img; leave the viewer and controls untouched.
+  var photoZoom = null;
+  var photoGesture = null;
+  var photoHold = null;
+  var photoLens = null;
+  var lensBlockingWrapper = null;
+  var lensReleaseFrame = 0;
+  var nativeLensGuardPatched = false;
+
+  function cancelPhotoHold(deferNativeRelease) {
+    if (photoHold) {
+      clearTimeout(photoHold.timer);
+      if (photoHold.active && photoHold.img.ontouchmove === null) photoHold.img.ontouchmove = photoHold.nativeMove;
+    }
+    photoHold = null;
+    if (photoLens) photoLens.classList.remove('is-visible');
+    if (lensReleaseFrame) cancelAnimationFrame(lensReleaseFrame);
+    lensReleaseFrame = 0;
+    if (deferNativeRelease && lensBlockingWrapper) {
+      // Let Hammer finish this touchend while the held lens still blocks its swipes.
+      lensReleaseFrame = requestAnimationFrame(function () {
+        lensBlockingWrapper = null;
+        lensReleaseFrame = 0;
+      });
+    } else {
+      lensBlockingWrapper = null;
+    }
+  }
+
+  function paintPhotoLens() {
+    if (!photoHold || !photoHold.active) return;
+    var img = photoHold.img;
+    var rect = img.getBoundingClientRect();
+    var point = photoHold.point;
+    if (!rect.width || !rect.height || point.x < rect.left || point.x > rect.right || point.y < rect.top || point.y > rect.bottom) {
+      if (photoLens) photoLens.classList.remove('is-visible');
+      return;
+    }
+    if (!photoLens) {
+      photoLens = document.createElement('div');
+      photoLens.className = 'tc-product-magnifier tc-mobile-photo-lens';
+      photoLens.setAttribute('aria-hidden', 'true');
+    }
+    if (photoLens.parentNode !== photoHold.wrapper) photoHold.wrapper.appendChild(photoLens);
+    var size = photoLens.offsetWidth;
+    var left = Math.max(12, Math.min(window.innerWidth - size - 12, point.x - size / 2));
+    var top = point.y - size - 24;
+    if (top < 12) top = point.y + 24;
+    top = Math.max(12, Math.min(window.innerHeight - size - 12, top));
+    photoLens.style.transform = 'translate3d(' + left + 'px, ' + top + 'px, 0)';
+    photoLens.style.backgroundImage = 'url(' + JSON.stringify(img.currentSrc || img.src) + ')';
+    photoLens.style.backgroundSize = (rect.width * 2.4) + 'px ' + (rect.height * 2.4) + 'px';
+    photoLens.style.backgroundPosition = (size / 2 - (point.x - rect.left) * 2.4) + 'px ' + (size / 2 - (point.y - rect.top) * 2.4) + 'px';
+    photoLens.classList.add('is-visible');
+  }
+
+  function schedulePhotoHold(img, wrapper, touch, blockNative) {
+    var point = { x: touch.clientX, y: touch.clientY };
+    var hold = { img: img, wrapper: wrapper, point: point, start: point, active: false, blockNative: blockNative };
+    photoHold = hold;
+    hold.timer = setTimeout(function () {
+      if (photoHold !== hold) return;
+      if (!img.isConnected || !img.closest('body.tc-product-popup-open .t-zoomer__wrapper') || !window.matchMedia('(max-width: 980px)').matches || wrapper.querySelector('.t-carousel__zoomer__item.active .t-carousel__zoomer__img') !== img) {
+        cancelPhotoHold();
+        return;
+      }
+      // Reuse Tilda's swipe guard; it delegates unchanged except for the held lens.
+      if (!nativeLensGuardPatched) {
+        if (typeof window.t_zoom__isScaled !== 'function') { cancelPhotoHold(); return; }
+        var nativeIsScaled = window.t_zoom__isScaled;
+        window.t_zoom__isScaled = function (viewer) {
+          return (!!lensBlockingWrapper && viewer === lensBlockingWrapper) || nativeIsScaled.apply(this, arguments);
+        };
+        nativeLensGuardPatched = true;
+      }
+      hold.active = true;
+      hold.nativeMove = img.ontouchmove;
+      img.ontouchmove = null; // A previous native double-tap must not drag the img under the lens.
+      lensBlockingWrapper = wrapper;
+      photoGesture = null; // Inspect with the lens instead of dragging the zoomed img.
+      paintPhotoLens();
+    }, 500);
+  }
+
+  function clearPhotoZoom() {
+    cancelPhotoHold();
+    if (photoZoom) {
+      var img = photoZoom.img;
+      img.style.transform = photoZoom.transform;
+      img.style.transformOrigin = photoZoom.origin;
+      img.style.transition = photoZoom.transition;
+    }
+    photoZoom = null;
+    photoGesture = null;
+  }
+
+  function touchGeometry(touches) {
+    var first = touches[0], second = touches[1] || first;
+    return {
+      x: (first.clientX + second.clientX) / 2,
+      y: (first.clientY + second.clientY) / 2,
+      distance: Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY)
+    };
+  }
+
+  function rebasePhotoGesture(touches, blockNative) {
+    var point = touchGeometry(touches);
+    photoGesture = {
+      pinch: touches.length > 1,
+      blockNative: blockNative,
+      x: point.x, y: point.y,
+      distance: point.distance,
+      scale: photoZoom.scale,
+      tx: photoZoom.x, ty: photoZoom.y,
+      startedAt: photoGesture ? photoGesture.startedAt : Date.now(),
+      maxPointers: Math.max(touches.length, photoGesture ? photoGesture.maxPointers : 0)
+    };
+  }
+
+  function startPhotoGesture(event) {
+    var heldBlockNative = !!(photoHold && photoHold.active && photoHold.blockNative);
+    if (event.touches.length > 1 || !photoHold || !photoHold.active) cancelPhotoHold();
+    if (!window.matchMedia('(max-width: 980px)').matches || !event.target.closest) return;
+    var wrapper = event.target.closest('body.tc-product-popup-open .t-zoomer__wrapper');
+    if (!wrapper) return;
+    var img = wrapper.querySelector('.t-carousel__zoomer__item.active .t-carousel__zoomer__img');
+    if (!img || !img.contains(event.target) || !img.complete || !img.naturalWidth) return;
+    if (photoZoom && photoZoom.img !== img) clearPhotoZoom();
+    if (event.touches.length === 1) {
+      var zoomed = photoZoom && photoZoom.scale > 1;
+      schedulePhotoHold(img, wrapper, event.touches[0], !!zoomed);
+      if (!zoomed) return; // Quick one-finger swipes remain Tilda's gallery/close gestures.
+    }
+
+    if (!photoZoom) {
+      // A native double-tap zoom must return to its fitted image before a pinch starts.
+      if (wrapper.classList.contains('scale-active') && typeof window.t_zoom_unscale === 'function') {
+        window.t_zoom_unscale();
+      }
+      var rect = img.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      photoZoom = {
+        img: img, wrapper: wrapper,
+        width: rect.width, height: rect.height,
+        cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2,
+        scale: 1, x: 0, y: 0,
+        transform: img.style.transform,
+        origin: img.style.transformOrigin,
+        transition: img.style.transition
+      };
+      img.style.transformOrigin = '50% 50%';
+      img.style.transition = 'none';
+    }
+    // First pinch reaches Hammer with both touches, so its one-finger swipes do not fire.
+    // A later one-finger drag of the zoomed img is ours from touchstart through touchend.
+    var blockNative = heldBlockNative || !!(photoGesture && photoGesture.blockNative) || event.touches.length === 1;
+    rebasePhotoGesture(event.touches, blockNative);
+    if (event.cancelable) event.preventDefault();
+    if (blockNative) event.stopPropagation();
+  }
+
+  function movePhotoGesture(event) {
+    if (photoHold && event.touches.length === 1) {
+      var point = touchGeometry(event.touches);
+      if (photoHold.active) {
+        photoHold.point = point;
+        paintPhotoLens();
+        if (event.cancelable) event.preventDefault();
+        if (photoHold.blockNative) event.stopPropagation();
+        return;
+      }
+      if (Math.hypot(point.x - photoHold.start.x, point.y - photoHold.start.y) > 10) cancelPhotoHold();
+      else photoHold.point = point;
+    }
+    if (!photoZoom || !photoGesture || !event.touches.length) return;
+    if (!photoZoom.img.isConnected || !window.matchMedia('(max-width: 980px)').matches) {
+      clearPhotoZoom();
+      return;
+    }
+    if (event.cancelable) event.preventDefault();
+    if (photoGesture.blockNative) event.stopPropagation();
+    var point = touchGeometry(event.touches);
+    var start = photoGesture;
+    if (start.pinch && event.touches.length > 1 && start.distance > 0) {
+      photoZoom.scale = Math.max(1, Math.min(4, start.scale * point.distance / start.distance));
+      // Keep the same image point under the midpoint of the two fingers.
+      var ratio = photoZoom.scale / start.scale;
+      photoZoom.x = point.x - photoZoom.cx - (start.x - photoZoom.cx - start.tx) * ratio;
+      photoZoom.y = point.y - photoZoom.cy - (start.y - photoZoom.cy - start.ty) * ratio;
+    } else {
+      photoZoom.x = start.tx + point.x - start.x;
+      photoZoom.y = start.ty + point.y - start.y;
+    }
+    var limitX = Math.max(0, (photoZoom.width * photoZoom.scale - window.innerWidth) / 2);
+    var limitY = Math.max(0, (photoZoom.height * photoZoom.scale - window.innerHeight) / 2);
+    photoZoom.x = Math.max(-limitX, Math.min(limitX, photoZoom.x));
+    photoZoom.y = Math.max(-limitY, Math.min(limitY, photoZoom.y));
+    photoZoom.img.style.transform = 'translate(' + photoZoom.x + 'px, ' + photoZoom.y + 'px) scale(' + photoZoom.scale + ')';
+  }
+
+  function endPhotoGesture(event) {
+    if (photoHold && photoHold.active) {
+      if (event.cancelable) event.preventDefault();
+      if (photoHold.blockNative) event.stopPropagation();
+      cancelPhotoHold(true);
+      return;
+    }
+    cancelPhotoHold();
+    if (!photoZoom || !photoGesture) return;
+    if (photoGesture.blockNative) event.stopPropagation();
+    if (!event.touches.length && event.type === 'touchend' && photoGesture.maxPointers === 1 && event.changedTouches && event.changedTouches.length) {
+      var end = event.changedTouches[0];
+      var dx = end.clientX - photoGesture.x, dy = end.clientY - photoGesture.y;
+      var elapsed = Math.max(1, Date.now() - photoGesture.startedAt);
+      if (elapsed < 500 && dy < -80 && Math.abs(dy) > Math.abs(dx) && (dy < -200 || dy / elapsed < -.3)) {
+        var wrapper = photoZoom.wrapper;
+        clearPhotoZoom();
+        if (typeof window.t_zoom_closeSwipeHandler === 'function') {
+          wrapper.setAttribute('data-on-drag', 'y');
+          window.t_zoom_closeSwipeHandler({ maxPointers: 1, deltaY: dy, velocityY: dy / elapsed });
+        } else if (typeof window.t_zoom_close === 'function') window.t_zoom_close();
+        return;
+      }
+      if (elapsed < 500 && Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) && typeof window.t_zoom__setEventOnBtn === 'function') {
+        clearPhotoZoom();
+        window.t_zoom__setEventOnBtn(dx < 0 ? 'next' : 'prev');
+        return;
+      }
+    }
+    if (event.touches.length && event.type !== 'touchcancel') {
+      rebasePhotoGesture(event.touches, photoGesture.blockNative);
+    } else {
+      photoGesture = null;
+      if (photoZoom.scale === 1) clearPhotoZoom();
+    }
+  }
+
+  document.addEventListener('touchstart', startPhotoGesture, { capture: true, passive: false });
+  document.addEventListener('touchmove', movePhotoGesture, { capture: true, passive: false });
+  document.addEventListener('touchend', endPhotoGesture, { capture: true, passive: false });
+  document.addEventListener('touchcancel', endPhotoGesture, { capture: true });
+  document.addEventListener('contextmenu', function (event) {
+    if (window.matchMedia('(max-width: 980px)').matches && event.target.closest('body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__img')) event.preventDefault();
   }, true);
+  document.addEventListener('zoom:close', clearPhotoZoom, true);
+  window.addEventListener('resize', clearPhotoZoom);
 })();
 
 (function () {
@@ -8233,7 +8602,7 @@ function setupDesktopAura() {
       escCloseOn: 'keydown',
       escSwallowOn: 'keyup/keypress + shield',
       escShieldMs: 1800,
-      escZoomerGuard: 'body t-zoomer__show/t-zoomer__active/t-zoomer__show_fixed',
+      escZoomerGuard: 'native photo-only close; swallow keydown/keyup/keypress',
       icons: link ? Array.prototype.map.call(
         link.querySelectorAll('.' + LINK_CLASS + '__icon'),
         function (icon) {
@@ -8356,6 +8725,7 @@ function setupDesktopAura() {
 
   var lastProductEscNativeCloseAt = 0;
   var productEscShieldUntil = 0;
+  var productPhotoEscHeld = false;
 
   function isTildaZoomerOpen() {
     return !!(document.body && (
@@ -8369,7 +8739,20 @@ function setupDesktopAura() {
     if (!isDesktopProductBackMode()) return;
     if (!event) return;
     if (event.key !== 'Escape' && event.code !== 'Escape' && event.keyCode !== 27) return;
-    if (isTildaZoomerOpen()) return;
+    // Consume the whole key sequence so the product-route handler cannot navigate home.
+    if (isTildaZoomerOpen() || productPhotoEscHeld) {
+      if (typeof window.t_zoom_close !== 'function') return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+      if (event.type === 'keydown' && !productPhotoEscHeld) {
+        productPhotoEscHeld = true;
+        window.t_zoom_close();
+      } else if (event.type === 'keyup') {
+        productPhotoEscHeld = false;
+      }
+      return;
+    }
 
     var now = Date.now();
     var popup = getVisibleProductPopup();

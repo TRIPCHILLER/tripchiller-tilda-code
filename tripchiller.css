@@ -3244,20 +3244,31 @@ button.t778__showmore.tc-loadmore-pressed,
   visibility: visible;
 }
 
-@media (min-width: 981px) and (pointer: fine) {
+@media (min-width: 981px) and (pointer: fine), (max-width: 980px) {
   /* Let photo shadows escape; the main/container still clip the slide track. */
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds {
     overflow: visible !important;
   }
 
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__main {
-    box-shadow: 0 2px 4px rgba(0,0,0,.20), 0 8px 18px rgba(0,0,0,.18) !important;
+    box-shadow: 0 5px 10px rgba(0,0,0,.22), 0 14px 30px rgba(0,0,0,.22) !important;
   }
 
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet {
-    box-shadow: 0 1px 2px rgba(0,0,0,.28), 0 3px 6px rgba(0,0,0,.22) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,.28), 0 6px 12px rgba(0,0,0,.24) !important;
   }
+}
 
+@media (max-width: 980px) {
+  /* Give mobile thumbnails room below the photo shadow; keep native item spacing. */
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet-wrapper {
+    margin-top: 28px !important;
+    padding-top: 0 !important;
+    text-align: center !important;
+  }
+}
+
+@media (min-width: 981px) and (pointer: fine) {
   /* Thumbnail photos stay clickable even when the main-photo magnifier hides its cursor. */
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet,
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__thumbsbullet * {
@@ -5029,6 +5040,11 @@ body.tc-product-page-active .tc-menu-eye-logo {
 
 /* Desktop product gallery: blend the controls; paint black shadows separately. */
 @media (min-width: 981px) and (pointer: fine) {
+  /* Embedded photo uses thumbnails; hide arrows and their separate shadows. */
+  #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container {
+    display: none !important;
+  }
+
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_wrapper {
     mix-blend-mode: difference;
   }
@@ -5042,8 +5058,8 @@ body.tc-product-page-active .tc-menu-eye-logo {
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container::after,
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::before,
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::after,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container::before,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container::after {
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::after {
     content: none;
     position: absolute;
     top: 50%;
@@ -5051,10 +5067,10 @@ body.tc-product-page-active .tc-menu-eye-logo {
     height: var(--tc-gallery-arrow-size);
     transform: translateY(-50%);
     border-radius: 50%;
-    box-shadow: 0 1px 2px rgba(0,0,0,.48), 0 2px 4px rgba(0,0,0,.26);
+    box-shadow: 0 2px 3px rgba(0,0,0,.38), 0 4px 7px rgba(0,0,0,.24);
     opacity: var(--tc-fullscreen-control-opacity, .75);
     pointer-events: none;
-    z-index: 8;
+    z-index: 100; /* Paint after the controls so invert() cannot sample the shadow. */
   }
 
   /* Tilda hides end arrows with inline display/opacity; hide their shadows too. */
@@ -5115,11 +5131,11 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 @keyframes tcProductGalleryArrowPress {
-  0%, 100% { transform: translateY(-50%) scale(1); }
-  35% { transform: translateY(-50%) scale(.90); }
+  0%, 100% { transform: translateY(-50%) rotate(var(--tc-gallery-shape-turn, 0deg)) scale(1); }
+  35% { transform: translateY(-50%) rotate(var(--tc-gallery-shape-turn, 0deg)) scale(.90); }
 }
 
-@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference), (max-width: 980px) and (prefers-reduced-motion: no-preference) {
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow.tc-gallery-arrow-pressed,
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container:has(.t-slds__arrow-left.tc-gallery-arrow-pressed)::before,
   #allrecords :is(.t-catalog__prod-popup__slider, .t-store__prod-popup__slider, :where(.uc-custom-grid .t778__product-full) .t778__col_left) .t-slds__arrow_container:has(.t-slds__arrow-right.tc-gallery-arrow-pressed)::after,
@@ -5136,9 +5152,117 @@ body.tc-product-page-active .tc-menu-eye-logo {
   transform: translateY(-50%) scale(1.1) !important;
 }
 
+/* Touch viewer: reuse fullscreen styling without desktop hover-to-hide behavior. */
+@media (max-width: 980px) {
+  body.tc-product-popup-open .t-zoomer__wrapper {
+    --tc-gallery-arrow-size: 40px;
+    touch-action: none !important; /* Only this viewer owns the photo pinch gesture. */
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__img {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  body.tc-product-popup-open .tc-product-magnifier.tc-mobile-photo-lens {
+    display: block !important;
+    z-index: 2147483647;
+    width: min(180px, 45vw);
+    height: min(180px, 45vw);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .18s ease, visibility 0s linear .18s;
+  }
+
+  body.tc-product-popup-open .tc-product-magnifier.tc-mobile-photo-lens.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity .18s ease;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper),
+  body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) > .t-zoomer__ui-item {
+    display: grid !important;
+    place-items: center;
+    width: var(--tc-gallery-arrow-size) !important;
+    height: var(--tc-gallery-arrow-size) !important;
+    opacity: var(--tc-fullscreen-control-opacity, .75) !important;
+    box-shadow: none !important;
+    font-family: var(--tc-font-main) !important;
+    font-size: 24px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control > .t-zoomer__ui-item > svg,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper > .t-zoomer__close > svg {
+    display: none !important;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control_left > .t-zoomer__ui-item::before {
+    content: '<';
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control_right > .t-zoomer__ui-item::before {
+    content: '>';
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::after,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::after {
+    content: none;
+    position: absolute;
+    top: 50%;
+    width: var(--tc-gallery-arrow-size);
+    height: var(--tc-gallery-arrow-size);
+    transform: translateY(-50%);
+    border-radius: 50%;
+    box-shadow: 0 2px 3px rgba(0,0,0,.38), 0 4px 7px rgba(0,0,0,.24);
+    opacity: var(--tc-fullscreen-control-opacity, .75);
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides:has(.t-carousel__zoomer__control_left:not([style*="display: none"]):not([style*="opacity: 0"]))::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides:has(.t-carousel__zoomer__control_right:not([style*="display: none"]):not([style*="opacity: 0"]))::after {
+    content: '';
+  }
+
+  /* Pinch zoom remains native; remove only its redundant button and shadow. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper > .t-zoomer__scale {
+    display: none !important;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::before {
+    content: none !important;
+  }
+}
+
+@media (max-width: 980px) and (prefers-reduced-motion: reduce) {
+  body.tc-product-popup-open .tc-product-magnifier.tc-mobile-photo-lens {
+    transition: none;
+  }
+}
+
 /* Fullscreen product photos: reuse gallery controls, inset by 7.5% of the viewport. */
-@media (min-width: 981px) and (pointer: fine) {
+@media (min-width: 981px) and (pointer: fine), (max-width: 980px) {
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides {
+    --tc-gallery-arrow-size: 46px; /* 40px × 1.15; top controls keep 40px. */
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__img {
+    box-shadow: 0 5px 10px rgba(0,0,0,.22), 0 14px 30px rgba(0,0,0,.22);
+  }
+
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control {
+    z-index: 99 !important;
     top: 50%;
     bottom: auto;
     width: var(--tc-gallery-arrow-size);
@@ -5167,35 +5291,36 @@ body.tc-product-page-active .tc-menu-eye-logo {
     padding: 0;
     border: 0;
     opacity: var(--tc-fullscreen-control-opacity, .75);
-    transform: translateY(-50%);
+    font-size: 27.6px !important;
+    transform: translateY(-50%) rotate(var(--tc-gallery-shape-turn, 0deg));
   }
 }
 
 /* Native idle fade plus photo/control hover; keep the black shadows in sync. */
-@media (min-width: 981px) and (pointer: fine) {
+@media (min-width: 981px) and (pointer: fine), (max-width: 980px) {
   body.tc-product-popup-open .t-zoomer__wrapper {
     --tc-fullscreen-control-opacity: .75;
     --tc-fullscreen-control-fade: .5s;
   }
 
-  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__ui-item.t-zoomer__hide-animation),
-  body.tc-product-popup-open .t-zoomer__wrapper:not(:has(.t-carousel__zoomer__img:hover, .t-carousel__zoomer__control:hover, .t-zoomer__ui-wrapper:hover)),
-  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__container--on-close) {
-    --tc-fullscreen-control-opacity: 0;
-    --tc-fullscreen-control-fade: 1s;
-  }
-
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-item,
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::before,
   body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::after,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container::before,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container::after {
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::after {
     transition: opacity var(--tc-fullscreen-control-fade) ease;
+  }
+
+  /* Keep the native top toolbar above the photo; paint its shadows after the buttons. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper > .t-zoomer__ui-item {
+    position: relative;
+    z-index: 99 !important;
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper > .t-zoomer__ui-item {
     padding: 0;
     border: 0;
+    transform: rotate(var(--tc-gallery-shape-turn, 0deg));
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper .t-zoomer__scale > svg {
@@ -5222,45 +5347,195 @@ body.tc-product-page-active .tc-menu-eye-logo {
     content: 'X';
   }
 
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container:has(> .t-zoomer__ui-wrapper > .t-zoomer__scale:not([style*="display: none"]))::before {
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper:has(> .t-zoomer__scale:not([style*="display: none"]))::before {
     content: '';
-    top: 33px;
-    right: 63px;
+    top: 50%;
+    right: 50px;
   }
 
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container:has(> .t-zoomer__ui-wrapper > .t-zoomer__close:not([style*="display: none"]))::after {
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper:has(> .t-zoomer__close:not([style*="display: none"]))::after {
     content: '';
-    top: 33px;
-    right: 13px;
+    top: 50%;
+    right: 0;
+  }
+}
+
+@media (min-width: 981px) and (pointer: fine) {
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__ui-item.t-zoomer__hide-animation),
+  body.tc-product-popup-open .t-zoomer__wrapper:not(:has(.t-carousel__zoomer__img:hover, .t-carousel__zoomer__control:hover, .t-zoomer__ui-wrapper:hover)),
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__container--on-close) {
+    --tc-fullscreen-control-opacity: 0;
+    --tc-fullscreen-control-fade: 1s;
   }
 }
 
 @keyframes tcFullscreenControlPress {
-  0%, 100% { transform: scale(1); }
-  35% { transform: scale(.90); }
+  0%, 100% { transform: rotate(var(--tc-gallery-shape-turn, 0deg)) scale(1); }
+  35% { transform: rotate(var(--tc-gallery-shape-turn, 0deg)) scale(.90); }
 }
 
-@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference), (max-width: 980px) and (prefers-reduced-motion: no-preference) {
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper > .tc-gallery-arrow-pressed {
     animation: tcFullscreenControlPress .36s ease-in-out;
   }
 
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container:has(.t-zoomer__scale.tc-gallery-arrow-pressed)::before,
-  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container:has(.t-zoomer__close.tc-gallery-arrow-pressed)::after {
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper:has(.t-zoomer__scale.tc-gallery-arrow-pressed)::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper:has(.t-zoomer__close.tc-gallery-arrow-pressed)::after {
     animation: tcProductGalleryArrowPress .36s ease-in-out;
   }
 }
 
 /* Filter the real backdrop, including the page outside the fullscreen photo. */
-@media (min-width: 981px) and (pointer: fine) {
+@media (min-width: 981px) and (pointer: fine), (max-width: 980px) {
   body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) > .t-zoomer__ui-item {
     background: transparent !important;
     color: #fff !important;
     -webkit-backdrop-filter: invert(1);
     backdrop-filter: invert(1);
+    border-radius: 0 !important;
+    -webkit-mask: url('./assets/black_icon_circle.svg') center / contain no-repeat;
+    mask: url('./assets/black_icon_circle.svg') center / contain no-repeat;
+  }
+
+  /* Fixed quarter turns diversify the silhouette; counter-rotate only the glyph. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__control_right > .t-zoomer__ui-item {
+    --tc-gallery-shape-turn: 90deg;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__scale {
+    --tc-gallery-shape-turn: 180deg;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__close {
+    --tc-gallery-shape-turn: 270deg;
   }
 
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-item::before {
     mix-blend-mode: difference;
+    transform: rotate(calc(-1 * var(--tc-gallery-shape-turn, 0deg)));
+  }
+}
+
+/* Desktop fullscreen: blend the complete white shape + black glyph once. */
+@media (min-width: 981px) and (pointer: fine) {
+  /* Only the photo advertises zoom; the empty fullscreen backdrop stays neutral. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__bg,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__inner {
+    cursor: default;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__img {
+    cursor: zoom-in;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper.scale-active .t-carousel__zoomer__img {
+    cursor: zoom-out;
+  }
+  /* Do not isolate arrows from the viewer backdrop in a transparent stacking context. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container {
+    z-index: auto;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__bg {
+    z-index: -1; /* Keep the native sibling backdrop behind the photo. */
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) {
+    mix-blend-mode: difference;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper {
+    z-index: 2147483646; /* Root-level black shadows paint after this blended group. */
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper :is(.t-carousel__zoomer__control, .t-zoomer__ui-wrapper) > .t-zoomer__ui-item {
+    background: #fff !important;
+    color: #000 !important;
+    opacity: var(--tc-fullscreen-control-opacity, .75) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-item::before {
+    mix-blend-mode: normal;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__scale::before {
+    background: #000;
+  }
+
+  /* No circular shadow or residual filtered silhouette inside the toolbar. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::after {
+    content: none !important;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::before,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::after,
+  body.tc-product-popup-open .t-zoomer__wrapper::before,
+  body.tc-product-popup-open .t-zoomer__wrapper::after {
+    /* 400px padding on each side of the original 1254px SVG gives 2054px. */
+    position: absolute;
+    width: calc(var(--tc-gallery-arrow-size) * 2054 / 1254);
+    height: calc(var(--tc-gallery-arrow-size) * 2054 / 1254);
+    background: url('./assets/black_icon_circle_shadow.svg#turn-0') center / contain no-repeat;
+    border-radius: 0;
+    box-shadow: none;
+    filter: none;
+    mix-blend-mode: normal;
+    opacity: var(--tc-fullscreen-control-opacity, .75);
+    --tc-gallery-shape-turn: 0deg; /* Shadow orientation is baked before blur, not after. */
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: opacity var(--tc-fullscreen-control-fade, .5s) ease;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::before {
+    margin-left: calc(var(--tc-gallery-arrow-size) * -400 / 1254);
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__slides::after {
+    margin-right: calc(var(--tc-gallery-arrow-size) * -400 / 1254);
+    background-image: url('./assets/black_icon_circle_shadow.svg#turn-90');
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper::before,
+  body.tc-product-popup-open .t-zoomer__wrapper::after {
+    content: none;
+    top: 33px; /* Native toolbar top 13px + half of its 40px button. */
+    margin-right: calc(var(--tc-gallery-arrow-size) * -400 / 1254);
+    z-index: 2147483647;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__ui-wrapper > .t-zoomer__scale:not(.t-zoomer__scale--disabled):not([style*="display: none"]))::before {
+    content: '';
+    right: 63px; /* 13px toolbar inset + 40px close + 10px gap. */
+    background-image: url('./assets/black_icon_circle_shadow.svg#turn-180');
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__ui-wrapper > .t-zoomer__close:not([style*="display: none"]))::after {
+    content: '';
+    right: 13px;
+    background-image: url('./assets/black_icon_circle_shadow.svg#turn-270');
+  }
+
+  /* Keep the accepted photo geometry; strengthen only its downward shadows. */
+  body.tc-product-popup-open .t-zoomer__wrapper:not(.scale-active) .t-carousel__zoomer__inner {
+    top: 40px;
+    bottom: 50px;
+    overflow: visible;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper:not(.scale-active) .t-carousel__zoomer__img {
+    max-height: calc(100vh - 90px);
+    max-width: calc(100vw - 90px);
+    box-shadow: 0 8px 12px -6px rgba(0,0,0,.30), 0 22px 30px -12px rgba(0,0,0,.40);
+  }
+}
+
+@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__scale.tc-gallery-arrow-pressed)::before,
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__close.tc-gallery-arrow-pressed)::after {
+    animation: tcProductGalleryArrowPress .36s ease-in-out;
   }
 }
