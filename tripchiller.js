@@ -2,18 +2,23 @@
   "use strict";
 
   window.__TC_EXTERNAL_CODE_VERSION__ = 'shop-hardfix-2026-06-11-v2';
-  // Gate only the desktop home entrance; back/forward restores its existing view.
+  // Gate the home entrance; back/forward restores its existing view.
   window.__TC_DESKTOP_ENTRY_PENDING__ = location.pathname === '/' &&
     window.matchMedia('(min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches &&
     ((performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {}).type !== 'back_forward';
-  if (window.__TC_DESKTOP_ENTRY_PENDING__) {
-    document.documentElement.classList.add('tc-desktop-entry-pending');
+  window.__TC_MOBILE_ENTRY_PENDING__ = location.pathname === '/' &&
+    window.matchMedia('(max-width: 980px), (pointer: coarse)').matches &&
+    window.matchMedia('(prefers-reduced-motion: no-preference)').matches &&
+    ((performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {}).type !== 'back_forward';
+  if (window.__TC_DESKTOP_ENTRY_PENDING__ || window.__TC_MOBILE_ENTRY_PENDING__) {
+    document.documentElement.classList.add(window.__TC_DESKTOP_ENTRY_PENDING__ ? 'tc-desktop-entry-pending' : 'tc-mobile-entry-pending');
     setTimeout(function () {
-      if (!window.__TC_DESKTOP_ENTRY_PENDING__) return;
+      if (!window.__TC_DESKTOP_ENTRY_PENDING__ && !window.__TC_MOBILE_ENTRY_PENDING__) return;
       if (window.__TC_FINISH_DESKTOP_ENTRY__) window.__TC_FINISH_DESKTOP_ENTRY__();
       else {
         window.__TC_DESKTOP_ENTRY_PENDING__ = false;
-        document.documentElement.classList.remove('tc-desktop-entry-pending');
+        window.__TC_MOBILE_ENTRY_PENDING__ = false;
+        document.documentElement.classList.remove('tc-desktop-entry-pending', 'tc-mobile-entry-pending');
         window.dispatchEvent(new CustomEvent('tc:catalog-entry-start'));
         window.dispatchEvent(new CustomEvent('tc:catalog-entry-ready'));
       }
@@ -1193,7 +1198,7 @@ if (flowerEl){
       }
 
 requestAnimationFrame(animate);
-if (window.__TC_DESKTOP_ENTRY_PENDING__) {
+if (window.__TC_DESKTOP_ENTRY_PENDING__ || window.__TC_MOBILE_ENTRY_PENDING__) {
   window.addEventListener('tc:catalog-entry-ready', runReturnIntroRoll, { once: true });
 } else runIntroRoll();
 
@@ -4103,12 +4108,25 @@ eyeUnlockTimer = setTimeout(function(){
   let desktopAssetsReady = !isDesktopHome;
   let desktopAssetsReadyAt = 0;
   let desktopEntryStarted = false;
+  let mobileBWReady = !window.__TC_MOBILE_ENTRY_PENDING__;
 
   function revealDesktopBackground() {
     desktopEntryStarted = true;
-    if (desktopAssetsReady) bg.classList.add('is-visible');
+    if (desktopAssetsReady && mobileBWReady) bg.classList.add('is-visible');
   }
   window.addEventListener('tc:catalog-entry-start', revealDesktopBackground, { once: true });
+  if (!mobileBWReady) {
+    const image = new Image();
+    image.src = BG_BW_MOBILE;
+    const ready = image.decode ? image.decode().catch(function () {}) : new Promise(function (resolve) {
+      if (image.complete) resolve();
+      else image.onload = image.onerror = resolve;
+    });
+    ready.then(function () {
+      mobileBWReady = true;
+      if (desktopEntryStarted) bg.classList.add('is-visible');
+    });
+  }
   if (isDesktopHome) {
     Promise.all([BG_BW_DESKTOP, BG_COLOR_EYES_DESKTOP, BG_COLOR_CLEAN_DESKTOP, BG_COLOR_RED].map(function (url) {
       const image = new Image();
@@ -4181,7 +4199,7 @@ eyeUnlockTimer = setTimeout(function(){
     setTimeout(function () {
       if (isDesktop) {
         if (!window.__TC_DESKTOP_ENTRY_PENDING__) revealDesktopBackground();
-      } else bg.classList.add("is-visible");
+      } else if (!window.__TC_MOBILE_ENTRY_PENDING__) revealDesktopBackground();
     }, 1000);
 
     if (isDesktop || isMobile) {
@@ -5164,8 +5182,8 @@ function setupDesktopAura() {
       if (changed) window.dispatchEvent(new CustomEvent('tc:catalog-section', { detail: name }));
     }
     if (changed && isCustom && shop && location.pathname === '/' &&
-        !window.__TC_DESKTOP_ENTRY_PENDING__ &&
-        window.matchMedia('(min-width:981px) and (pointer:fine) and (prefers-reduced-motion:no-preference)').matches &&
+        !window.__TC_DESKTOP_ENTRY_PENDING__ && !window.__TC_MOBILE_ENTRY_PENDING__ &&
+        window.matchMedia('(prefers-reduced-motion:no-preference)').matches &&
         shop.querySelector('.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item')) {
       void shop.offsetWidth;
       shop.classList.add('tc-entry-filters-out');
@@ -5847,7 +5865,7 @@ function setupDesktopAura() {
   var DESKTOP_CARD_SELECTOR = '.t-catalog__card, .t-store__card, .t-catalog__product, .t778__col';
 
   function desktopEntryEnabled() {
-    return isDesktopProductBackMode() && location.pathname === '/' && !isProductRoute() &&
+    return (isDesktopProductBackMode() || window.matchMedia('(max-width: 980px), (pointer: coarse)').matches) && location.pathname === '/' && !isProductRoute() &&
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
@@ -5878,10 +5896,11 @@ function setupDesktopAura() {
   }
 
   function releaseDesktopEntry() {
-    if (!window.__TC_DESKTOP_ENTRY_PENDING__) return;
+    if (!window.__TC_DESKTOP_ENTRY_PENDING__ && !window.__TC_MOBILE_ENTRY_PENDING__) return;
     window.__TC_DESKTOP_ENTRY_PENDING__ = false;
-    var wasWaiting = document.documentElement.classList.contains('tc-desktop-entry-pending');
-    document.documentElement.classList.remove('tc-desktop-entry-pending');
+    window.__TC_MOBILE_ENTRY_PENDING__ = false;
+    var wasWaiting = document.documentElement.classList.contains('tc-desktop-entry-pending') || document.documentElement.classList.contains('tc-mobile-entry-pending');
+    document.documentElement.classList.remove('tc-desktop-entry-pending', 'tc-mobile-entry-pending');
     if (wasWaiting) window.dispatchEvent(new CustomEvent('tc:catalog-entry-start'));
     window.dispatchEvent(new CustomEvent('tc:catalog-entry-ready'));
   }
@@ -5921,7 +5940,7 @@ function setupDesktopAura() {
         grid.classList.remove('tc-entry-filters');
       }, 1000);
     }
-    document.documentElement.classList.remove('tc-desktop-entry-pending');
+    document.documentElement.classList.remove('tc-desktop-entry-pending', 'tc-mobile-entry-pending');
     window.dispatchEvent(new CustomEvent('tc:catalog-entry-start'));
     entryTimer = setTimeout(function () {
       clearDesktopCards(replayFilters);
@@ -6043,8 +6062,8 @@ function setupDesktopAura() {
   }
 
   function startIntro() {
-    if (isDesktopProductBackMode()) {
-      return window.__TC_DESKTOP_ENTRY_PENDING__ && !suppressedByNavigation && !isProductRoute() ? startDesktopEntry() : false;
+    if (isDesktopProductBackMode() || window.matchMedia('(max-width: 980px), (pointer: coarse)').matches) {
+      return (window.__TC_DESKTOP_ENTRY_PENDING__ || window.__TC_MOBILE_ENTRY_PENDING__) && !suppressedByNavigation && !isProductRoute() ? startDesktopEntry() : false;
     }
     if (!shouldStartIntro()) {
       hasProductReturnState();
@@ -6060,7 +6079,7 @@ function setupDesktopAura() {
   }
 
   function scheduleInitialIntro() {
-    if (isDesktopProductBackMode()) {
+    if (isDesktopProductBackMode() || window.matchMedia('(max-width: 980px), (pointer: coarse)').matches) {
       [1000, 1120, 1350, 1700, 2200, 2800].forEach(function (delay) {
         setTimeout(function () { if (!introStarted) startIntro(); }, delay);
       });
@@ -6095,7 +6114,7 @@ function setupDesktopAura() {
   window.addEventListener('hashchange', suppressAfterNavigation);
   window.addEventListener('tc:catalog-section', function () {
     catalogAction = null;
-    if (!window.__TC_DESKTOP_ENTRY_PENDING__) startDesktopEntry(true);
+    if (!window.__TC_DESKTOP_ENTRY_PENDING__ && !window.__TC_MOBILE_ENTRY_PENDING__) startDesktopEntry(true);
   });
   window.addEventListener('click', function (event) {
     if (!desktopEntryEnabled() || !event.target.closest) return;
