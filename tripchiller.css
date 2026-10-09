@@ -5418,6 +5418,19 @@ body.tc-product-page-active .tc-menu-eye-logo {
 
 /* Desktop fullscreen: blend the complete white shape + black glyph once. */
 @media (min-width: 981px) and (pointer: fine) {
+  /* Only the photo advertises zoom; the empty fullscreen backdrop stays neutral. */
+  body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__bg,
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__inner {
+    cursor: default;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper .t-carousel__zoomer__img {
+    cursor: zoom-in;
+  }
+
+  body.tc-product-popup-open .t-zoomer__wrapper.scale-active .t-carousel__zoomer__img {
+    cursor: zoom-out;
+  }
   /* Do not isolate arrows from the viewer backdrop in a transparent stacking context. */
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container {
     z-index: auto;
