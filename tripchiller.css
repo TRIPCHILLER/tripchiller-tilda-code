@@ -4046,21 +4046,20 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
 
 /* 5.2) controlled one-shot intro for catalog cards */
 @media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  html:not(.tc-external-code-loaded) :is(.uc-shop-grid, .uc-custom-grid) :is(.t-catalog__card, .t-store__card, .t-catalog__product, .t778__col):nth-child(-n+3),
-  html.tc-desktop-entry-pending :is(.uc-shop-grid, .uc-custom-grid) :is(.t-catalog__card, .t-store__card, .t-catalog__product, .t778__col):nth-child(-n+3) {
+  html:not(.tc-external-code-loaded) :is(.uc-shop-grid, .uc-custom-grid) :is(.t-catalog__card, .t-store__card, .t-catalog__product, .t778__col),
+  html.tc-desktop-entry-pending :is(.uc-shop-grid, .uc-custom-grid) :is(.t-catalog__card, .t-store__card, .t-catalog__product, .t778__col) {
     opacity: 0 !important;
     pointer-events: none;
   }
   html:not(.tc-external-code-loaded) :is(.uc-shop-grid, .uc-custom-grid) :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item),
   html.tc-desktop-entry-pending :is(.uc-shop-grid, .uc-custom-grid) :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item),
-  .tc-entry-playing:not(.tc-entry-filters) :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item) {
+  .tc-entry-playing:not(.tc-entry-filters):not(.tc-entry-content-only) :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item) {
     opacity: 0 !important;
     visibility: hidden;
   }
   html.tc-desktop-entry-pending #tc-fixed-bg { opacity: 0 !important; }
   .tc-entry-playing .tc-entry-card {
     animation: tcDesktopCardEntry 500ms cubic-bezier(.16,.84,.24,1) var(--tc-entry-delay) both !important;
-    will-change: transform, opacity;
   }
   .tc-entry-filters :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item) {
     animation: tcDesktopFilterEntry 1000ms ease both;
