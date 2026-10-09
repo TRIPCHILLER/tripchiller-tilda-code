@@ -6298,7 +6298,22 @@ function setupDesktopAura() {
       return 24000;
     }
 
+    function syncPhotoNavPositions() {
+      if (!window.matchMedia('(min-width: 981px) and (pointer: fine)').matches) return;
+      if (!track || !activeSlide || !activeImg || !prevImg || !nextImg) return;
+      var slideWidth = activeSlide.getBoundingClientRect().width;
+      var step = slideWidth + (parseFloat(getComputedStyle(track).columnGap) || 0);
+      var halfViewport = viewport.getBoundingClientRect().width / 2;
+      var activeWidth = activeImg.naturalWidth ? activeImg.getBoundingClientRect().width : slideWidth;
+      [[prevImg, prevBtn, '--tc-user-nav-prev'], [nextImg, nextBtn, '--tc-user-nav-next']].forEach(function (slot) {
+        var width = slot[0].naturalWidth ? slot[0].getBoundingClientRect().width : slideWidth;
+        var inset = halfViewport - step / 2 + (width - activeWidth) / 4 - slot[1].getBoundingClientRect().width / 2;
+        section.style.setProperty(slot[2], inset + 'px');
+      });
+    }
+
     function syncTickerSpeeds() {
+      syncPhotoNavPositions();
       if (!topTickerTrack || !bottomTickerTrack) return;
 
       var topWidth = topTickerTrack.scrollWidth || 0;
@@ -6389,6 +6404,7 @@ function setupDesktopAura() {
       setPhotoSlot(nextLink, nextImg, ids.next, 'next');
       setPhotoSlot(farNextLink, farNextImg, ids.farNext, 'far-next');
       preloadNeighbors(current);
+      scheduleTickerSpeedSync();
     }
 
     function cleanupSlideState() {
@@ -6772,6 +6788,9 @@ function setupDesktopAura() {
     }
 
 
+    [prevImg, activeImg, nextImg].forEach(function (img) {
+      if (img) img.addEventListener('load', scheduleTickerSpeedSync);
+    });
     requestAnimationFrame(syncTickerSpeeds);
     window.addEventListener('load', syncTickerSpeeds);
     window.addEventListener('resize', scheduleTickerSpeedSync);
@@ -6787,6 +6806,9 @@ function setupDesktopAura() {
         }
         window.removeEventListener('load', syncTickerSpeeds);
         window.removeEventListener('resize', scheduleTickerSpeedSync);
+        [prevImg, activeImg, nextImg].forEach(function (img) {
+          if (img) img.removeEventListener('load', scheduleTickerSpeedSync);
+        });
 
         document.removeEventListener('visibilitychange', onVisibilityChange);
         prevBtn.removeEventListener('click', onPrev);
