@@ -2122,7 +2122,7 @@ html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
   #tc-fixed-bg .tc-bg-ripple {
     opacity: 0;
     transition: opacity 120ms linear;
-    will-change: opacity, transform, filter, mask-image, -webkit-mask-image;
+    will-change: opacity;
   }
 
   #tc-fixed-bg .tc-bg-color,
@@ -4045,6 +4045,36 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
 }
 
 /* 5.2) controlled one-shot intro for catalog cards */
+@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not(.tc-external-code-loaded) :is(.uc-shop-grid, .uc-custom-grid) :is(.t-catalog__card, .t-store__card, .t-catalog__product, .t778__col):nth-child(-n+3),
+  html.tc-desktop-entry-pending :is(.uc-shop-grid, .uc-custom-grid) :is(.t-catalog__card, .t-store__card, .t-catalog__product, .t778__col):nth-child(-n+3) {
+    opacity: 0 !important;
+    pointer-events: none;
+  }
+  html:not(.tc-external-code-loaded) :is(.uc-shop-grid, .uc-custom-grid) :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item),
+  html.tc-desktop-entry-pending :is(.uc-shop-grid, .uc-custom-grid) :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item),
+  .tc-entry-playing :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item) {
+    opacity: 0 !important;
+    visibility: hidden;
+  }
+  html.tc-desktop-entry-pending #tc-fixed-bg { opacity: 0 !important; }
+  .tc-entry-playing .tc-entry-card {
+    animation: tcDesktopCardEntry 500ms cubic-bezier(.16,.84,.24,1) var(--tc-entry-delay) both !important;
+    will-change: transform, opacity;
+  }
+  .tc-entry-filters :is(.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item) {
+    animation: tcDesktopFilterEntry 1000ms ease both;
+  }
+}
+@keyframes tcDesktopCardEntry {
+  from { opacity: 0; transform: translate3d(0, var(--tc-entry-rise), 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes tcDesktopFilterEntry {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes tcCatalogCardIntro {
   from {
     opacity: 0;
