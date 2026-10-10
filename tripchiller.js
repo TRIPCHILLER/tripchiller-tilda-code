@@ -5626,11 +5626,14 @@ function setupDesktopAura() {
 
   function getProductLink(target) {
     if (!target || !target.closest) return null;
-    return target.closest('a[href*="/tproduct/"], a[href*="#!/tproduct/"], .js-product-url[href]');
+    return target.closest('a[href*="/tproduct/"], a[href*="#!/tproduct/"], .js-product-url[href]') ||
+      (window.matchMedia('(max-width: 980px), (pointer: coarse)').matches &&
+        target.closest('.uc-custom-grid .t778__col a[href^="#prodpopup"]'));
   }
 
   function getSourceCard(link) {
-    return link && link.closest(CATALOG_CARD_SELECTOR + ', #tc-user-photos-root');
+    return link && (link.closest(CATALOG_CARD_SELECTOR + ', #tc-user-photos-root') ||
+      (window.matchMedia('(max-width: 980px), (pointer: coarse)').matches && link.closest('.uc-custom-grid .t778__col')));
   }
 
   function saveReturnPosition(event) {
@@ -5653,12 +5656,23 @@ function setupDesktopAura() {
         productId: (href.match(/tproduct\/([^?#]+)/) || [])[1] || '',
         sourceCard: card,
         sourceCardTop: rect.top,
+        archive: !!link.closest('.uc-custom-grid .t778__col'),
         awaitingReturn: true
       };
       restoreActive = false;
       lastRestore = null;
     }
     if (event.type === 'click' && document.body) {
+      // T778 replaces the URL instead of pushing a product entry. Keep its origin for Back.
+      if (returnState.archive && window.matchMedia('(max-width: 980px), (pointer: coarse)').matches) {
+        var archivePopup = card.closest('.uc-custom-grid').querySelector('.t-popup');
+        if (archivePopup && !archivePopup.hasAttribute('data-tc-mobile-archive-history')) {
+          try {
+            history.pushState(history.state, '', location.href);
+            archivePopup.setAttribute('data-tc-mobile-archive-history', '');
+          } catch (_) {}
+        }
+      }
       document.body.style.setProperty('--tc-product-catalog-height', document.documentElement.scrollHeight + 'px');
       document.body.classList.add('tc-product-return-preserved');
       document.documentElement.classList.add('tc-product-return-preserved');
@@ -5790,10 +5804,28 @@ function setupDesktopAura() {
   window.__TC_ARM_PRODUCT_RETURN_SCROLL__ = armReturnRestore;
   document.addEventListener('pointerdown', saveReturnPosition, true);
   document.addEventListener('click', saveReturnPosition, true);
-  document.addEventListener('catalog:popupClosed', armReturnRestore, true);
-  window.addEventListener('popstate', function () {
+  document.addEventListener('catalog:popupClosed', function (event) {
+    var popup = event.target;
+    if (popup && popup.matches('.uc-custom-grid .t-popup') && popup.hasAttribute('data-tc-mobile-archive-history')) {
+      popup.removeAttribute('data-tc-mobile-archive-history');
+      if (isProductRoute()) history.back();
+    }
+    armReturnRestore();
+  }, true);
+  window.addEventListener('popstate', function (event) {
     if (!window.matchMedia || !window.matchMedia('(max-width: 980px), (pointer: coarse)').matches) return;
     if (!returnState || !returnState.awaitingReturn || isProductRoute()) return;
+
+    if (returnState.archive) {
+      // Do not let the main catalog's stale history handler re-render the gallery.
+      event.stopImmediatePropagation();
+      var archivePopup = document.querySelector('.uc-custom-grid .t-popup.t-popup_show');
+      if (archivePopup && typeof window.t778_closePopup === 'function') window.t778_closePopup(document.body, archivePopup);
+      if (typeof window.__TC_FORCE_PRODUCT_ROUTE_MODE__ === 'function') window.__TC_FORCE_PRODUCT_ROUTE_MODE__();
+      if (typeof window.__TC_SYNC_SITE_HEADER_REVEAL__ === 'function') window.__TC_SYNC_SITE_HEADER_REVEAL__();
+      armReturnRestore();
+      return;
+    }
 
     var popup = document.querySelector('.t-popup.t-popup_show, .t-store__prod-popup.t-popup_show');
     var close = popup && popup.querySelector('.t-popup__close');
@@ -8492,6 +8524,10 @@ function setupDesktopAura() {
   function getMobileProductTextBlock(surface) {
     if (!surface) return null;
 
+    if (surface.closest('.uc-custom-grid')) {
+      return surface.querySelector('.t778__product-full[style*="display: block"] .t778__descr');
+    }
+
     return surface.querySelector(
       '.js-catalog-prod-all-text, ' +
       '.js-catalog-prod-text, ' +
@@ -8545,6 +8581,11 @@ function setupDesktopAura() {
       event.preventDefault();
       event.stopPropagation();
       if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+      if (surface.closest('.uc-custom-grid') && !surface.hasAttribute('data-tc-mobile-archive-history')) {
+        if (typeof window.t778_closePopup === 'function') window.t778_closePopup(document.body, surface);
+        else closeProductPopupViaNativeCloseControl();
+        return;
+      }
       history.back();
     };
 
