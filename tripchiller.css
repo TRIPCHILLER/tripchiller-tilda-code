@@ -2528,6 +2528,13 @@ html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
     animation: tcCaretBlink .72s steps(1, end) infinite;
   }
 
+  .tw-printing.is-currently-typing::after {
+    content: '|';
+    display: inline-block;
+    color: currentColor;
+    animation: tcCaretBlink .72s steps(1, end) infinite;
+  }
+
   @keyframes tcCaretBlink {
     0%, 49% {
       opacity: 1;
@@ -4908,6 +4915,27 @@ body.tc-product-page-active .tc-menu-eye-logo {
     color: #fff !important;
     opacity: 1 !important;
   }
+}
+
+/* Tight SVG outlines also clip pointer hit testing; native text/layout/colors stay. */
+#allrecords button.tc-safe-load-more-btn,
+#allrecords .t-btn.tc-safe-load-more-btn,
+#allrecords button.js-catalog-load-more-btn,
+#allrecords .js-store-load-more-btn,
+#allrecords .t-store__load-more-btn,
+#allrecords .t778__showmore {
+  border-radius: 0 !important;
+  clip-path: url('#tc-load-more-shape');
+}
+
+#allrecords a.tc-legal-btn[href*='/offer_agreement'] {
+  border-radius: 0 !important;
+  clip-path: url('#tc-offer-shape');
+}
+
+#allrecords a.tc-legal-btn[href*='/data_processing_policy'] {
+  border-radius: 0 !important;
+  clip-path: url('#tc-policy-shape');
 }
 
 #allrecords button.tc-safe-load-more-btn,
