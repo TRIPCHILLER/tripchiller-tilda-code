@@ -2413,6 +2413,13 @@ html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
     display: block !important;
   }
 
+  body.tc-section-custom .uc-custom-grid::before {
+    content: '';
+    display: block;
+    height: var(--tc-archive-filter-space, 68px);
+    pointer-events: none;
+  }
+
   /* =========================================================
      SWITCHER BASE
      ========================================================= */
