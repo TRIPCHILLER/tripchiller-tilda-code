@@ -2426,7 +2426,7 @@ html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
   .tc-disk-switcher {
     width: fit-content;
     max-width: calc(100vw - 24px);
-    margin: 18px auto 10px;
+    margin: 31px auto 10px;
 
     display: flex;
     flex-direction: column;
@@ -2563,7 +2563,7 @@ html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
 
   @media (max-width: 640px) {
     .tc-disk-switcher {
-      margin: 14px auto 10px;
+      margin: 31px auto 10px;
       max-width: calc(100vw - 14px);
       gap: 4px;
     }
@@ -2571,6 +2571,12 @@ html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
     .tc-path-row {
       padding: 5px 9px;
       font-size: clamp(11px, 4.1vw, 18px);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .tc-disk-switcher {
+      margin-top: 29px;
     }
   }
 
