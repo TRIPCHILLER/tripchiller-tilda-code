@@ -5174,6 +5174,12 @@ function setupDesktopAura() {
     var isCustom = name === 'custom';
     var changed = !document.body.classList.contains(isCustom ? 'tc-section-custom' : 'tc-section-shop');
     var shop = document.querySelector('.uc-shop-grid');
+    var archive = document.querySelector('.uc-custom-grid');
+    var filters = shop && shop.querySelector('.t-catalog-parts-above__container, .t-store__parts-switch-wrapper, .t-catalog__parts-switch-wrapper');
+    if (archive && filters && filters.offsetHeight) {
+      var filterSpace = filters.offsetHeight + (parseFloat(getComputedStyle(filters).marginBottom) || 0);
+      archive.style.setProperty('--tc-archive-filter-space', filterSpace + 'px');
+    }
     clearTimeout(sectionFadeTimer);
     if (shop) {
       shop.classList.remove('tc-entry-filters-out');
