@@ -3932,8 +3932,9 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
 
 @media (min-width: 981px) and (pointer: fine) {
   .t-catalog__product-popup .t-catalog__prod-popup__title-wrapper,
-  .t-catalog__product-popup .t-catalog__prod-popup__name {
-    text-align: center !important;
+  .t-catalog__product-popup .t-catalog__prod-popup__name,
+  .t-catalog__product-popup .tc-product-popup-short-descr {
+    text-align: left !important;
   }
 }
 
@@ -3972,6 +3973,23 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
   text-align: center;
   line-height: 1.35;
 }
+
+@media (min-width: 981px) and (pointer: fine) {
+  .t-catalog__product-popup .t-product__option-variants_custom.t-product__option-variants_radio {
+    justify-content: flex-start;
+    max-width: 210px;
+    gap: 16px 6px;
+    margin: 8px 0 0 !important;
+  }
+  .t-catalog__product-popup .t-product__option-variants_custom > .t-product__option-item_radio {
+    flex-basis: calc((100% - 12px) / 3);
+    align-items: flex-start;
+  }
+  .t-catalog__product-popup .t-product__option-item_radio > .t-product__option-title {
+    width: 100%;
+  }
+}
+
 
 /* 4) скрываем технический хвост характеристик в основном теле */
 #allrecords .t-store__prod-popup .js-store-prod-all-charcs,
