@@ -5177,7 +5177,7 @@ function setupDesktopAura() {
     clearTimeout(sectionFadeTimer);
     if (shop) {
       shop.classList.remove('tc-entry-filters-out');
-      shop.style.removeProperty('--tc-filter-exit-height');
+      shop.style.removeProperty('--tc-filter-exit-top');
     }
     function applySection() {
       document.body.classList.toggle('tc-section-shop', !isCustom);
@@ -5189,15 +5189,13 @@ function setupDesktopAura() {
         !window.__TC_DESKTOP_ENTRY_PENDING__ && !window.__TC_MOBILE_ENTRY_PENDING__ &&
         window.matchMedia('(prefers-reduced-motion:no-preference)').matches &&
         shop.querySelector('.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item')) {
-      var filters = shop.querySelector('.t-catalog-parts-above__container, .t-store__parts-switch-wrapper, .t-catalog__parts-switch-wrapper, .tc-safe-filter-item');
-      var height = filters.getBoundingClientRect().height + (parseFloat(getComputedStyle(filters).marginBottom) || 0);
-      shop.style.setProperty('--tc-filter-exit-height', height + 'px');
+      shop.style.setProperty('--tc-filter-exit-top', getComputedStyle(shop).paddingTop);
       void shop.offsetWidth;
       shop.classList.add('tc-entry-filters-out');
       applySection();
       sectionFadeTimer = setTimeout(function () {
         shop.classList.remove('tc-entry-filters-out');
-        shop.style.removeProperty('--tc-filter-exit-height');
+        shop.style.removeProperty('--tc-filter-exit-top');
       }, 1000);
     } else applySection();
   }
