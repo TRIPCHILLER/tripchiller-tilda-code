@@ -8277,7 +8277,7 @@ function setupDesktopAura() {
     var productId = getCurrentTildaProductId();
     if (!productId) return '';
 
-    var cards = document.querySelectorAll('.js-product.t-catalog__card, .t-catalog__card.js-product');
+    var cards = document.querySelectorAll('.uc-shop-grid .js-product.t-catalog__card');
 
     for (var i = 0; i < cards.length; i += 1) {
       var card = cards[i];
@@ -8287,7 +8287,7 @@ function setupDesktopAura() {
       var href = link.getAttribute('href') || '';
       if (href.indexOf(productId) === -1) continue;
 
-      var descr = card.querySelector('.js-catalog-prod-descr');
+      var descr = card.querySelector('.js-product-descr, .t-catalog__card__descr, .js-catalog-prod-descr');
       if (!descr) return '';
 
       return (descr.textContent || '').replace(/\s+/g, ' ').trim();
