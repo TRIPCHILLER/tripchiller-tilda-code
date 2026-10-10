@@ -4160,21 +4160,22 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
   /* Keep only the outgoing filter strip while archive cards enter. */
   body.tc-section-custom .uc-shop-grid.tc-entry-filters-out {
     display: block !important;
-    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+    height: 0 !important;
     min-height: 0 !important;
-    padding-bottom: 0 !important;
-    overflow: hidden !important;
+    padding: 0 !important;
+    overflow: visible !important;
     pointer-events: none;
-    animation: tcDesktopFilterCollapse 1000ms ease both !important;
+  }
+  body.tc-section-custom .uc-shop-grid.tc-entry-filters-out > :first-child {
+    position: relative;
+    top: var(--tc-filter-exit-top);
   }
   body.tc-section-custom .uc-shop-grid.tc-entry-filters-out .t-catalog__cont-w-filter,
   body.tc-section-custom .uc-shop-grid.tc-entry-filters-out .t-store__grid-cont {
     display: none !important;
   }
-}
-@keyframes tcDesktopFilterCollapse {
-  from { height: var(--tc-filter-exit-height); }
-  to { height: 0; padding-top: 0; }
 }
 @keyframes tcDesktopCardEntry {
   from { opacity: 0; transform: translate3d(0, var(--tc-entry-rise), 0); }
