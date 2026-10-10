@@ -3948,13 +3948,13 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
   flex-direction: row !important;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 16px 12px;
+  gap: 16px 6px;
   width: 100%;
-  max-width: 420px;
+  max-width: 210px;
   margin: 8px auto 0 !important;
 }
 .t-catalog__product-popup .t-product__option-variants_custom > .t-product__option-item_radio {
-  flex: 0 0 calc((100% - 24px) / 3);
+  flex: 0 0 calc((100% - 12px) / 3);
   min-width: 0;
   box-sizing: border-box;
   flex-direction: column !important;
@@ -5177,6 +5177,29 @@ body.tc-product-page-active .tc-menu-eye-logo {
   #allrecords .uc-custom-grid .t778__product-full .t778__col_left .t-slds__main {
     border-radius: 25px;
     overflow: hidden;
+  }
+}
+
+/* Desktop archive text follows the store info column; preserve mobile centering. */
+@media (min-width: 981px) and (pointer: fine) {
+  #allrecords .uc-custom-grid .t778__product-full .t778__title,
+  #allrecords .uc-custom-grid .t778__product-full .t778__title * {
+    text-align: left !important;
+  }
+
+  #allrecords .uc-custom-grid .t778__product-full .t778__descr {
+    width: 300px !important;
+    max-width: 100% !important;
+    font-weight: 300 !important;
+  }
+
+  #allrecords .uc-custom-grid .t778__product-full .t778__descr,
+  #allrecords .uc-custom-grid .t778__product-full .t778__descr * {
+    font-family: Corona, Arial, sans-serif !important;
+    font-size: 16px !important;
+    line-height: 1.55 !important;
+    color: rgba(0, 0, 0, .5) !important;
+    text-align: left !important;
   }
 }
 
