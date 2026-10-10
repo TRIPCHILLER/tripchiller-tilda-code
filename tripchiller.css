@@ -2775,12 +2775,13 @@ html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
   max-width: 54px !important;
   max-height: 54px !important;
   aspect-ratio: 1 / 1;
-  border-radius: 50% !important;
+  border-radius: 0 !important;
   appearance: none;
   -webkit-appearance: none;
   flex: 0 0 54px;
   border: 0;
-  background: #000;
+  background: transparent;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5));
   color: #fff;
   font-family: var(--tc-font-display), Arial, monospace;
   font-size: 34px;
@@ -2791,10 +2792,28 @@ html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
   cursor: pointer;
   transition: background-color .16s ease, color .08s linear, transform .06s ease, opacity .16s ease;
 }
-.tc-user-photos__nav:hover { background: #9d191c; }
-.tc-user-photos__nav:active { background: #9d191c; color: #bfbfbf; transform: translateY(-50%) scale(.96); }
+.tc-user-photos__nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #000;
+  -webkit-mask: url('./assets/black_icon_circle.svg') center / contain no-repeat;
+  mask: url('./assets/black_icon_circle.svg') center / contain no-repeat;
+  transform: rotate(var(--tc-community-shape-turn, 0deg));
+  transition: background-color .16s ease;
+  pointer-events: none;
+}
+.tc-user-photos__nav--next { --tc-community-shape-turn: 90deg; }
+.tc-user-photos__nav:hover::before,
+.tc-user-photos__nav:active::before,
+.tc-user-photos__nav.tc-gallery-arrow-pressed::before { background: #9d191c; }
+.tc-user-photos__nav:active { color: #bfbfbf; }
+@media (prefers-reduced-motion: no-preference) {
+  .tc-user-photos__nav.tc-gallery-arrow-pressed { animation: tcProductGalleryArrowPress 1s ease-in-out; }
+}
 .tc-user-photos__nav:disabled { opacity: .4; cursor: default; }
 .tc-user-photos__nav span {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2878,7 +2897,7 @@ html.tc-page-contacts #tc-fixed-bg.is-visible .tc-bg-bw {
     min-height: 44px !important;
     max-width: 44px !important;
     max-height: 44px !important;
-    border-radius: 50% !important;
+    border-radius: 0 !important;
     flex-basis: 44px;
     font-size: 26px;
   }
@@ -3898,18 +3917,79 @@ html.tc-product-page #rec2312983111 .t-catalog__prod-popup__sku,
   opacity: 0 !important;
 }
 
+.tc-product-popup-short-descr {
+  margin-top: 8px !important;
+  margin-bottom: 18px !important;
+  color: #808080 !important;
+  font-family: var(--tc-font-main, 'Corona', sans-serif) !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  line-height: 1.35 !important;
+  text-align: center !important;
+  letter-spacing: .02em !important;
+  text-transform: none !important;
+}
+
 @media (min-width: 981px) and (pointer: fine) {
-  .tc-product-popup-short-descr {
-    margin-top: 8px !important;
-    margin-bottom: 18px !important;
-    color: rgba(0, 0, 0, .52) !important;
-    font-family: 'DS VTCorona Cyr', 'Corona', monospace !important;
-    font-size: 16px !important;
-    line-height: 1.25 !important;
-    letter-spacing: .02em !important;
-    text-transform: none !important;
+  .t-catalog__product-popup .t-catalog__prod-popup__title-wrapper,
+  .t-catalog__product-popup .t-catalog__prod-popup__name,
+  .t-catalog__product-popup .tc-product-popup-short-descr {
+    text-align: left !important;
   }
 }
+
+/* Keep native option inputs; lay out complete choices in centered rows of three. */
+.t-catalog__product-popup .t-product__option[data-edition-option-id="Расцветка:" i] > .js-product-edition-option-name,
+.t-catalog__product-popup .t-product__option[data-edition-option-id="Расцветка" i] > .js-product-edition-option-name {
+  display: none !important;
+}
+.t-catalog__product-popup .t-product__option-variants_custom.t-product__option-variants_radio {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px 6px;
+  width: 100%;
+  max-width: 210px;
+  margin: 8px auto 0 !important;
+}
+.t-catalog__product-popup .t-product__option-variants_custom > .t-product__option-item_radio {
+  flex: 0 0 calc((100% - 12px) / 3);
+  min-width: 0;
+  box-sizing: border-box;
+  flex-direction: column !important;
+  align-items: center;
+  gap: 6px;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.t-catalog__product-popup .t-product__option-item_image > .t-product__option-checkmark {
+  margin: 0 0 0 26px !important;
+  flex-shrink: 0;
+}
+.t-catalog__product-popup .t-product__option-item_radio > .t-product__option-title {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  text-align: center;
+  line-height: 1.35;
+}
+
+@media (min-width: 981px) and (pointer: fine) {
+  .t-catalog__product-popup .t-product__option-variants_custom.t-product__option-variants_radio {
+    justify-content: flex-start;
+    max-width: 210px;
+    gap: 16px 6px;
+    margin: 8px 0 0 !important;
+  }
+  .t-catalog__product-popup .t-product__option-variants_custom > .t-product__option-item_radio {
+    flex-basis: calc((100% - 12px) / 3);
+    align-items: flex-start;
+  }
+  .t-catalog__product-popup .t-product__option-item_radio > .t-product__option-title {
+    width: 100%;
+  }
+}
+
 
 /* 4) скрываем технический хвост характеристик в основном теле */
 #allrecords .t-store__prod-popup .js-store-prod-all-charcs,
@@ -5097,6 +5177,29 @@ body.tc-product-page-active .tc-menu-eye-logo {
   #allrecords .uc-custom-grid .t778__product-full .t778__col_left .t-slds__main {
     border-radius: 25px;
     overflow: hidden;
+  }
+}
+
+/* Desktop archive text follows the store info column; preserve mobile centering. */
+@media (min-width: 981px) and (pointer: fine) {
+  #allrecords .uc-custom-grid .t778__product-full .t778__title,
+  #allrecords .uc-custom-grid .t778__product-full .t778__title * {
+    text-align: left !important;
+  }
+
+  #allrecords .uc-custom-grid .t778__product-full .t778__descr {
+    width: 300px !important;
+    max-width: 100% !important;
+    font-weight: 300 !important;
+  }
+
+  #allrecords .uc-custom-grid .t778__product-full .t778__descr,
+  #allrecords .uc-custom-grid .t778__product-full .t778__descr * {
+    font-family: Corona, Arial, sans-serif !important;
+    font-size: 16px !important;
+    line-height: 1.55 !important;
+    color: rgba(0, 0, 0, .5) !important;
+    text-align: left !important;
   }
 }
 

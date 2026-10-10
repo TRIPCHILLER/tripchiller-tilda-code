@@ -7684,14 +7684,15 @@ function setupDesktopAura() {
 
   function animateGalleryPress(event) {
     if (event.button !== 0 || !event.target || !event.target.closest) return;
+    var communityButton = event.target.closest('.tc-user-photos__nav');
     if (photoZoom && event.type === 'click' && event.target.closest('.t-carousel__zoomer__control, .t-zoomer__close') && photoZoom.wrapper.contains(event.target)) clearPhotoZoom();
     var desktop = window.matchMedia('(min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches;
     var touchViewer = window.matchMedia('(max-width: 980px) and (prefers-reduced-motion: no-preference)').matches && event.target.closest('body.tc-product-popup-open .t-zoomer__wrapper');
-    if (!desktop && !touchViewer) return;
-    if (event.type === 'pointerdown' && !touchViewer) return;
-    var button = event.target.closest('.t-slds__arrow, .t-carousel__zoomer__control, .t-zoomer__scale, .t-zoomer__close');
+    if (!desktop && !touchViewer && !(communityButton && !window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    if (event.type === 'pointerdown' && (!touchViewer || communityButton)) return;
+    var button = communityButton || event.target.closest('.t-slds__arrow, .t-carousel__zoomer__control, .t-zoomer__scale, .t-zoomer__close');
     if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return;
-    if (!button.closest('#allrecords .t-catalog__prod-popup__slider, #allrecords .t-store__prod-popup__slider, #allrecords .uc-custom-grid .t778__product-full .t778__col_left, body.tc-product-popup-open .t-zoomer__wrapper')) return;
+    if (!communityButton && !button.closest('#allrecords .t-catalog__prod-popup__slider, #allrecords .t-store__prod-popup__slider, #allrecords .uc-custom-grid .t778__product-full .t778__col_left, body.tc-product-popup-open .t-zoomer__wrapper')) return;
 
     // The compatibility click follows pointerdown; avoid replaying the same pulse.
     if (event.type === 'click' && touchViewer && button.classList.contains('tc-gallery-arrow-pressed')) return;
@@ -7703,7 +7704,7 @@ function setupDesktopAura() {
     button.__tcGalleryArrowPressTimer = setTimeout(function () {
       button.classList.remove('tc-gallery-arrow-pressed');
       button.__tcGalleryArrowPressTimer = null;
-    }, 400);
+    }, communityButton ? 1000 : 400);
   }
 
   document.addEventListener('click', animateGalleryPress, true);
@@ -8277,7 +8278,7 @@ function setupDesktopAura() {
     var productId = getCurrentTildaProductId();
     if (!productId) return '';
 
-    var cards = document.querySelectorAll('.js-product.t-catalog__card, .t-catalog__card.js-product');
+    var cards = document.querySelectorAll('.uc-shop-grid .js-product.t-catalog__card');
 
     for (var i = 0; i < cards.length; i += 1) {
       var card = cards[i];
@@ -8287,7 +8288,7 @@ function setupDesktopAura() {
       var href = link.getAttribute('href') || '';
       if (href.indexOf(productId) === -1) continue;
 
-      var descr = card.querySelector('.js-catalog-prod-descr');
+      var descr = card.querySelector('.js-product-descr, .t-catalog__card__descr, .js-catalog-prod-descr');
       if (!descr) return '';
 
       return (descr.textContent || '').replace(/\s+/g, ' ').trim();
