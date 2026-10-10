@@ -5175,9 +5175,11 @@ function setupDesktopAura() {
     var changed = !document.body.classList.contains(isCustom ? 'tc-section-custom' : 'tc-section-shop');
     var shop = document.querySelector('.uc-shop-grid');
     clearTimeout(sectionFadeTimer);
-    if (shop) shop.classList.remove('tc-entry-filters-out');
+    if (shop) {
+      shop.classList.remove('tc-entry-filters-out');
+      shop.style.removeProperty('--tc-filter-exit-height');
+    }
     function applySection() {
-      if (shop) shop.classList.remove('tc-entry-filters-out');
       document.body.classList.toggle('tc-section-shop', !isCustom);
       document.body.classList.toggle('tc-section-custom', isCustom);
       refreshTildaLayout();
@@ -5187,9 +5189,16 @@ function setupDesktopAura() {
         !window.__TC_DESKTOP_ENTRY_PENDING__ && !window.__TC_MOBILE_ENTRY_PENDING__ &&
         window.matchMedia('(prefers-reduced-motion:no-preference)').matches &&
         shop.querySelector('.t-catalog__parts-switch-wrapper, .t-store__parts-switch-wrapper, .tc-safe-filter-item')) {
+      var filters = shop.querySelector('.t-catalog-parts-above__container, .t-store__parts-switch-wrapper, .t-catalog__parts-switch-wrapper, .tc-safe-filter-item');
+      var height = filters.getBoundingClientRect().height + (parseFloat(getComputedStyle(filters).marginBottom) || 0);
+      shop.style.setProperty('--tc-filter-exit-height', height + 'px');
       void shop.offsetWidth;
       shop.classList.add('tc-entry-filters-out');
-      sectionFadeTimer = setTimeout(applySection, 1000);
+      applySection();
+      sectionFadeTimer = setTimeout(function () {
+        shop.classList.remove('tc-entry-filters-out');
+        shop.style.removeProperty('--tc-filter-exit-height');
+      }, 1000);
     } else applySection();
   }
 
