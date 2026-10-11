@@ -7587,6 +7587,52 @@ function setupDesktopAura() {
   observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
 
+/* Russian copy for the native T972; keep its elements and consent handlers. */
+(function () {
+  if (window.__TC_COOKIE_COPY_RU_V1__) return;
+  window.__TC_COOKIE_COPY_RU_V1__ = true;
+
+  function translateCookies() {
+    document.querySelectorAll('#allrecords [data-record-type="972"] .t972').forEach(function (panel) {
+      function text(selector, value) {
+        var node = panel.querySelector(selector);
+        if (node) node.textContent = value;
+      }
+      text('.t972__title', 'Здесь могла бы быть шутка про печенье');
+      text('.t972__text', 'К вашему вниманию мы относимся серьёзно. Cookie нужны для работы сайта. А разрешать ли дополнительные cookie для аналитики и рекламы — решаете вы.');
+      text('.t972__accept-btn .t-btnflex__text', 'ПРИНЯТЬ ВСЕ');
+      text('.t972__reject-btn .t-btnflex__text', 'ОТКЛОНИТЬ НЕОБЯЗАТЕЛЬНЫЕ');
+      text('.t972__settings-btn .t-btnflex__text', 'НАСТРОИТЬ ВРУЧНУЮ');
+      text('.t972__settings-header span', 'К уведомлению');
+      text('.t972__settings-title', 'Настройки cookie');
+      text('.t972__settings-text', 'Необходимые cookie всегда включены. Остальные — на ваше усмотрение. Выберите категории и сохраните настройки.');
+      text('.t972__confirm-btn .t-btnflex__text', 'СОХРАНИТЬ ВЫБОР');
+
+      var copy = {
+        essential: ['Необходимые cookie', 'Эти cookie нужны для работы сайта и его основных функций. Их нельзя отключить в этой панели. Они используются, например, для сохранения настроек конфиденциальности и работы форм.'],
+        analytics: ['Аналитические cookie', 'При разрешении помогают понять, как посетители пользуются сайтом, оценить эффективность кампаний и улучшить взаимодействие с сайтом.'],
+        advertising: ['Рекламные cookie', 'При разрешении помогают показывать более подходящую рекламу и ограничивать её повторения. Информация об активности может передаваться рекламным сервисам.']
+      };
+      panel.querySelectorAll('.t972__category').forEach(function (category) {
+        var input = category.querySelector('.t972__toggle-input');
+        var key = input ? input.value : (category.querySelector('.js_always-enabled') ? 'essential' : '');
+        if (!Object.prototype.hasOwnProperty.call(copy, key)) return;
+        var title = category.querySelector('.t972__category-title');
+        var body = category.querySelector('.t972__category-body');
+        if (input) input.setAttribute('aria-label', copy[key][0]);
+        if (title) title.textContent = copy[key][0];
+        if (body) body.textContent = copy[key][1];
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', translateCookies, { once: true });
+  } else {
+    translateCookies();
+  }
+})();
+
 /* Product gallery: desktop clicks and touch fullscreen presses; native navigation stays intact. */
 (function () {
   if (window.__TC_PRODUCT_GALLERY_ARROW_PRESS__) return;
