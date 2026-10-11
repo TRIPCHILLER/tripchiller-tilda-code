@@ -5817,3 +5817,124 @@ body.tc-product-page-active .tc-menu-eye-logo {
     animation: tcProductGalleryArrowPress .36s ease-in-out;
   }
 }
+
+/* TRIPCHILLER / NATIVE T972 COOKIE CONSENT
+   Keep Tilda's visibility classes, buttons and consent handling intact. */
+#allrecords [data-record-type="972"] .t972,
+#allrecords [data-record-type="972"] .t972 * {
+  font-family: var(--tc-font-main) !important;
+  box-sizing: border-box;
+}
+
+#allrecords [data-record-type="972"] .t972:not(.t972_widgetview) {
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100%;
+}
+
+#allrecords [data-record-type="972"] .t972__banner {
+  width: 100%;
+  max-width: none;
+  padding: 22px clamp(20px, 3vw, 48px) calc(22px + env(safe-area-inset-bottom));
+  background: #9d191c;
+  color: #f7f3ef;
+  text-align: center;
+  border-radius: 0;
+  box-shadow: 0 -3px 0 #090909;
+}
+
+#allrecords [data-record-type="972"] :is(.t972__title, .t972__settings-title) {
+  color: #f7f3ef;
+  font-size: 23px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+#allrecords [data-record-type="972"] .t972__text {
+  color: #f7f3ef;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+#allrecords [data-record-type="972"] :is(.t972__buttons, .t972__buttons-wrap) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+#allrecords [data-record-type="972"] .t972__buttons { margin-top: 18px; }
+
+#allrecords [data-record-type="972"] .t972 .t-btn {
+  width: auto;
+  min-height: 46px;
+  height: auto;
+  margin: 0 !important;
+  padding: 13px 16px !important;
+  background: #090909 !important;
+  color: #f7f3ef !important;
+  border-radius: 2px;
+  font-size: 17px;
+  line-height: 1.3;
+  white-space: normal;
+}
+
+#allrecords [data-record-type="972"] .t972 .t-btn:hover { background: #231010 !important; }
+#allrecords [data-record-type="972"] .t972 .t-btn:focus-visible { outline: 2px solid #f7f3ef; outline-offset: 3px; }
+
+#allrecords [data-record-type="972"] .t972 .t972__settings-btn {
+  background: #fff !important;
+  color: #000 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#allrecords [data-record-type="972"] .t972 .t972__settings-btn:hover { background: #e6dfda !important; }
+
+#allrecords [data-record-type="972"] .t972__settings {
+  width: min(610px, 100%);
+  max-width: 610px;
+  margin-inline: auto;
+  background: #090909;
+  color: #f7f3ef;
+  border-top: 3px solid #9d191c;
+}
+
+#allrecords [data-record-type="972"] :is(.t972__settings-header, .t972__settings-footer) {
+  background: #090909;
+  color: #f7f3ef;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+#allrecords [data-record-type="972"] .t972__settings-arrow :is(line, path) { stroke: #f7f3ef; }
+#allrecords [data-record-type="972"] .t972__line { background: #f7f3ef !important; }
+#allrecords [data-record-type="972"] .t972__category-title { color: #f7f3ef; font-size: 18px; font-weight: 700; }
+#allrecords [data-record-type="972"] :is(.t972__settings-text, .t972__category-body) { color: #c6bdb6; font-size: 16px; line-height: 1.5; }
+#allrecords [data-record-type="972"] .t972__toggle-txt { color: #c6bdb6 !important; font-size: 14px; }
+#allrecords [data-record-type="972"] .t972__category { column-gap: 16px; row-gap: 12px; border-color: #3d3232; }
+#allrecords [data-record-type="972"] .t972__category-header { min-width: 0; flex-basis: 220px; }
+#allrecords [data-record-type="972"] .t972__toggle-input:checked + .t972__toggle-container :is(.t972__toggle-mark, .t972__toggle-background) { background: #9d191c !important; }
+#allrecords [data-record-type="972"] .t972 .t972__confirm-btn { width: 100%; background: #9d191c !important; }
+#allrecords [data-record-type="972"] .t972 .t972__confirm-btn:hover { background: #7d1114 !important; }
+
+@media (max-width: 640px) {
+  #allrecords [data-record-type="972"] .t972__settings { height: auto; }
+  #allrecords [data-record-type="972"] .t972__settings-footer { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+  #allrecords [data-record-type="972"] .t972__buttons-wrap { width: 100%; }
+  #allrecords [data-record-type="972"] .t972__buttons-wrap .t-btn { flex: 1 1 130px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #allrecords [data-record-type="972"] .t972__banner_show {
+    animation: tcNativeCookieReveal .65s cubic-bezier(.22, .68, .3, 1) both;
+  }
+}
+
+@keyframes tcNativeCookieReveal {
+  from { transform: translateY(calc(100% + 12px)); }
+  78% { transform: translateY(-4px); }
+  to { transform: translateY(0); }
+}
