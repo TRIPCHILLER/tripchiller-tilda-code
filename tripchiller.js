@@ -7168,7 +7168,7 @@ function setupDesktopAura() {
     '.t-store__loadmore, .t-store__load-more, .js-store-load-more, .t-catalog__loadmore, .t-catalog__load-more, ' +
     '.js-catalog-load-more, .js-catalog-load-more-btn, ' +
     '#allrecords .t778__btn-wrapper .t778__btn, .soc1 .tn-atom, .soc2 .tn-atom, .soc3 .tn-atom, .soc4 .tn-atom, ' +
-    '.tc-contact-link';
+    '.tc-contact-link, #allrecords [data-record-type="972"] .t972 :is(.t-btn, .t972__settings-header, .t972__category-header, .t972__toggle-label)';
 
   var activeTarget = null;
 

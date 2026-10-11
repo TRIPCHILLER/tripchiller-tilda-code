@@ -5940,8 +5940,9 @@ body.tc-product-page-active .tc-menu-eye-logo {
   border-radius: 0;
   box-shadow: none;
   background: #fff !important;
-  transform: none !important;
+  transform: scale(.72) !important;
   opacity: 0;
+  transition: opacity .18s ease, transform .24s cubic-bezier(.16, .84, .24, 1);
   -webkit-mask: url('./assets/checkmark.svg') center / contain no-repeat;
   mask: url('./assets/checkmark.svg') center / contain no-repeat;
 }
@@ -5949,10 +5950,28 @@ body.tc-product-page-active .tc-menu-eye-logo {
   background: #9d191c;
   border-color: #9d191c;
 }
-#allrecords [data-record-type="972"] .t972__toggle-input:checked + .t972__toggle-container .t972__toggle-mark { opacity: 1; }
+#allrecords [data-record-type="972"] .t972__toggle-input:checked + .t972__toggle-container .t972__toggle-mark { opacity: 1; transform: scale(1) !important; }
 #allrecords [data-record-type="972"] .t972__toggle-input:focus-visible + .t972__toggle-container { outline: 2px solid #f7f3ef; outline-offset: 3px; }
 #allrecords [data-record-type="972"] .t972 .t972__confirm-btn { width: 100%; background: #9d191c !important; }
 #allrecords [data-record-type="972"] .t972 .t972__confirm-btn:hover { background: #7d1114 !important; }
+
+#allrecords [data-record-type="972"] .t972 :is(.t-btn, .t972__settings-header, .t972__category-header, .t972__toggle-container) {
+  transition: background-color .22s ease, border-color .22s ease, transform .12s ease, filter .22s ease !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+#allrecords [data-record-type="972"] .t972 :is(.t-btn, .t972__settings-header, .t972__category-header):is(:active, .tc-ui-pressed),
+#allrecords [data-record-type="972"] .t972__toggle-label:is(:active, .tc-ui-pressed) .t972__toggle-container,
+#allrecords [data-record-type="972"] .t972__toggle-input:active + .t972__toggle-container {
+  transform: translateY(2px) scale(.975) !important;
+  filter: brightness(.92);
+}
+@media (prefers-reduced-motion: reduce) {
+  #allrecords [data-record-type="972"] .t972 :is(.t-btn, .t972__settings-header, .t972__category-header, .t972__toggle-container, .t972__toggle-mark) { transition: none !important; }
+  #allrecords [data-record-type="972"] .t972 :is(.t-btn, .t972__settings-header, .t972__category-header):is(:active, .tc-ui-pressed),
+  #allrecords [data-record-type="972"] .t972__toggle-label:is(:active, .tc-ui-pressed) .t972__toggle-container,
+  #allrecords [data-record-type="972"] .t972__toggle-input:active + .t972__toggle-container { transform: none !important; }
+}
 
 @media (max-width: 640px) {
   #allrecords [data-record-type="972"] .t972__settings { height: auto; }
