@@ -5833,6 +5833,19 @@ body.tc-product-page-active .tc-menu-eye-logo {
   width: 100%;
 }
 
+#allrecords [data-record-type="972"] .t972::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: rgba(0, 0, 0, .5);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .2s ease, visibility .2s ease;
+}
+#allrecords [data-record-type="972"] .t972:has(.t972__banner_show, .t972__settings_show)::before { opacity: 1; visibility: visible; }
+
 #allrecords [data-record-type="972"] .t972__banner {
   width: 100%;
   max-width: none;
@@ -5880,7 +5893,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
   font-size: 17px;
   line-height: 1.3;
   white-space: normal;
-  filter: drop-shadow(0 4px 0 rgba(0,0,0,.34)) drop-shadow(0 8px 13px rgba(0,0,0,.38));
+  filter: drop-shadow(0 4px 4.5px rgba(0,0,0,.30));
 }
 
 #allrecords [data-record-type="972"] .t972 .t-btn:hover { background: #231010 !important; }
@@ -6059,14 +6072,15 @@ body.tc-product-page-active .tc-menu-eye-logo {
   filter: brightness(.92);
 }
 #allrecords [data-record-type="972"] .t972 .t-btn:is(:active, .tc-ui-pressed) {
-  filter: drop-shadow(0 2px 0 rgba(0,0,0,.36)) drop-shadow(0 4px 8px rgba(0,0,0,.34)) brightness(.92);
+  filter: drop-shadow(0 2px 2.5px rgba(0,0,0,.34)) brightness(.92);
 }
 @media (hover: hover) and (pointer: fine) {
   #allrecords [data-record-type="972"] .t972 .t-btn:hover:not(:active):not(.tc-ui-pressed) {
-    filter: drop-shadow(0 5px 0 rgba(0,0,0,.36)) drop-shadow(0 10px 16px rgba(0,0,0,.42));
+    filter: drop-shadow(0 5px 6px rgba(0,0,0,.34));
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  #allrecords [data-record-type="972"] .t972::before { transition: none; }
   #allrecords [data-record-type="972"] .t972 :is(.t972__accept-btn, .t972__reject-btn, .t972__settings-btn)::before { transition: none; }
   #allrecords [data-record-type="972"] .t972 :is(.t-btn, .t972__settings-header, .t972__category-header, .t972__toggle-container, .t972__toggle-background, .t972__toggle-mark) { transition: none !important; }
   #allrecords [data-record-type="972"] .t972 :is(.t-btn, .t972__settings-header, .t972__category-header):is(:active, .tc-ui-pressed),
@@ -6092,18 +6106,6 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 @media (max-width: 640px) {
-  #allrecords [data-record-type="972"] .t972::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background: rgba(0, 0, 0, .5);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity .2s ease, visibility .2s ease;
-  }
-  #allrecords [data-record-type="972"] .t972:has(.t972__banner_show, .t972__settings_show)::before { opacity: 1; visibility: visible; }
   #allrecords [data-record-type="972"] .t972__banner {
     padding-top: 16px;
     padding-bottom: calc(16px + env(safe-area-inset-bottom));
@@ -6140,10 +6142,6 @@ body.tc-product-page-active .tc-menu-eye-logo {
     width: fit-content;
     max-width: 100%;
   }
-}
-
-@media (max-width: 640px) and (prefers-reduced-motion: reduce) {
-  #allrecords [data-record-type="972"] .t972::before { transition: none; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
