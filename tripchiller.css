@@ -6012,6 +6012,8 @@ body.tc-product-page-active .tc-menu-eye-logo {
   user-select: none;
 }
 #allrecords [data-record-type="972"] .t972__toggle-input {
+  -webkit-appearance: none;
+  appearance: none;
   display: block;
   position: absolute;
   width: 1px;
@@ -6025,8 +6027,14 @@ body.tc-product-page-active .tc-menu-eye-logo {
   border: 0;
   border-radius: 2px;
   background: #fff;
+  isolation: isolate;
+  filter: none !important;
+  mix-blend-mode: normal;
 }
-#allrecords [data-record-type="972"] :is(.t972__toggle-background, .t972__toggle-mark) {
+#allrecords [data-record-type="972"] :is(.t972__toggle-background, .t972__toggle-mark) { display: none !important; }
+#allrecords [data-record-type="972"] .t972__toggle-container::before,
+#allrecords [data-record-type="972"] .t972__toggle-container::after {
+  content: '';
   display: block;
   position: absolute;
   inset: 0;
@@ -6035,16 +6043,18 @@ body.tc-product-page-active .tc-menu-eye-logo {
   margin: 0;
   border-radius: 0;
   box-shadow: none;
+  filter: none;
+  mix-blend-mode: normal;
   transition: opacity .16s ease, transform .2s ease !important;
 }
-#allrecords [data-record-type="972"] .t972__toggle-background {
-  background: #9d191c;
+#allrecords [data-record-type="972"] .t972__toggle-container::before {
+  background: #9d191c !important;
   opacity: 1;
   transform: scale(.9) rotate(0);
   -webkit-mask: url('./assets/cross.svg') center / contain no-repeat;
   mask: url('./assets/cross.svg') center / contain no-repeat;
 }
-#allrecords [data-record-type="972"] .t972__toggle-mark {
+#allrecords [data-record-type="972"] .t972__toggle-container::after {
   background: #fff !important;
   transform: scale(.648) rotate(-45deg) !important;
   opacity: 0;
@@ -6054,8 +6064,8 @@ body.tc-product-page-active .tc-menu-eye-logo {
 #allrecords [data-record-type="972"] .t972__toggle-input:checked + .t972__toggle-container {
   background: #9d191c;
 }
-#allrecords [data-record-type="972"] .t972__toggle-input:checked + .t972__toggle-container .t972__toggle-background { opacity: 0; transform: scale(.648) rotate(45deg); }
-#allrecords [data-record-type="972"] .t972__toggle-input:checked + .t972__toggle-container .t972__toggle-mark { opacity: 1; transform: scale(.9) !important; }
+#allrecords [data-record-type="972"] .t972__toggle-input:checked + .t972__toggle-container::before { opacity: 0; transform: scale(.648) rotate(45deg); }
+#allrecords [data-record-type="972"] .t972__toggle-input:checked + .t972__toggle-container::after { opacity: 1; transform: scale(.9) !important; }
 #allrecords [data-record-type="972"] .t972__toggle-input:focus-visible + .t972__toggle-container { outline: 2px solid #f7f3ef; outline-offset: 3px; }
 #allrecords [data-record-type="972"] .t972 .t972__confirm-btn { min-width: min(260px, 100%); max-width: 100%; background: #9d191c !important; }
 #allrecords [data-record-type="972"] .t972 .t972__confirm-btn:hover { background: #7d1114 !important; }
@@ -6083,6 +6093,8 @@ body.tc-product-page-active .tc-menu-eye-logo {
   #allrecords [data-record-type="972"] .t972::before { transition: none; }
   #allrecords [data-record-type="972"] .t972 :is(.t972__accept-btn, .t972__reject-btn, .t972__settings-btn)::before { transition: none; }
   #allrecords [data-record-type="972"] .t972 :is(.t-btn, .t972__settings-header, .t972__category-header, .t972__toggle-container, .t972__toggle-background, .t972__toggle-mark) { transition: none !important; }
+  #allrecords [data-record-type="972"] .t972__toggle-container::before,
+  #allrecords [data-record-type="972"] .t972__toggle-container::after { transition: none !important; }
   #allrecords [data-record-type="972"] .t972 :is(.t-btn, .t972__settings-header, .t972__category-header):is(:active, .tc-ui-pressed),
   #allrecords [data-record-type="972"] .t972__toggle-label:is(:active, .tc-ui-pressed) .t972__toggle-container,
   #allrecords [data-record-type="972"] .t972__toggle-input:active + .t972__toggle-container { transform: none !important; }
@@ -6148,8 +6160,8 @@ body.tc-product-page-active .tc-menu-eye-logo {
   #allrecords [data-record-type="972"] .t972:not(.tc-cookie-interacted) .t972__banner_show {
     animation: tcNativeCookieReveal .65s cubic-bezier(.22, .68, .3, 1) both;
   }
-  #allrecords [data-record-type="972"] .t972__settings_show,
-  #allrecords [data-record-type="972"] .t972.tc-cookie-interacted .t972__banner_show {
+  #allrecords [data-record-type="972"] .t972__settings_show > :is(.t972__settings-header, .t972__settings-body, .t972__settings-footer),
+  #allrecords [data-record-type="972"] .t972.tc-cookie-interacted .t972__banner_show > :is(.t972__title, .t972__text, .t972__buttons) {
     animation: tcNativeCookieFade .16s ease both;
   }
 }
