@@ -5510,6 +5510,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
     display: none !important;
   }
 
+  body.tc-product-popup-open .t-zoomer__wrapper::before,
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::before {
     content: none !important;
   }
