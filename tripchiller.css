@@ -5265,6 +5265,11 @@ body.tc-product-page-active .tc-menu-eye-logo {
 
 /* Mobile archive gallery: thumbnails replace embedded arrows; fullscreen is separate. */
 @media (max-width: 980px), (pointer: coarse) {
+  /* The archive has its own native mobile back toolbar. */
+  #allrecords .uc-custom-grid .t-popup > .t-popup__close {
+    display: none !important;
+  }
+
   /* T778 has its own outer spacing and text classes, unlike the store popup. */
   #allrecords .uc-custom-grid .t-popup__container,
   #allrecords .uc-custom-grid .t778__product-full .t778__container,
@@ -5505,6 +5510,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
     display: none !important;
   }
 
+  body.tc-product-popup-open .t-zoomer__wrapper::before,
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__ui-wrapper::before {
     content: none !important;
   }
@@ -5696,6 +5702,10 @@ body.tc-product-page-active .tc-menu-eye-logo {
   body.tc-product-popup-open .t-zoomer__wrapper.scale-active .t-carousel__zoomer__img {
     cursor: zoom-out;
   }
+}
+
+/* Share the accepted control composition and separate black shadows with touch. */
+@media (min-width: 981px) and (pointer: fine), (max-width: 980px) {
   /* Do not isolate arrows from the viewer backdrop in a transparent stacking context. */
   body.tc-product-popup-open .t-zoomer__wrapper .t-zoomer__container {
     z-index: auto;
@@ -5784,6 +5794,9 @@ body.tc-product-page-active .tc-menu-eye-logo {
     background-image: url('./assets/black_icon_circle_shadow.svg#turn-270');
   }
 
+}
+
+@media (min-width: 981px) and (pointer: fine) {
   /* Keep the accepted photo geometry; strengthen only its downward shadows. */
   body.tc-product-popup-open .t-zoomer__wrapper:not(.scale-active) .t-carousel__zoomer__inner {
     top: 40px;
@@ -5798,7 +5811,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
   }
 }
 
-@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+@media (min-width: 981px) and (pointer: fine) and (prefers-reduced-motion: no-preference), (max-width: 980px) and (prefers-reduced-motion: no-preference) {
   body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__scale.tc-gallery-arrow-pressed)::before,
   body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__close.tc-gallery-arrow-pressed)::after {
     animation: tcProductGalleryArrowPress .36s ease-in-out;
