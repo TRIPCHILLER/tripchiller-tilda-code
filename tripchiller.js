@@ -7615,6 +7615,7 @@ function setupDesktopAura() {
         reopen.textContent = 'Настройки cookie';
         reopen.addEventListener('click', function (event) {
           event.preventDefault();
+          event.stopImmediatePropagation();
           var record = panel.closest('[data-record-type="972"]');
           if (typeof t972_translateToggle === 'function') t972_translateToggle(record.id.replace(/^rec/, ''));
           settingsButton.click();
