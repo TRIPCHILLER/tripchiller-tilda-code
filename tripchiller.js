@@ -7592,6 +7592,7 @@ function setupDesktopAura() {
   if (window.__TC_COOKIE_COPY_RU_V1__) return;
   window.__TC_COOKIE_COPY_RU_V1__ = true;
   var mobileCookies = window.matchMedia('(max-width: 640px)');
+  var desktopCookies = window.matchMedia('(min-width: 981px)');
 
   function setupNativeCookies() {
     document.querySelectorAll('#allrecords [data-record-type="972"] .t972').forEach(function (panel) {
@@ -7613,6 +7614,19 @@ function setupDesktopAura() {
         if (!category) return;
         var title = category.querySelector('.t972__category-title');
         if (title) input.setAttribute('aria-label', title.textContent.trim());
+        var status = category.querySelector('.t972__toggle-txt');
+        if (!status) return;
+        input.id = input.id || 'tc-cookie-' + panel.closest('[data-record-type="972"]').id + '-' + input.value;
+        var statusLabel = document.createElement('label');
+        statusLabel.className = status.className;
+        while (status.firstChild) statusLabel.appendChild(status.firstChild);
+        status.replaceWith(statusLabel);
+        var updateStatusLabel = function () {
+          if (desktopCookies.matches) statusLabel.htmlFor = input.id;
+          else statusLabel.removeAttribute('for');
+        };
+        updateStatusLabel();
+        desktopCookies.addEventListener('change', updateStatusLabel);
       });
     });
   }
