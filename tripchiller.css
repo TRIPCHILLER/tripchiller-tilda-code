@@ -5985,13 +5985,15 @@ body.tc-product-page-active .tc-menu-eye-logo {
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
 
+#allrecords [data-record-type="972"] .t972__settings-header { color: #c6bdb6; }
+#allrecords [data-record-type="972"] .t972__settings-header span { font-size: 18px; line-height: 24px; color: inherit; }
 #allrecords [data-record-type="972"] .t972__settings-header::before {
   content: '';
   flex: 0 0 24px;
   width: 24px;
   height: 16px;
   margin-right: 14px;
-  background: #fff;
+  background: currentColor;
   -webkit-mask: url('./assets/BackArrow.svg') center / contain no-repeat;
   mask: url('./assets/BackArrow.svg') center / contain no-repeat;
 }
