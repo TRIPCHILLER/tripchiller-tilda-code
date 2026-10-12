@@ -7168,7 +7168,7 @@ function setupDesktopAura() {
     '.t-store__loadmore, .t-store__load-more, .js-store-load-more, .t-catalog__loadmore, .t-catalog__load-more, ' +
     '.js-catalog-load-more, .js-catalog-load-more-btn, ' +
     '#allrecords .t778__btn-wrapper .t778__btn, .soc1 .tn-atom, .soc2 .tn-atom, .soc3 .tn-atom, .soc4 .tn-atom, ' +
-    '.tc-contact-link';
+    '.tc-contact-link, #allrecords [data-record-type="972"] .t972 :is(.t-btn, .t972__settings-header, .t972__category-header, .t972__toggle-label)';
 
   var activeTarget = null;
 
@@ -7585,6 +7585,36 @@ function setupDesktopAura() {
   });
 
   observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
+
+/* Use T972's published content; only the back label and accessible names are supplied here. */
+(function () {
+  if (window.__TC_COOKIE_COPY_RU_V1__) return;
+  window.__TC_COOKIE_COPY_RU_V1__ = true;
+
+  function setupNativeCookies() {
+    document.querySelectorAll('#allrecords [data-record-type="972"] .t972').forEach(function (panel) {
+      panel.addEventListener('click', function (event) {
+        if (event.target.closest('.t-btn, .t972__settings-header')) {
+          panel.classList.add('tc-cookie-interacted');
+        }
+      }, true);
+      var back = panel.querySelector('.t972__settings-header span');
+      if (back) back.textContent = 'К уведомлению';
+      panel.querySelectorAll('.t972__toggle-input').forEach(function (input) {
+        var category = input.closest('.t972__category');
+        if (!category) return;
+        var title = category.querySelector('.t972__category-title');
+        if (title) input.setAttribute('aria-label', title.textContent.trim());
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupNativeCookies, { once: true });
+  } else {
+    setupNativeCookies();
+  }
 })();
 
 /* Product gallery: desktop clicks and touch fullscreen presses; native navigation stays intact. */
