@@ -6053,7 +6053,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
   right: 0;
   height: 2px;
   pointer-events: none;
-  background: #c6bdb6;
+  background: #6d6262;
   -webkit-mask: url('./assets/separator.svg#svgView(preserveAspectRatio(none))') center / 100% 100% no-repeat;
   mask: url('./assets/separator.svg#svgView(preserveAspectRatio(none))') center / 100% 100% no-repeat;
 }
