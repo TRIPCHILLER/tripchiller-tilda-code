@@ -5950,7 +5950,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
   max-height: calc(100vh - 20px);
   max-height: calc(100dvh - 20px);
   margin: 0;
-  background: #090909;
+  background: #1f1f1f;
   color: #f7f3ef;
   border-top: 0;
   border-radius: 0;
@@ -5961,7 +5961,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
 #allrecords [data-record-type="972"] :is(.t972__settings-header, .t972__settings-footer) {
   flex: 0 0 auto;
   padding-inline: clamp(20px, 3vw, 48px);
-  background: #090909;
+  background: #1f1f1f;
   color: #f7f3ef;
   border-radius: 0;
   box-shadow: none;
@@ -5986,13 +5986,21 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 #allrecords [data-record-type="972"] .t972__settings-header { color: #c6bdb6; }
-#allrecords [data-record-type="972"] .t972__settings-header span { font-size: 18px; line-height: 24px; color: inherit; }
+#allrecords [data-record-type="972"] .t972__settings-header span { display: none; }
+#allrecords [data-record-type="972"] .t972__settings,
+#allrecords [data-record-type="972"] .t972__settings * {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent !important;
+}
 #allrecords [data-record-type="972"] .t972__settings-header::before {
   content: '';
   flex: 0 0 24px;
   width: 24px;
   height: 16px;
-  margin-right: 14px;
+  margin-right: 0;
+  transform: translateY(-5px);
   background: currentColor;
   -webkit-mask: url('./assets/BackArrow.svg') center / contain no-repeat;
   mask: url('./assets/BackArrow.svg') center / contain no-repeat;
@@ -6126,11 +6134,13 @@ body.tc-product-page-active .tc-menu-eye-logo {
   #allrecords [data-record-type="972"] .t972__settings { position: relative; padding-top: 58px; }
   #allrecords [data-record-type="972"] .t972__settings-header {
     position: absolute;
-    top: 19px;
+    top: 9px;
     left: clamp(20px, 3vw, 48px);
-    width: auto;
+    width: 44px;
+    min-height: 44px;
     max-width: calc(50% - 160px);
     padding: 0;
+    justify-content: center;
     z-index: 1;
   }
   #allrecords [data-record-type="972"] .t972__settings-title {
@@ -6164,7 +6174,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
     font-size: 18px;
     line-height: 28px;
   }
-  #allrecords [data-record-type="972"] .t972__category-body { margin-bottom: 0; text-align: left; }
+  #allrecords [data-record-type="972"] .t972__category-body { margin-bottom: 0; text-align: center; }
 }
 
 @media (max-width: 640px) {
@@ -6183,8 +6193,6 @@ body.tc-product-page-active .tc-menu-eye-logo {
     justify-content: center;
     z-index: 1;
   }
-  #allrecords [data-record-type="972"] .t972__settings-header span { display: none; }
-  #allrecords [data-record-type="972"] .t972__settings-header::before { margin-right: 0; }
   #allrecords [data-record-type="972"] .t972__settings-title {
     position: absolute;
     top: 20px;
