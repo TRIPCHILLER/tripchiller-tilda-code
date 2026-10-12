@@ -7592,7 +7592,6 @@ function setupDesktopAura() {
   if (window.__TC_COOKIE_COPY_RU_V1__) return;
   window.__TC_COOKIE_COPY_RU_V1__ = true;
   var mobileCookies = window.matchMedia('(max-width: 640px)');
-  var desktopCookies = window.matchMedia('(min-width: 981px)');
 
   function setupNativeCookies() {
     document.querySelectorAll('#allrecords [data-record-type="972"] .t972').forEach(function (panel) {
@@ -7601,6 +7600,17 @@ function setupDesktopAura() {
           panel.classList.add('tc-cookie-interacted');
         }
       }, true);
+      var backButton = panel.querySelector('.t972__settings-header');
+      if (backButton) {
+        backButton.setAttribute('role', 'button');
+        backButton.setAttribute('tabindex', '0');
+        backButton.setAttribute('aria-label', 'К уведомлению');
+        backButton.addEventListener('keydown', function (event) {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          backButton.click();
+        });
+      }
       var back = panel.querySelector('.t972__settings-header span');
       if (back) {
         var updateBackLabel = function () {
@@ -7621,13 +7631,34 @@ function setupDesktopAura() {
         statusLabel.className = status.className;
         while (status.firstChild) statusLabel.appendChild(status.firstChild);
         status.replaceWith(statusLabel);
-        var updateStatusLabel = function () {
-          if (desktopCookies.matches) statusLabel.htmlFor = input.id;
-          else statusLabel.removeAttribute('for');
-        };
-        updateStatusLabel();
-        desktopCookies.addEventListener('change', updateStatusLabel);
+        statusLabel.htmlFor = input.id;
       });
+      var always = panel.querySelector('.js_always-enabled');
+      if (always) {
+        var updateAlwaysStatus = function () {
+          if (mobileCookies.matches) {
+            always.setAttribute('role', 'button');
+            always.setAttribute('tabindex', '0');
+            always.setAttribute('aria-label', 'Почему необходимые cookie всегда разрешены');
+          } else {
+            always.removeAttribute('role');
+            always.removeAttribute('tabindex');
+            always.removeAttribute('aria-label');
+          }
+        };
+        always.addEventListener('click', function () {
+          if (!mobileCookies.matches) return;
+          var header = always.closest('.t972__category').querySelector('.t972__category-header');
+          if (header && header.style.pointerEvents !== 'none') header.click();
+        });
+        always.addEventListener('keydown', function (event) {
+          if (!mobileCookies.matches || (event.key !== 'Enter' && event.key !== ' ')) return;
+          event.preventDefault();
+          always.click();
+        });
+        updateAlwaysStatus();
+        mobileCookies.addEventListener('change', updateAlwaysStatus);
+      }
     });
   }
 
