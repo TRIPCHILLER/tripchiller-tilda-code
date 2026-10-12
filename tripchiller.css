@@ -6111,6 +6111,8 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 @media (min-width: 981px) {
+  #allrecords [data-record-type="972"] .t972__banner { padding-top: 19px; }
+  #allrecords [data-record-type="972"] .t972__title { margin-bottom: 15px; }
   #allrecords [data-record-type="972"] .t972__categories {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
