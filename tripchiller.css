@@ -5911,11 +5911,19 @@ body.tc-product-page-active .tc-menu-eye-logo {
 #allrecords [data-record-type="972"] .t972 :is(.t972__accept-btn, .t972__reject-btn, .t972__settings-btn) {
   position: relative;
   isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  height: auto;
+  padding: 11px !important;
+  line-height: 22px;
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
   --tc-cookie-button-fill: #090909;
-  --tc-cookie-button-mask: url('./assets/ofert_button.svg');
+  /* Fit the drawn bounds to the padded text box, independently on each axis. */
+  --tc-cookie-button-mask: url('./assets/ofert_button.svg#svgView(viewBox(0.37,0.33,281.13,68.46);preserveAspectRatio(none))');
 }
 #allrecords [data-record-type="972"] .t972 :is(.t972__accept-btn, .t972__reject-btn, .t972__settings-btn)::before {
   content: '';
@@ -5929,7 +5937,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
   transform: scaleX(-1);
   transition: background-color .22s ease;
 }
-#allrecords [data-record-type="972"] .t972 .t972__reject-btn { --tc-cookie-button-mask: url('./assets/politic_button.svg'); }
+#allrecords [data-record-type="972"] .t972 .t972__reject-btn { --tc-cookie-button-mask: url('./assets/politic_button.svg#svgView(viewBox(1.07,0.64,463.93,69.04);preserveAspectRatio(none))'); }
 #allrecords [data-record-type="972"] .t972 .t972__settings-btn { --tc-cookie-button-fill: #fff; }
 #allrecords [data-record-type="972"] .t972 .t972__settings-btn::before { transform: scaleY(-1); }
 #allrecords [data-record-type="972"] .t972 :is(.t972__accept-btn, .t972__reject-btn, .t972__settings-btn):hover { background: transparent !important; --tc-cookie-button-fill: #231010; }
@@ -6101,8 +6109,6 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 @media (min-width: 981px) {
-  #allrecords [data-record-type="972"] .t972 .t972__accept-btn::before { transform: scale(-1, 1.19); }
-  #allrecords [data-record-type="972"] .t972 .t972__settings-btn::before { transform: scale(1, -.905); }
   #allrecords [data-record-type="972"] .t972__categories {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
