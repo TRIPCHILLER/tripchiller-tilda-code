@@ -6051,7 +6051,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
   position: absolute;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 1.5px;
   pointer-events: none;
   background: #6d6262;
   -webkit-mask: url('./assets/separator.svg#svgView(preserveAspectRatio(none))') center / 100% 100% no-repeat;
