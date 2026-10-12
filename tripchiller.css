@@ -6101,6 +6101,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 @media (min-width: 981px) {
+  #allrecords [data-record-type="972"] .t972 .t972__accept-btn::before { transform: scale(-1, 1.3); }
   #allrecords [data-record-type="972"] .t972__categories {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
