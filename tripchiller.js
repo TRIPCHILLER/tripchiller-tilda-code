@@ -7591,6 +7591,7 @@ function setupDesktopAura() {
 (function () {
   if (window.__TC_COOKIE_COPY_RU_V1__) return;
   window.__TC_COOKIE_COPY_RU_V1__ = true;
+  var mobileCookies = window.matchMedia('(max-width: 640px)');
 
   function setupNativeCookies() {
     document.querySelectorAll('#allrecords [data-record-type="972"] .t972').forEach(function (panel) {
@@ -7600,7 +7601,13 @@ function setupDesktopAura() {
         }
       }, true);
       var back = panel.querySelector('.t972__settings-header span');
-      if (back) back.textContent = 'К уведомлению';
+      if (back) {
+        var updateBackLabel = function () {
+          back.textContent = mobileCookies.matches ? 'НАЗАД' : 'К уведомлению';
+        };
+        updateBackLabel();
+        mobileCookies.addEventListener('change', updateBackLabel);
+      }
       panel.querySelectorAll('.t972__toggle-input').forEach(function (input) {
         var category = input.closest('.t972__category');
         if (!category) return;
