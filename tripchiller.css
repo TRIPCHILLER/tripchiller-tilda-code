@@ -5567,7 +5567,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
   }
 }
 
-/* Native idle fade plus photo/control hover; keep the black shadows in sync. */
+/* Fullscreen control fade; keep the black shadows in sync. */
 @media (min-width: 981px) and (pointer: fine), (max-width: 980px) {
   body.tc-product-popup-open .t-zoomer__wrapper {
     --tc-fullscreen-control-opacity: .75;
@@ -5632,8 +5632,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 @media (min-width: 981px) and (pointer: fine) {
-  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__ui-item.t-zoomer__hide-animation),
-  body.tc-product-popup-open .t-zoomer__wrapper:not(:has(.t-carousel__zoomer__img:hover, .t-carousel__zoomer__control:hover, .t-zoomer__ui-wrapper:hover)),
+  body.tc-product-popup-open .t-zoomer__wrapper:has(.t-carousel__zoomer__img:hover):not(:has(.t-carousel__zoomer__control:hover, .t-zoomer__ui-wrapper:hover)),
   body.tc-product-popup-open .t-zoomer__wrapper:has(.t-zoomer__container--on-close) {
     --tc-fullscreen-control-opacity: 0;
     --tc-fullscreen-control-fade: 1s;
