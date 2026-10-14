@@ -5819,6 +5819,32 @@ body.tc-product-page-active .tc-menu-eye-logo {
 
 /* TRIPCHILLER / NATIVE T972 COOKIE CONSENT
    Keep Tilda's visibility classes, buttons and consent handling intact. */
+#allrecords .tc-cookie-footer {
+  display: flex;
+  justify-content: center;
+  padding: 12px 20px 0;
+  text-align: center;
+}
+#allrecords .tc-cookie-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #c6bdb6 !important;
+  font-family: var(--tc-font-main);
+  font-size: 16px;
+  line-height: 1.4;
+}
+#allrecords [data-record-type="972"] .tc-cookie-info { margin: 10px 0 0; text-align: center; font-size: 14px; line-height: 1.4; }
+#allrecords [data-record-type="972"] .tc-cookie-info a { color: inherit !important; }
+#allrecords :is(.tc-cookie-footer, .tc-cookie-info) a {
+  text-decoration: underline !important;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+#allrecords :is(.tc-cookie-footer, .tc-cookie-info) a:hover { opacity: .8; }
+#allrecords :is(.tc-cookie-footer, .tc-cookie-info) a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+
 #allrecords [data-record-type="972"] .t972,
 #allrecords [data-record-type="972"] .t972 * {
   font-family: var(--tc-font-main) !important;

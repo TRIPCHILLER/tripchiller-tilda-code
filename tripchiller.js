@@ -7587,13 +7587,44 @@ function setupDesktopAura() {
   observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
 
-/* Use T972's published content; only the back label and accessible names are supplied here. */
+/* Keep native T972 consent; add policy access and reopening through its settings button. */
 (function () {
   if (window.__TC_COOKIE_COPY_RU_V1__) return;
   window.__TC_COOKIE_COPY_RU_V1__ = true;
 
   function setupNativeCookies() {
     document.querySelectorAll('#allrecords [data-record-type="972"] .t972').forEach(function (panel) {
+      var policyUrl = '/data_processing_policy';
+      panel.querySelectorAll('.t972__text, .t972__settings-text').forEach(function (text) {
+        if (text.parentNode.querySelector('.tc-cookie-info')) return;
+        var info = document.createElement('p');
+        info.className = 'tc-cookie-info';
+        var link = document.createElement('a');
+        link.href = policyUrl;
+        link.textContent = 'Политика обработки данных';
+        info.appendChild(link);
+        text.insertAdjacentElement('afterend', info);
+      });
+      var settingsButton = panel.querySelector('.t972__settings-btn');
+      if (settingsButton && !document.querySelector('.tc-cookie-footer')) {
+        var footer = document.createElement('nav');
+        footer.className = 'tc-cookie-footer';
+        footer.setAttribute('aria-label', 'Управление конфиденциальностью');
+        var reopen = document.createElement('a');
+        reopen.href = '#opencookiebanner';
+        reopen.textContent = 'Настройки cookie';
+        reopen.addEventListener('click', function (event) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          var record = panel.closest('[data-record-type="972"]');
+          if (typeof t972_translateToggle === 'function') t972_translateToggle(record.id.replace(/^rec/, ''));
+          settingsButton.click();
+        });
+        footer.appendChild(reopen);
+        var legalFooter = document.querySelector('.uc-legal-footer-butt');
+        if (legalFooter) legalFooter.appendChild(footer);
+        else panel.closest('[data-record-type="972"]').insertAdjacentElement('afterend', footer);
+      }
       panel.addEventListener('click', function (event) {
         if (event.target.closest('.t-btn, .t972__settings-header')) {
           panel.classList.add('tc-cookie-interacted');
