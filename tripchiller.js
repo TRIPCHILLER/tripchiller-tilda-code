@@ -5320,6 +5320,7 @@ function setupDesktopAura() {
     var candidates = document.querySelectorAll('a, button, .tn-atom, .t-btn');
 
     candidates.forEach(function (el) {
+      if (el.closest('.tc-cookie-info')) return;
       var text = normalizeText(el.textContent);
       var matched = targets.some(function (target) {
         return text.indexOf(target) !== -1;
@@ -7595,7 +7596,7 @@ function setupDesktopAura() {
   function setupNativeCookies() {
     document.querySelectorAll('#allrecords [data-record-type="972"] .t972').forEach(function (panel) {
       var policyUrl = '/data_processing_policy';
-      panel.querySelectorAll('.t972__text, .t972__settings-text').forEach(function (text) {
+      panel.querySelectorAll('.t972__settings-text').forEach(function (text) {
         if (text.parentNode.querySelector('.tc-cookie-info')) return;
         var info = document.createElement('p');
         info.className = 'tc-cookie-info';
@@ -7612,7 +7613,11 @@ function setupDesktopAura() {
         footer.setAttribute('aria-label', 'Управление конфиденциальностью');
         var reopen = document.createElement('a');
         reopen.href = '#opencookiebanner';
-        reopen.textContent = 'Настройки cookie';
+        reopen.className = 't-btn t-btnflex t-btnflex_type_button t-btnflex_md tc-legal-btn';
+        var reopenText = document.createElement('span');
+        reopenText.className = 't-btnflex__text';
+        reopenText.textContent = 'Настройки cookie';
+        reopen.appendChild(reopenText);
         reopen.addEventListener('click', function (event) {
           event.preventDefault();
           event.stopImmediatePropagation();
@@ -7621,7 +7626,7 @@ function setupDesktopAura() {
           settingsButton.click();
         });
         footer.appendChild(reopen);
-        var legalFooter = document.querySelector('.uc-legal-footer-butt');
+        var legalFooter = document.querySelector('.uc-legal-footer-butt .t1331__row');
         if (legalFooter) legalFooter.appendChild(footer);
         else panel.closest('[data-record-type="972"]').insertAdjacentElement('afterend', footer);
       }
