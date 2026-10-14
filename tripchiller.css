@@ -5847,7 +5847,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
     font-size: 16px;
   }
 }
-#allrecords [data-record-type="972"] .tc-cookie-info { margin: 10px 0 0; text-align: center; font-size: 14px; line-height: 1.4; }
+#allrecords [data-record-type="972"] .tc-cookie-info { margin: 22px 0; text-align: center; font-size: 14px; line-height: 1.4; }
 #allrecords [data-record-type="972"] .tc-cookie-info a {
   color: #fff !important;
   transition: color .12s linear;
@@ -6022,7 +6022,7 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 #allrecords [data-record-type="972"] .t972__settings-title { margin: 8px 0 12px; text-align: center; }
-#allrecords [data-record-type="972"] .t972__settings-text { margin-bottom: 22px; text-align: center; }
+#allrecords [data-record-type="972"] .t972__settings-text { margin-bottom: 0; text-align: center; }
 #allrecords [data-record-type="972"] .t972__categories { margin-bottom: 0; }
 #allrecords [data-record-type="972"] .t972__settings-footer {
   display: flex;
