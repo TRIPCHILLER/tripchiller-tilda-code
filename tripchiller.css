@@ -5835,7 +5835,14 @@ body.tc-product-page-active .tc-menu-eye-logo {
   line-height: 1.4;
 }
 #allrecords [data-record-type="972"] .tc-cookie-info { margin: 10px 0 0; text-align: center; font-size: 14px; line-height: 1.4; }
-#allrecords [data-record-type="972"] .tc-cookie-info a { color: inherit !important; }
+#allrecords [data-record-type="972"] .tc-cookie-info a {
+  color: #fff !important;
+  transition: color .12s linear;
+}
+#allrecords [data-record-type="972"] .tc-cookie-info a:hover {
+  color: #ff6b6b !important;
+  opacity: 1;
+}
 #allrecords :is(.tc-cookie-footer, .tc-cookie-info) a {
   text-decoration: underline !important;
   text-underline-offset: 4px;
