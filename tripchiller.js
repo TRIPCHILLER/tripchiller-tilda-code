@@ -7596,7 +7596,7 @@ function setupDesktopAura() {
   function setupNativeCookies() {
     document.querySelectorAll('#allrecords [data-record-type="972"] .t972').forEach(function (panel) {
       var policyUrl = '/data_processing_policy';
-      panel.querySelectorAll('.t972__text, .t972__settings-text').forEach(function (text) {
+      panel.querySelectorAll('.t972__settings-text').forEach(function (text) {
         if (text.parentNode.querySelector('.tc-cookie-info')) return;
         var info = document.createElement('p');
         info.className = 'tc-cookie-info';
