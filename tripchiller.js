@@ -5320,6 +5320,7 @@ function setupDesktopAura() {
     var candidates = document.querySelectorAll('a, button, .tn-atom, .t-btn');
 
     candidates.forEach(function (el) {
+      if (el.closest('.tc-cookie-info')) return;
       var text = normalizeText(el.textContent);
       var matched = targets.some(function (target) {
         return text.indexOf(target) !== -1;
