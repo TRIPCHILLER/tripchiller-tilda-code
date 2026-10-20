@@ -947,12 +947,29 @@ function forceEyeCenterInstant(){
 
     eye.style.transition = 'none';
     eye.style.transform = 'translate(0,0) scale(1,1)';
+    syncEyeGlints(eye, 0, 0);
     eye.style.opacity = '1';
   });
 }
 
 window.__TC_FORCE_EYE_CENTER__ = forceEyeCenterInstant;
+function syncEyeGlints(eye, x, y){
+  var glints = eye.__tcGlints;
+  if (!glints) return;
+  glints.style.transition = eye.style.transition;
+  // Counter 70% of gaze motion: the reflection keeps 30% of the pupil's travel.
+  glints.style.transform = 'translate(' + (-x * 0.7) + 'px,' + (-y * 0.7) + 'px)';
+}
   ready(function(){
+    ['desktop', 'mobile'].forEach(function(mode){
+      var eye = qInner(document.querySelector('.eye-' + mode));
+      var glints = document.querySelector('.eye-glints-' + mode);
+      if (!eye || !glints) return;
+      glints.classList.add('tc-eye-glints');
+      eye.style.position = 'relative';
+      eye.appendChild(glints);
+      eye.__tcGlints = glints;
+    });
 
     restoreHeroBaseVisibility('ready');
 
@@ -1187,6 +1204,7 @@ curY += (targetY - curY) * EASE;
         var finalY = curY + introY + idleFloatY;
 
         eye.style.transform = "translate("+finalX+"px,"+finalY+"px) scale("+sx+","+sy+")";
+        syncEyeGlints(eye, finalX, finalY);
         eye.style.opacity = String(opacity);
 
 if (flowerEl){
@@ -1429,18 +1447,21 @@ setTimeout(function(){
             setTimeout(function(){
               eye.style.transition = "transform "+(T2/1000)+"s ease";
               eye.style.transform = "translate("+(-DX)+"px,"+DY+"px) scale(1)";
+              syncEyeGlints(eye, -DX, DY);
 }, EYE_START_DELAY_MOBILE + T1);
 
 
             setTimeout(function(){
               eye.style.transition = "transform "+(T3/1000)+"s ease";
               eye.style.transform = "translate("+DX+"px,"+DY+"px) scale(1)";
+              syncEyeGlints(eye, DX, DY);
 }, EYE_START_DELAY_MOBILE + T1 + T2);
 
 
             setTimeout(function(){
               eye.style.transition = "transform "+(T4/1000)+"s ease";
               eye.style.transform = "translate(0,0) scale(1)";
+              syncEyeGlints(eye, 0, 0);
 }, EYE_START_DELAY_MOBILE + T1 + T2 + T3);
 
 
@@ -1567,6 +1588,7 @@ var finalX = rollX;
 var finalY = curY + rollY;
 
 eye.style.transform = "translate("+finalX+"px,"+finalY+"px) scale("+wakeCur+","+(wakeCur*blinkCur)+")";
+syncEyeGlints(eye, finalX, finalY);
 
                 if (flowerEl){
                   flowerEl.style.transform = (baseFlowerTf ? baseFlowerTf + ' ' : '') + "scale("+wakeCur+")";
