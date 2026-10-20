@@ -952,6 +952,7 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
   position: relative !important;
   width: 100% !important;
   height: 100% !important;
+  transform: none !important;
 }
 #tc-egg-fall-overlay .tc-egg-fall-eye img {
   display: block !important;
