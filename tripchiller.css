@@ -509,6 +509,8 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
 
 .flower{ z-index:1; }
   .eye-desktop, .eye-mobile{ z-index:2; }
+  .eye-glints-desktop:not(.tc-eye-glints),
+  .eye-glints-mobile:not(.tc-eye-glints) { visibility: hidden !important; }
   .tc-eye-glints {
     display: block !important;
     position: absolute !important;
