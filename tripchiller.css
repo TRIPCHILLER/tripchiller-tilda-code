@@ -509,6 +509,23 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
 
 .flower{ z-index:1; }
   .eye-desktop, .eye-mobile{ z-index:2; }
+  .tc-eye-glints {
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    z-index: 3 !important;
+    pointer-events: none !important;
+    transform-origin: center center !important;
+    will-change: transform;
+  }
+  .tc-eye-glints :is(.tn-atom, img, svg) {
+    width: 100% !important;
+    height: 100% !important;
+    filter: none !important;
+  }
   .eye-desktop .tn-atom,
   .eye-desktop img, .eye-desktop svg,
   .eye-mobile  .tn-atom,
