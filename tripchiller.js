@@ -957,8 +957,9 @@ function syncEyeGlints(eye, x, y){
   var glints = eye.__tcGlints;
   if (!glints) return;
   glints.style.transition = eye.style.transition;
-  // Counter 70% of gaze motion: the reflection keeps 30% of the pupil's travel.
-  glints.style.transform = 'translate(' + (-x * 0.7) + 'px,' + (-y * 0.7) + 'px)';
+  // Smoothly bound reflection drift to 0.8% of the SVG canvas, also diagonally.
+  var drift = 0.8 / Math.sqrt(4 + x * x + y * y);
+  glints.style.transform = 'translate(' + (-x * drift) + '%,' + (-y * drift) + '%)';
 }
   ready(function(){
     ['desktop', 'mobile'].forEach(function(mode){
