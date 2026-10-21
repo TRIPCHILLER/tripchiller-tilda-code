@@ -9753,3 +9753,77 @@ function setupDesktopAura() {
 
   observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
+
+/* ABOUT: opt-in desktop folder scene. No global layout or catalog changes. */
+(function () {
+  'use strict';
+  function initFolder() {
+    var root = document.getElementById('tc-contact-folder');
+    if (!root || root.dataset.folderReady || !window.matchMedia('(min-width: 981px)').matches) return;
+    root.dataset.folderReady = '1';
+    var base = root.dataset.assetBase;
+    var stage = root.querySelector('.tc-folder-stage');
+    var tabs = Array.from(root.querySelectorAll('.tc-folder-tab'));
+    var sheets = Array.from(root.querySelectorAll('.tc-folder-sheet'));
+    var replay = root.querySelector('.tc-folder-replay');
+    var status = root.querySelector('.tc-folder-status');
+    var cover = root.querySelector('.tc-folder-cover');
+    var latch = root.querySelector('.tc-folder-latch');
+    var clip = root.querySelector('.tc-folder-clip');
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var busy = true, current = 0, started = false;
+    function controls(disabled) { tabs.concat(replay).forEach(function (button) { button.disabled = disabled; }); }
+    function select(index) {
+      current = index;
+      sheets.forEach(function (sheet, i) { sheet.setAttribute('aria-hidden', String(i !== index)); });
+      tabs.forEach(function (tab, i) { tab.setAttribute('aria-pressed', String(i === index)); });
+      status.textContent = 'Лист 0' + (index + 1) + ' / 03';
+    }
+    async function move(el, frames, duration, delay) {
+      if (reduced.matches) return;
+      var animation = el.animate(frames, { duration: duration, delay: delay || 0, easing: 'cubic-bezier(.22,.65,.25,1)', fill: 'forwards' });
+      await animation.finished;
+    }
+    async function open() {
+      busy = true; controls(true); select(0); status.textContent = 'Папка открывается…';
+      stage.getAnimations({ subtree: true }).forEach(function (animation) { animation.cancel(); });
+      root.classList.remove('tc-folder-unlatched', 'tc-folder-opening');
+      cover.style.visibility = ''; latch.style.visibility = '';
+      await move(latch, [{ transform: 'rotateY(0deg)', opacity: 1 }, { transform: 'rotateY(135deg)', opacity: 0 }], 220, 900);
+      latch.style.visibility = 'hidden'; root.classList.add('tc-folder-unlatched');
+      await move(cover, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-180deg)' }], 720, 90);
+      root.classList.add('tc-folder-opening');
+      cover.style.visibility = 'hidden';
+      await move(clip, [{ transform: 'rotateX(0deg)' }, { transform: 'rotateX(-28deg) translateY(-3%)', offset: .45 }, { transform: 'rotateX(0deg)' }], 340);
+      busy = false; select(0); controls(false);
+    }
+    tabs.forEach(function (tab, index) {
+      tab.addEventListener('click', async function () {
+        if (busy || index === current) return;
+        busy = true; controls(true);
+        await move(clip, [{ transform: 'rotateX(0deg)' }, { transform: 'rotateX(-28deg)' }], 100);
+        var outgoing = sheets[current];
+        sheets[index].setAttribute('aria-hidden', 'false'); outgoing.style.zIndex = '4';
+        await move(outgoing, [{ transform: 'rotateY(0deg)', opacity: 1 }, { transform: 'rotateY(-120deg) translateX(-5%)', opacity: 0 }], 430);
+        select(index); outgoing.getAnimations().forEach(function (animation) { animation.cancel(); }); outgoing.style.zIndex = '';
+        await move(clip, [{ transform: 'rotateX(-28deg)' }, { transform: 'rotateX(0deg)' }], 140);
+        clip.getAnimations().forEach(function (animation) { animation.cancel(); });
+        busy = false; controls(false);
+      });
+    });
+    replay.addEventListener('click', function () { if (!busy) open(); });
+    controls(true);
+    Promise.all(Array.from(root.querySelectorAll('img[data-asset]')).map(function (img) {
+      img.src = base + img.dataset.asset + '.webp';
+      return img.decode();
+    })).then(function () {
+      var observer = new IntersectionObserver(function (entries) {
+        if (started || !entries.some(function (entry) { return entry.isIntersecting; })) return;
+        started = true; observer.disconnect(); open();
+      }, { threshold: .35 });
+      observer.observe(stage);
+    }).catch(function () { status.textContent = 'Не удалось загрузить графику папки. Обновите предпросмотр.'; });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initFolder);
+  else initFolder();
+})();
