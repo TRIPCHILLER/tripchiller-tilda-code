@@ -9760,13 +9760,14 @@ function setupDesktopAura() {
   function initFolder() {
     var root = document.getElementById('tc-contact-folder');
     if (!root || root.dataset.folderReady || !window.matchMedia('(min-width: 981px)').matches) return;
-    root.dataset.folderReady = '3';
+    root.dataset.folderReady = '4';
     var stage = root.querySelector('.tc-folder-stage');
     var tabs = Array.from(root.querySelectorAll('.tc-folder-tab'));
     var sheets = Array.from(root.querySelectorAll('.tc-folder-sheet'));
     var replay = root.querySelector('.tc-folder-replay');
     var status = root.querySelector('.tc-folder-status');
     var cover = root.querySelector('.tc-folder-cover');
+    var inner = root.querySelector('.tc-folder-base');
     var latchClosed = root.querySelector('.tc-folder-latch-closed');
     var latchOpen = root.querySelector('.tc-folder-latch-open');
     var closedShadow = root.querySelector('.tc-folder-closed-shadow');
@@ -9810,6 +9811,7 @@ function setupDesktopAura() {
       busy = true; controls(true); order = [0, 1, 2]; place();
       root.dataset.state = 'closed'; status.textContent = 'Папка открывается…';
       cover.style.visibility = ''; cover.style.transform = '';
+      inner.style.clipPath = '';
       latchClosed.style.visibility = ''; latchClosed.style.transform = '';
       latchOpen.style.visibility = 'hidden'; closedShadow.style.visibility = '';
       clipOpen.style.opacity = '0'; clipClosed.style.opacity = '1';
@@ -9819,7 +9821,11 @@ function setupDesktopAura() {
       latchOpen.style.visibility = 'visible';
       await move(latchOpen, [{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }], 170);
       root.dataset.state = 'opening';
-      await move(cover, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-85deg)', offset: .45 }, { transform: 'rotateY(-178deg)', offset: .92 }, { transform: 'rotateY(-180deg)' }], 650, 100);
+      await Promise.all([
+        move(cover, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-85deg)', offset: .45 }, { transform: 'rotateY(-178deg)', offset: .92 }, { transform: 'rotateY(-180deg)' }], 650, 100),
+        move(inner, [{ clipPath: 'inset(0 0 0 47.5%)' }, { clipPath: 'inset(0 0 0 47.5%)', offset: .45 }, { clipPath: 'inset(0 0 0 45%)', offset: .46 }, { clipPath: 'inset(0 0 0 45%)' }], 650, 100)
+      ]);
+      inner.style.clipPath = '';
       root.dataset.state = 'open'; cover.style.visibility = 'hidden'; latchOpen.style.visibility = 'hidden'; closedShadow.style.visibility = 'hidden';
       busy = false; describe(); controls(false);
     }
