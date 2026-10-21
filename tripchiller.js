@@ -9760,7 +9760,7 @@ function setupDesktopAura() {
   function initFolder() {
     var root = document.getElementById('tc-contact-folder');
     if (!root || root.dataset.folderReady || !window.matchMedia('(min-width: 981px)').matches) return;
-    root.dataset.folderReady = '2';
+    root.dataset.folderReady = '3';
     var stage = root.querySelector('.tc-folder-stage');
     var tabs = Array.from(root.querySelectorAll('.tc-folder-tab'));
     var sheets = Array.from(root.querySelectorAll('.tc-folder-sheet'));
@@ -9790,13 +9790,15 @@ function setupDesktopAura() {
       root.dataset.order = order.map(function (index) { return index + 1; }).join(',');
       sheets.forEach(function (sheet, index) {
         sheet.querySelector('.tc-folder-paper-face').setAttribute('aria-hidden', String(index !== order[0]));
-        tabs[index].setAttribute('aria-pressed', String(index === order[0]));
       });
       status.textContent = 'Лист 0' + (order[0] + 1) + ' / 03';
     }
+    function highlight(index) {
+      tabs.forEach(function (tab, i) { tab.setAttribute('aria-pressed', String(i === index)); });
+    }
     function place() {
       order.forEach(function (index, depth) { sheets[index].style.zIndex = String(3 - depth); sheets[index].style.transform = position(depth); });
-      describe();
+      describe(); highlight(order[0]);
     }
     function setClip(open) {
       return Promise.all([
@@ -9812,14 +9814,13 @@ function setupDesktopAura() {
       latchOpen.style.visibility = 'hidden'; closedShadow.style.visibility = '';
       clipOpen.style.opacity = '0'; clipClosed.style.opacity = '1';
       // Two registered tongue faces turn about the fastening edge; the cover stays still.
-      await move(latchClosed, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-90deg)' }], 150, 800);
-      latchClosed.style.visibility = 'hidden'; closedShadow.style.visibility = 'hidden';
+      await move(latchClosed, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }], 150, 800);
+      latchClosed.style.visibility = 'hidden';
       latchOpen.style.visibility = 'visible';
-      await move(latchOpen, [{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(0deg)' }], 170);
+      await move(latchOpen, [{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }], 170);
       root.dataset.state = 'opening';
       await move(cover, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-85deg)', offset: .45 }, { transform: 'rotateY(-178deg)', offset: .92 }, { transform: 'rotateY(-180deg)' }], 650, 100);
-      root.dataset.state = 'open'; cover.style.visibility = 'hidden'; latchOpen.style.visibility = 'hidden';
-      await setClip(true); await setClip(false);
+      root.dataset.state = 'open'; cover.style.visibility = 'hidden'; latchOpen.style.visibility = 'hidden'; closedShadow.style.visibility = 'hidden';
       busy = false; describe(); controls(false);
     }
     async function cycleSheet() {
@@ -9837,7 +9838,7 @@ function setupDesktopAura() {
     tabs.forEach(function (tab, index) {
       tab.addEventListener('click', async function () {
         if (busy || index === order[0]) return;
-        busy = true; controls(true); await setClip(true);
+        busy = true; controls(true); highlight(index); await setClip(true);
         // A deeper target is reached by cycling each preceding front leaf to the back.
         while (order[0] !== index) await cycleSheet();
         await setClip(false); busy = false; controls(false);
