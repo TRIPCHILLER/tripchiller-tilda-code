@@ -9760,66 +9760,97 @@ function setupDesktopAura() {
   function initFolder() {
     var root = document.getElementById('tc-contact-folder');
     if (!root || root.dataset.folderReady || !window.matchMedia('(min-width: 981px)').matches) return;
-    root.dataset.folderReady = '1';
-    var base = root.dataset.assetBase;
+    root.dataset.folderReady = '2';
     var stage = root.querySelector('.tc-folder-stage');
     var tabs = Array.from(root.querySelectorAll('.tc-folder-tab'));
     var sheets = Array.from(root.querySelectorAll('.tc-folder-sheet'));
     var replay = root.querySelector('.tc-folder-replay');
     var status = root.querySelector('.tc-folder-status');
     var cover = root.querySelector('.tc-folder-cover');
-    var latch = root.querySelector('.tc-folder-latch');
-    var clip = root.querySelector('.tc-folder-clip');
+    var latchClosed = root.querySelector('.tc-folder-latch-closed');
+    var latchOpen = root.querySelector('.tc-folder-latch-open');
+    var closedShadow = root.querySelector('.tc-folder-closed-shadow');
+    var clipClosed = root.querySelector('.tc-folder-clip-closed');
+    var clipOpen = root.querySelector('.tc-folder-clip-open');
     var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-    var busy = true, current = 0, started = false;
+    var busy = true, order = [0, 1, 2];
     function controls(disabled) { tabs.concat(replay).forEach(function (button) { button.disabled = disabled; }); }
-    function select(index) {
-      current = index;
-      sheets.forEach(function (sheet, i) { sheet.setAttribute('aria-hidden', String(i !== index)); });
-      tabs.forEach(function (tab, i) { tab.setAttribute('aria-pressed', String(i === index)); });
-      status.textContent = 'Лист 0' + (index + 1) + ' / 03';
-    }
+    function position() { return 'translateY(0%)'; }
     async function move(el, frames, duration, delay) {
-      if (reduced.matches) return;
-      var animation = el.animate(frames, { duration: duration, delay: delay || 0, easing: 'cubic-bezier(.22,.65,.25,1)', fill: 'forwards' });
-      await animation.finished;
+      var animation;
+      if (!reduced.matches) {
+        animation = el.animate(frames, { duration: duration, delay: delay || 0, easing: 'cubic-bezier(.3,.05,.25,1)', fill: 'both' });
+        await animation.finished;
+      }
+      var last = frames[frames.length - 1];
+      Object.keys(last).forEach(function (key) { if (key !== 'offset') el.style[key] = last[key]; });
+      if (animation) animation.cancel();
     }
-    async function open() {
-      busy = true; controls(true); select(0); status.textContent = 'Папка открывается…';
-      stage.getAnimations({ subtree: true }).forEach(function (animation) { animation.cancel(); });
-      root.classList.remove('tc-folder-unlatched', 'tc-folder-opening');
-      cover.style.visibility = ''; latch.style.visibility = '';
-      await move(latch, [{ transform: 'rotateY(0deg)', opacity: 1 }, { transform: 'rotateY(135deg)', opacity: 0 }], 220, 900);
-      latch.style.visibility = 'hidden'; root.classList.add('tc-folder-unlatched');
-      await move(cover, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-180deg)' }], 720, 90);
-      root.classList.add('tc-folder-opening');
-      cover.style.visibility = 'hidden';
-      await move(clip, [{ transform: 'rotateX(0deg)' }, { transform: 'rotateX(-28deg) translateY(-3%)', offset: .45 }, { transform: 'rotateX(0deg)' }], 340);
-      busy = false; select(0); controls(false);
+    function describe() {
+      root.dataset.order = order.map(function (index) { return index + 1; }).join(',');
+      sheets.forEach(function (sheet, index) {
+        sheet.querySelector('.tc-folder-paper-face').setAttribute('aria-hidden', String(index !== order[0]));
+        tabs[index].setAttribute('aria-pressed', String(index === order[0]));
+      });
+      status.textContent = 'Лист 0' + (order[0] + 1) + ' / 03';
+    }
+    function place() {
+      order.forEach(function (index, depth) { sheets[index].style.zIndex = String(3 - depth); sheets[index].style.transform = position(depth); });
+      describe();
+    }
+    function setClip(open) {
+      return Promise.all([
+        move(clipOpen, [{ opacity: open ? 0 : 1 }, { opacity: open ? 1 : 0 }], 160),
+        move(clipClosed, [{ opacity: open ? 1 : 0 }, { opacity: open ? 0 : 1 }], 160)
+      ]);
+    }
+    async function openFolder() {
+      busy = true; controls(true); order = [0, 1, 2]; place();
+      root.dataset.state = 'closed'; status.textContent = 'Папка открывается…';
+      cover.style.visibility = ''; cover.style.transform = '';
+      latchClosed.style.visibility = ''; latchClosed.style.transform = '';
+      latchOpen.style.visibility = 'hidden'; closedShadow.style.visibility = '';
+      clipOpen.style.opacity = '0'; clipClosed.style.opacity = '1';
+      // Two registered tongue faces turn about the fastening edge; the cover stays still.
+      await move(latchClosed, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-90deg)' }], 150, 800);
+      latchClosed.style.visibility = 'hidden'; closedShadow.style.visibility = 'hidden';
+      latchOpen.style.visibility = 'visible';
+      await move(latchOpen, [{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(0deg)' }], 170);
+      root.dataset.state = 'opening';
+      await move(cover, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-85deg)', offset: .45 }, { transform: 'rotateY(-178deg)', offset: .92 }, { transform: 'rotateY(-180deg)' }], 650, 100);
+      root.dataset.state = 'open'; cover.style.visibility = 'hidden'; latchOpen.style.visibility = 'hidden';
+      await setClip(true); await setClip(false);
+      busy = false; describe(); controls(false);
+    }
+    async function cycleSheet() {
+      var outgoing = sheets[order[0]];
+      // Lift the entire leaf AND its attached tab clear of the pile. No book hinge.
+      await move(outgoing, [{ transform: position(0) }, { transform: 'translateY(-106%)' }], 420);
+      order.push(order.shift());
+      outgoing.style.zIndex = '1';
+      order.slice(0, 2).forEach(function (index, depth) {
+        sheets[index].style.zIndex = String(3 - depth);
+      });
+      describe();
+      await move(outgoing, [{ transform: 'translateY(-106%)' }, { transform: position() }], 460);
     }
     tabs.forEach(function (tab, index) {
       tab.addEventListener('click', async function () {
-        if (busy || index === current) return;
-        busy = true; controls(true);
-        await move(clip, [{ transform: 'rotateX(0deg)' }, { transform: 'rotateX(-28deg)' }], 100);
-        var outgoing = sheets[current];
-        sheets[index].setAttribute('aria-hidden', 'false'); outgoing.style.zIndex = '4';
-        await move(outgoing, [{ transform: 'rotateY(0deg)', opacity: 1 }, { transform: 'rotateY(-120deg) translateX(-5%)', opacity: 0 }], 430);
-        select(index); outgoing.getAnimations().forEach(function (animation) { animation.cancel(); }); outgoing.style.zIndex = '';
-        await move(clip, [{ transform: 'rotateX(-28deg)' }, { transform: 'rotateX(0deg)' }], 140);
-        clip.getAnimations().forEach(function (animation) { animation.cancel(); });
-        busy = false; controls(false);
+        if (busy || index === order[0]) return;
+        busy = true; controls(true); await setClip(true);
+        // A deeper target is reached by cycling each preceding front leaf to the back.
+        while (order[0] !== index) await cycleSheet();
+        await setClip(false); busy = false; controls(false);
       });
     });
-    replay.addEventListener('click', function () { if (!busy) open(); });
-    controls(true);
+    replay.addEventListener('click', function () { if (!busy) openFolder(); });
+    controls(true); place(); status.textContent = 'Загрузка папки…';
     Promise.all(Array.from(root.querySelectorAll('img[data-asset]')).map(function (img) {
-      img.src = base + img.dataset.asset + '.webp';
-      return img.decode();
+      img.src = root.dataset.assetBase + img.dataset.asset + '.webp'; return img.decode();
     })).then(function () {
       var observer = new IntersectionObserver(function (entries) {
-        if (started || !entries.some(function (entry) { return entry.isIntersecting; })) return;
-        started = true; observer.disconnect(); open();
+        if (!entries.some(function (entry) { return entry.isIntersecting; })) return;
+        observer.disconnect(); openFolder();
       }, { threshold: .35 });
       observer.observe(stage);
     }).catch(function () { status.textContent = 'Не удалось загрузить графику папки. Обновите предпросмотр.'; });

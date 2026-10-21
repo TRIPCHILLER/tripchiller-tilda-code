@@ -6348,38 +6348,44 @@ body.tc-product-page-active .tc-menu-eye-logo {
 }
 
 /* ABOUT: desktop folder prototype; activated only by its explicit T123 marker. */
-#tc-contact-folder { --tc-paper: #f8f7f3; padding: 60px 24px 36px; color: #eee; font-family: var(--tc-font-main, 'Courier New', monospace); }
+#tc-contact-folder { --tc-paper: #f8f7f3; padding: 100px 24px 36px; color: #eee; font-family: var(--tc-font-main, 'Courier New', monospace); }
 #tc-contact-folder * { box-sizing: border-box; }
-#tc-contact-folder .tc-folder-stage { position: relative; width: min(1060px, 100%); aspect-ratio: 4578 / 2636; margin: 0 auto; perspective: 1900px; isolation: isolate; }
+#tc-contact-folder .tc-folder-stage { position: relative; width: min(1060px, 100%); aspect-ratio: 4578 / 2636; margin: 0 auto; perspective: 2400px; isolation: isolate; }
 #tc-contact-folder img { display: block; width: 100%; height: 100%; user-select: none; pointer-events: none; }
-#tc-contact-folder .tc-folder-base, #tc-contact-folder .tc-folder-cover, #tc-contact-folder .tc-folder-latch { position: absolute; top: 0; height: 100%; }
-#tc-contact-folder .tc-folder-base { inset: 0; filter: drop-shadow(0 12px 10px #0005); }
-#tc-contact-folder .tc-folder-left { clip-path: inset(0 55% 0 0); opacity: 0; }
-#tc-contact-folder .tc-folder-right { clip-path: inset(0 11% 0 45%); }
-#tc-contact-folder.tc-folder-unlatched .tc-folder-right { clip-path: inset(0 0 0 45%); }
-#tc-contact-folder.tc-folder-opening .tc-folder-left { opacity: 1; }
-#tc-contact-folder .tc-folder-cover { left: 45%; width: 45.55%; transform-origin: 0 50%; transform-style: preserve-3d; z-index: 8; }
-#tc-contact-folder .tc-folder-cover-front, #tc-contact-folder .tc-folder-cover-back { position: absolute; inset: 0; backface-visibility: hidden; overflow: hidden; }
-#tc-contact-folder .tc-folder-cover-front img { width: 121.95%; clip-path: inset(0 18% 0 0); }
-#tc-contact-folder .tc-folder-cover-back { transform: rotateY(180deg); }
+#tc-contact-folder .tc-folder-base, #tc-contact-folder .tc-folder-open-shadow { position: absolute; inset: 0; }
+#tc-contact-folder .tc-folder-base { clip-path: inset(0 11.7% 0 45%); }
+#tc-contact-folder[data-state="opening"] .tc-folder-base { clip-path: inset(0 0 0 45%); }
+#tc-contact-folder[data-state="open"] .tc-folder-base { clip-path: none; }
+/* Contact shadows follow complete alpha silhouettes, never clipped panels. */
+#tc-contact-folder .tc-folder-open-shadow, #tc-contact-folder .tc-folder-closed-shadow { filter: drop-shadow(0 2px 1px #0008) drop-shadow(0 5px 3px #0005); }
+#tc-contact-folder .tc-folder-open-shadow { visibility: hidden; }
+#tc-contact-folder[data-state="open"] .tc-folder-open-shadow { visibility: visible; }
+#tc-contact-folder .tc-folder-cover, #tc-contact-folder .tc-folder-latch-closed, #tc-contact-folder .tc-folder-latch-open, #tc-contact-folder .tc-folder-closed-shadow { position: absolute; left: 45%; top: 0; width: 55.49%; height: 100%; }
+#tc-contact-folder .tc-folder-closed-shadow img { position: absolute; inset: 0; }
+#tc-contact-folder .tc-folder-cover { transform-origin: 0 50%; transform-style: preserve-3d; z-index: 8; }
+#tc-contact-folder .tc-folder-cover-front, #tc-contact-folder .tc-folder-cover-back { position: absolute; inset: 0; backface-visibility: hidden; }
+#tc-contact-folder .tc-folder-cover-back { width: 81.1%; overflow: hidden; transform: rotateY(180deg); }
 #tc-contact-folder .tc-folder-cover-back img { width: 222.22%; }
-#tc-contact-folder .tc-folder-latch { left: 45%; width: 45.6%; clip-path: inset(0 0 0 75%); transform-origin: 100% 50%; z-index: 9; }
-#tc-contact-folder .tc-folder-paper-stack { position: absolute; left: 49%; top: 4.5%; width: 36%; aspect-ratio: 210 / 297; perspective: 1400px; z-index: 3; }
-#tc-contact-folder .tc-folder-paper-stack::before, #tc-contact-folder .tc-folder-paper-stack::after { content: ''; position: absolute; inset: 0; background: #e5e3de; border: 1px solid #c7c5c0; transform: translate(3px, 3px) rotate(.3deg); box-shadow: 0 3px 5px #0005; }
-#tc-contact-folder .tc-folder-paper-stack::after { transform: translate(1px, 1px) rotate(-.25deg); }
-#tc-contact-folder .tc-folder-sheet { position: absolute; inset: 0; margin: 0; background: var(--tc-paper); box-shadow: 0 4px 10px #0004; transform-origin: 0 0; backface-visibility: hidden; z-index: 1; }
-#tc-contact-folder .tc-folder-sheet[aria-hidden="true"] { visibility: hidden; }
+#tc-contact-folder .tc-folder-latch-closed, #tc-contact-folder .tc-folder-latch-open { transform-origin: 79.64% 49%; z-index: 9; backface-visibility: hidden; }
+#tc-contact-folder .tc-folder-latch-open { visibility: hidden; }
+#tc-contact-folder .tc-folder-paper-stack { position: absolute; left: 49%; top: 4.5%; width: 37.5%; aspect-ratio: 210 / 297; z-index: 3; visibility: hidden; }
+#tc-contact-folder .tc-folder-sheet { position: absolute; inset: 0; margin: 0; }
+#tc-contact-folder .tc-folder-paper-face { position: absolute; inset: 0; background: var(--tc-paper); box-shadow: 0 2px 2px #0004; }
 #tc-contact-folder .tc-folder-page-number { position: absolute; right: 6%; bottom: 4%; font: 14px 'Courier New', monospace; color: #6b6964; }
-#tc-contact-folder .tc-folder-tabs { position: absolute; right: 11.9%; top: 8%; width: 11%; display: grid; gap: 5px; z-index: 5; }
-#tc-contact-folder .tc-folder-tab { position: relative; border: 0; padding: 0; background: none; aspect-ratio: 1716 / 568; cursor: pointer; transition: transform .18s; }
-#tc-contact-folder .tc-folder-tab span { position: absolute; inset: 0; display: grid; place-items: center; padding-right: 15%; color: #222; font: bold 12px 'Courier New', monospace; }
-#tc-contact-folder .tc-folder-tab[aria-pressed="true"] { transform: translateX(8%); }
-#tc-contact-folder .tc-folder-tab:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+#tc-contact-folder .tc-folder-tab { position: absolute; top: 8%; right: -3.8%; width: 27%; aspect-ratio: 1716 / 568; border: 0; padding: 0; background: none; cursor: pointer; }
+#tc-contact-folder .tc-folder-sheet[data-page="2"] .tc-folder-tab { top: 14.3%; }
+#tc-contact-folder .tc-folder-sheet[data-page="3"] .tc-folder-tab { top: 20.6%; }
+#tc-contact-folder .tc-folder-tab[aria-pressed="false"] { filter: brightness(.62); }
+#tc-contact-folder .tc-folder-tab-label { position: absolute; inset: 0; display: grid; place-items: center; padding-right: 12%; color: #222; font: bold 12px 'Courier New', monospace; pointer-events: none; }
+#tc-contact-folder .tc-folder-tab-tip { position: absolute; right: 0; top: 0; width: 14%; height: 100%; }
+#tc-contact-folder .tc-folder-tab:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 #tc-contact-folder .tc-folder-tab:disabled { cursor: default; }
-#tc-contact-folder .tc-folder-clip { position: absolute; left: 54%; top: .4%; width: 27%; aspect-ratio: 2120 / 580; z-index: 6; transform-origin: 50% 5%; filter: drop-shadow(0 3px 2px #0008); }
-#tc-contact-folder .tc-folder-controls { display: flex; justify-content: center; align-items: center; gap: 24px; width: fit-content; margin: 28px auto 0; padding: 8px 14px; min-height: 32px; background: #181818; font-size: 12px; }
+#tc-contact-folder .tc-folder-clip { position: absolute; left: 54%; top: -.8%; width: 27%; aspect-ratio: 2171 / 647; z-index: 6; visibility: hidden; }
+#tc-contact-folder .tc-folder-clip img { position: absolute; inset: 0; }
+#tc-contact-folder .tc-folder-clip-open { opacity: 0; }
+#tc-contact-folder[data-state="opening"] .tc-folder-paper-stack, #tc-contact-folder[data-state="open"] .tc-folder-paper-stack, #tc-contact-folder[data-state="opening"] .tc-folder-clip, #tc-contact-folder[data-state="open"] .tc-folder-clip { visibility: visible; }
+#tc-contact-folder .tc-folder-controls { display: flex; justify-content: center; align-items: center; gap: 24px; width: fit-content; margin: 30px auto 0; padding: 8px 14px; min-height: 32px; background: #181818; font-size: 12px; }
 #tc-contact-folder .tc-folder-replay { border: 1px solid #777; padding: 9px 14px; background: #171717; color: #eee; font: inherit; cursor: pointer; }
 #tc-contact-folder .tc-folder-replay:disabled { opacity: .45; cursor: default; }
 #tc-contact-folder .tc-folder-status { color: #ccc; }
 @media (max-width: 980px) { #tc-contact-folder { display: none; } }
-@media (prefers-reduced-motion: reduce) { #tc-contact-folder .tc-folder-tab { transition: none; } }
