@@ -9760,7 +9760,7 @@ function setupDesktopAura() {
   function initFolder() {
     var root = document.getElementById('tc-contact-folder');
     if (!root || root.dataset.folderReady || !window.matchMedia('(min-width: 981px)').matches) return;
-    root.dataset.folderReady = '5';
+    root.dataset.folderReady = '6';
     var stage = root.querySelector('.tc-folder-stage');
     var tabs = Array.from(root.querySelectorAll('.tc-folder-tab'));
     var sheets = Array.from(root.querySelectorAll('.tc-folder-sheet'));
