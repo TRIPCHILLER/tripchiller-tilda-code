@@ -9760,7 +9760,7 @@ function setupDesktopAura() {
   function initFolder() {
     var root = document.getElementById('tc-contact-folder');
     if (!root || root.dataset.folderReady || !window.matchMedia('(min-width: 981px)').matches) return;
-    root.dataset.folderReady = '4';
+    root.dataset.folderReady = '5';
     var stage = root.querySelector('.tc-folder-stage');
     var tabs = Array.from(root.querySelectorAll('.tc-folder-tab'));
     var sheets = Array.from(root.querySelectorAll('.tc-folder-sheet'));
@@ -9812,11 +9812,13 @@ function setupDesktopAura() {
       root.dataset.state = 'closed'; status.textContent = 'Папка открывается…';
       cover.style.visibility = ''; cover.style.transform = '';
       inner.style.clipPath = '';
+      stage.style.transform = 'translateX(-17.9%)';
       latchClosed.style.visibility = ''; latchClosed.style.transform = '';
       latchOpen.style.visibility = 'hidden'; closedShadow.style.visibility = '';
       clipOpen.style.opacity = '0'; clipClosed.style.opacity = '1';
+      await move(stage, [{ transform: 'translateX(-17.9%)' }, { transform: 'translateX(0%)' }], 700, 350);
       // Two registered tongue faces turn about the fastening edge; the cover stays still.
-      await move(latchClosed, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }], 150, 800);
+      await move(latchClosed, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }], 150, 150);
       latchClosed.style.visibility = 'hidden';
       latchOpen.style.visibility = 'visible';
       await move(latchOpen, [{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }], 170);
