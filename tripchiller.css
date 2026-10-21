@@ -6353,9 +6353,9 @@ body.tc-product-page-active .tc-menu-eye-logo {
 #tc-contact-folder .tc-folder-stage { position: relative; width: min(1060px, 100%); aspect-ratio: 4578 / 2636; margin: 0 auto; perspective: 2400px; isolation: isolate; transform: translateX(-17.9%); }
 #tc-contact-folder img { display: block; width: 100%; height: 100%; user-select: none; pointer-events: none; }
 #tc-contact-folder .tc-folder-base, #tc-contact-folder .tc-folder-open-shadow { position: absolute; inset: 0; }
-#tc-contact-folder .tc-folder-base { visibility: hidden; clip-path: inset(0 0 0 47.5%); }
+#tc-contact-folder .tc-folder-base { visibility: hidden; clip-path: inset(0 11% 0 47.5%); }
 #tc-contact-folder[data-state="opening"] .tc-folder-base { visibility: visible; }
-#tc-contact-folder[data-state="open"] .tc-folder-base { visibility: visible; clip-path: none; }
+#tc-contact-folder[data-state="open"] .tc-folder-base { visibility: visible; clip-path: inset(0 11% 0 0); }
 /* Contact shadows follow complete alpha silhouettes, never clipped panels. */
 #tc-contact-folder .tc-folder-open-shadow, #tc-contact-folder .tc-folder-closed-shadow { filter: url(#tc-folder-contact-shadow); }
 #tc-contact-folder .tc-folder-open-shadow { visibility: hidden; }
@@ -6366,12 +6366,13 @@ body.tc-product-page-active .tc-menu-eye-logo {
 #tc-contact-folder .tc-folder-cover, #tc-contact-folder .tc-folder-latch-closed, #tc-contact-folder .tc-folder-latch-open, #tc-contact-folder .tc-folder-closed-shadow { position: absolute; left: 45%; top: 0; width: 55.49%; height: 100%; }
 #tc-contact-folder .tc-folder-closed-shadow img { position: absolute; inset: 0; }
 #tc-contact-folder .tc-folder-cover { transform-origin: 0 50%; transform-style: preserve-3d; z-index: 8; }
-#tc-contact-folder .tc-folder-cover-front, #tc-contact-folder .tc-folder-cover-back { position: absolute; inset: 0; backface-visibility: hidden; }
+#tc-contact-folder .tc-folder-cover-front, #tc-contact-folder .tc-folder-cover-front, #tc-contact-folder .tc-folder-closed-shadow img { transform-origin: 0 50%; transform: scale(1.009, 1.008); }
+#tc-contact-folder .tc-folder-cover-back { position: absolute; inset: 0; backface-visibility: hidden; }
 #tc-contact-folder .tc-folder-cover-back { width: 81.1%; transform: rotateY(180deg); filter: drop-shadow(0 5px 2px #0000007a); }
 #tc-contact-folder .tc-folder-cover-back-crop { height: 100%; overflow: hidden; }
 #tc-contact-folder .tc-folder-cover-back img { width: 222.22%; }
 #tc-contact-folder .tc-folder-latch-closed, #tc-contact-folder .tc-folder-latch-open { transform-origin: 79.64% 49%; z-index: 9; backface-visibility: hidden; }
-#tc-contact-folder .tc-folder-latch-open { visibility: hidden; }
+#tc-contact-folder .tc-folder-latch-open { left: 44.5%; visibility: hidden; }
 #tc-contact-folder .tc-folder-paper-stack { position: absolute; left: 49.9375%; top: 6.8%; width: 35.625%; aspect-ratio: 210 / 297; z-index: 3; visibility: hidden; }
 #tc-contact-folder .tc-folder-sheet { position: absolute; inset: 0; margin: 0; }
 #tc-contact-folder .tc-folder-paper-face { position: absolute; inset: 0; background: var(--tc-paper); box-shadow: 0 2px 2px #0004; }

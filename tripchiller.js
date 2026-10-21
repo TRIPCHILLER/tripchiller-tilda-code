@@ -9760,7 +9760,7 @@ function setupDesktopAura() {
   function initFolder() {
     var root = document.getElementById('tc-contact-folder');
     if (!root || root.dataset.folderReady || !window.matchMedia('(min-width: 981px)').matches) return;
-    root.dataset.folderReady = '7';
+    root.dataset.folderReady = '8';
     var stage = root.querySelector('.tc-folder-stage');
     var tabs = Array.from(root.querySelectorAll('.tc-folder-tab'));
     var sheets = Array.from(root.querySelectorAll('.tc-folder-sheet'));
@@ -9828,13 +9828,13 @@ function setupDesktopAura() {
       root.dataset.state = 'opening';
       await Promise.all([
         move(cover, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-85deg)', offset: .45 }, { transform: 'rotateY(-178deg)', visibility: 'visible', offset: .919 }, { transform: 'rotateY(-178deg)', visibility: 'hidden', offset: .92 }, { transform: 'rotateY(-180deg)', visibility: 'hidden' }], 650, 100),
-        move(inner, [{ clipPath: 'inset(0 0 0 47.5%)' }, { clipPath: 'inset(0 0 0 47.5%)', offset: .45 }, { clipPath: 'inset(0 0 0 45%)', offset: .46 }, { clipPath: 'inset(0 0 0 45%)', offset: .919 }, { clipPath: 'inset(0)', offset: .92 }, { clipPath: 'inset(0)' }], 650, 100),
+        move(inner, [{ clipPath: 'inset(0 11% 0 47.5%)' }, { clipPath: 'inset(0 11% 0 47.5%)', offset: .45 }, { clipPath: 'inset(0 11% 0 45%)', offset: .46 }, { clipPath: 'inset(0 11% 0 45%)', offset: .919 }, { clipPath: 'inset(0 11% 0 0)', offset: .92 }, { clipPath: 'inset(0 11% 0 0)' }], 650, 100),
         move(shadowMask, [{ clipPath: 'inset(0 0 0 45%)' }, { clipPath: 'inset(0 0 0 45%)', offset: .919 }, { clipPath: 'inset(0)', offset: .92 }, { clipPath: 'inset(0)' }], 650, 100),
         move(openShadow, [{ opacity: 0 }, { opacity: 0, offset: .45 }, { opacity: 1, offset: .46 }, { opacity: 1 }], 650, 100),
         move(closedShadow, [{ opacity: 1 }, { opacity: 1, offset: .45 }, { opacity: 0, offset: .46 }, { opacity: 0 }], 650, 100)
       ]);
       inner.style.clipPath = '';
-      root.dataset.state = 'open'; cover.style.visibility = 'hidden'; latchOpen.style.visibility = 'hidden'; closedShadow.style.visibility = 'hidden';
+      root.dataset.state = 'open'; cover.style.visibility = 'hidden'; closedShadow.style.visibility = 'hidden';
       busy = false; describe(); controls(false);
     }
     async function cycleSheet() {
