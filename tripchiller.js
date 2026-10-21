@@ -9760,7 +9760,7 @@ function setupDesktopAura() {
   function initFolder() {
     var root = document.getElementById('tc-contact-folder');
     if (!root || root.dataset.folderReady || !window.matchMedia('(min-width: 981px)').matches) return;
-    root.dataset.folderReady = '6';
+    root.dataset.folderReady = '7';
     var stage = root.querySelector('.tc-folder-stage');
     var tabs = Array.from(root.querySelectorAll('.tc-folder-tab'));
     var sheets = Array.from(root.querySelectorAll('.tc-folder-sheet'));
@@ -9768,6 +9768,8 @@ function setupDesktopAura() {
     var status = root.querySelector('.tc-folder-status');
     var cover = root.querySelector('.tc-folder-cover');
     var inner = root.querySelector('.tc-folder-base');
+    var openShadow = root.querySelector('.tc-folder-open-shadow');
+    var shadowMask = openShadow.querySelector('img');
     var latchClosed = root.querySelector('.tc-folder-latch-closed');
     var latchOpen = root.querySelector('.tc-folder-latch-open');
     var closedShadow = root.querySelector('.tc-folder-closed-shadow');
@@ -9811,6 +9813,7 @@ function setupDesktopAura() {
       busy = true; controls(true); order = [0, 1, 2]; place();
       root.dataset.state = 'closed'; status.textContent = 'Папка открывается…';
       cover.style.visibility = ''; cover.style.transform = '';
+      openShadow.style.opacity = '0'; shadowMask.style.clipPath = ''; closedShadow.style.opacity = '1';
       inner.style.clipPath = '';
       stage.style.transform = 'translateX(-17.9%)';
       latchClosed.style.visibility = ''; latchClosed.style.transform = '';
@@ -9824,8 +9827,11 @@ function setupDesktopAura() {
       await move(latchOpen, [{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }], 170);
       root.dataset.state = 'opening';
       await Promise.all([
-        move(cover, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-85deg)', offset: .45 }, { transform: 'rotateY(-178deg)', offset: .92 }, { transform: 'rotateY(-180deg)' }], 650, 100),
-        move(inner, [{ clipPath: 'inset(0 0 0 47.5%)' }, { clipPath: 'inset(0 0 0 47.5%)', offset: .45 }, { clipPath: 'inset(0 0 0 45%)', offset: .46 }, { clipPath: 'inset(0 0 0 45%)' }], 650, 100)
+        move(cover, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-85deg)', offset: .45 }, { transform: 'rotateY(-178deg)', visibility: 'visible', offset: .919 }, { transform: 'rotateY(-178deg)', visibility: 'hidden', offset: .92 }, { transform: 'rotateY(-180deg)', visibility: 'hidden' }], 650, 100),
+        move(inner, [{ clipPath: 'inset(0 0 0 47.5%)' }, { clipPath: 'inset(0 0 0 47.5%)', offset: .45 }, { clipPath: 'inset(0 0 0 45%)', offset: .46 }, { clipPath: 'inset(0 0 0 45%)', offset: .919 }, { clipPath: 'inset(0)', offset: .92 }, { clipPath: 'inset(0)' }], 650, 100),
+        move(shadowMask, [{ clipPath: 'inset(0 0 0 45%)' }, { clipPath: 'inset(0 0 0 45%)', offset: .919 }, { clipPath: 'inset(0)', offset: .92 }, { clipPath: 'inset(0)' }], 650, 100),
+        move(openShadow, [{ opacity: 0 }, { opacity: 0, offset: .45 }, { opacity: 1, offset: .46 }, { opacity: 1 }], 650, 100),
+        move(closedShadow, [{ opacity: 1 }, { opacity: 1, offset: .45 }, { opacity: 0, offset: .46 }, { opacity: 0 }], 650, 100)
       ]);
       inner.style.clipPath = '';
       root.dataset.state = 'open'; cover.style.visibility = 'hidden'; latchOpen.style.visibility = 'hidden'; closedShadow.style.visibility = 'hidden';

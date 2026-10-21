@@ -6359,8 +6359,9 @@ body.tc-product-page-active .tc-menu-eye-logo {
 /* Contact shadows follow complete alpha silhouettes, never clipped panels. */
 #tc-contact-folder .tc-folder-open-shadow, #tc-contact-folder .tc-folder-closed-shadow { filter: url(#tc-folder-contact-shadow); }
 #tc-contact-folder .tc-folder-open-shadow { visibility: hidden; }
-#tc-contact-folder[data-state="opening"] .tc-folder-open-shadow { visibility: visible; clip-path: inset(0 -10% -10% 45%); }
-#tc-contact-folder[data-state="opening"] .tc-folder-closed-shadow { visibility: hidden; }
+#tc-contact-folder[data-state="opening"] .tc-folder-open-shadow { visibility: visible; }
+#tc-contact-folder .tc-folder-open-shadow img { clip-path: inset(0 0 0 45%); }
+#tc-contact-folder[data-state="open"] .tc-folder-open-shadow img { clip-path: none; }
 #tc-contact-folder[data-state="open"] .tc-folder-open-shadow { visibility: visible; }
 #tc-contact-folder .tc-folder-cover, #tc-contact-folder .tc-folder-latch-closed, #tc-contact-folder .tc-folder-latch-open, #tc-contact-folder .tc-folder-closed-shadow { position: absolute; left: 45%; top: 0; width: 55.49%; height: 100%; }
 #tc-contact-folder .tc-folder-closed-shadow img { position: absolute; inset: 0; }
