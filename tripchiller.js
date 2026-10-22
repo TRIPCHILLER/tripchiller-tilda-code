@@ -9753,3 +9753,185 @@ function setupDesktopAura() {
 
   observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
+
+/* ABOUT: opt-in desktop folder, persistent A4 forms and local letter preview. */
+(function () {
+  'use strict';
+  function initFolder() {
+    var root = document.getElementById('tc-contact-folder');
+    if (!root || root.dataset.folderReady || !window.matchMedia('(min-width: 981px)').matches) return;
+    root.dataset.folderReady = '9';
+    var stage = root.querySelector('.tc-folder-stage');
+    var tabs = Array.from(root.querySelectorAll('.tc-folder-tab'));
+    var sheets = Array.from(root.querySelectorAll('.tc-folder-sheet'));
+    var replay = root.querySelector('.tc-folder-replay');
+    var send = root.querySelector('.tc-brief-send');
+    var status = root.querySelector('.tc-folder-status');
+    var cover = root.querySelector('.tc-folder-cover');
+    var spine = root.querySelector('.tc-folder-spine');
+    var shadowMoving = root.querySelector('.tc-folder-shadow-moving');
+    var shadowSpine = root.querySelector('.tc-folder-shadow-spine');
+    var shadowLatch = root.querySelector('.tc-folder-shadow-latch');
+    var latchClosed = root.querySelector('.tc-folder-latch-closed');
+    var latchOpen = root.querySelector('.tc-folder-latch-open');
+    var clipClosed = root.querySelector('.tc-folder-clip-closed');
+    var clipOpen = root.querySelector('.tc-folder-clip-open');
+    var form = root.querySelector('#tc-brief-form');
+    var preview = root.querySelector('.tc-brief-preview');
+    var letter = root.querySelector('.tc-brief-letter');
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var busy = true, order = sheets.map(function (_, index) { return index; }), letterText = '';
+    root.style.setProperty('--tc-brief-button-shape', 'url("' + root.dataset.assetBase + 'brief-button.svg")');
+    function controls(disabled) {
+      tabs.concat(replay, send).forEach(function (button) { button.disabled = disabled; });
+      root.setAttribute('aria-busy', String(disabled));
+      sheets.forEach(function (sheet, index) {
+        sheet.querySelector('.tc-folder-paper-face').inert = disabled || index !== order[0];
+      });
+    }
+    async function move(el, frames, duration, delay) {
+      var animation;
+      if (!reduced.matches) {
+        animation = el.animate(frames, { duration: duration, delay: delay || 0, easing: 'cubic-bezier(.3,.05,.25,1)', fill: 'both' });
+        await animation.finished;
+      }
+      var last = frames[frames.length - 1];
+      Object.keys(last).forEach(function (key) { if (key !== 'offset') el.style[key] = last[key]; });
+      if (animation) animation.cancel();
+    }
+    function describe() {
+      root.dataset.order = order.map(function (index) { return index + 1; }).join(',');
+      sheets.forEach(function (sheet, index) {
+        var face = sheet.querySelector('.tc-folder-paper-face');
+        face.setAttribute('aria-hidden', String(index !== order[0]));
+        face.inert = busy || index !== order[0];
+      });
+      status.textContent = 'Лист 0' + (order[0] + 1) + ' / 04';
+    }
+    function highlight(index) {
+      tabs.forEach(function (tab, i) { tab.setAttribute('aria-pressed', String(i === index)); });
+    }
+    function place() {
+      order.forEach(function (index, depth) {
+        sheets[index].style.zIndex = String(sheets.length - depth);
+        sheets[index].style.transform = 'translateY(0%)';
+      });
+      describe(); highlight(order[0]);
+    }
+    function setClip(open) {
+      return Promise.all([
+        move(clipOpen, [{ opacity: open ? 0 : 1 }, { opacity: open ? 1 : 0 }], 160),
+        move(clipClosed, [{ opacity: open ? 1 : 0 }, { opacity: open ? 0 : 1 }], 160)
+      ]);
+    }
+    async function openFolder() {
+      busy = true; controls(true); order = sheets.map(function (_, index) { return index; }); place();
+      root.dataset.state = 'closed'; status.textContent = 'Папка открывается…';
+      cover.style.transform = 'rotateY(0deg)';
+      spine.style.visibility = 'hidden';
+      shadowMoving.style.transform = 'scaleX(1)';
+      shadowSpine.style.opacity = '0'; shadowLatch.style.opacity = '0';
+      stage.style.transform = 'translateX(-17.9%)';
+      latchClosed.style.visibility = ''; latchClosed.style.transform = '';
+      latchOpen.style.visibility = 'hidden';
+      clipOpen.style.opacity = '0'; clipClosed.style.opacity = '1';
+      await move(stage, [{ transform: 'translateX(-17.9%)' }, { transform: 'translateX(0%)' }], 700, 350);
+      await move(latchClosed, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }], 150, 150);
+      latchClosed.style.visibility = 'hidden'; latchOpen.style.visibility = 'visible';
+      await Promise.all([
+        move(latchOpen, [{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }], 170),
+        move(shadowLatch, [{ opacity: 0 }, { opacity: 1 }], 170)
+      ]);
+      root.dataset.state = 'opening';
+      // One fixed spine and right panel; only the cover rotates. No image hand-off.
+      await Promise.all([
+        move(cover, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-85deg)', offset: .45 }, { transform: 'rotateY(-180deg)' }], 650, 100),
+        move(spine, [{ visibility: 'hidden' }, { visibility: 'hidden', offset: .45 }, { visibility: 'visible', offset: .46 }, { visibility: 'visible' }], 650, 100),
+        move(shadowMoving, [{ transform: 'scaleX(1)' }, { transform: 'scaleX(.0872)', offset: .45 }, { transform: 'scaleX(-1)' }], 650, 100),
+        move(shadowSpine, [{ opacity: 0 }, { opacity: 0, offset: .45 }, { opacity: 1, offset: .46 }, { opacity: 1 }], 650, 100)
+      ]);
+      root.dataset.state = 'open'; busy = false; describe(); controls(false);
+    }
+    async function cycleSheet() {
+      var outgoing = sheets[order[0]];
+      await move(outgoing, [{ transform: 'translateY(0%)' }, { transform: 'translateY(-106%)' }], 420);
+      order.push(order.shift());
+      order.forEach(function (index, depth) { sheets[index].style.zIndex = String(sheets.length - depth); });
+      describe();
+      await move(outgoing, [{ transform: 'translateY(-106%)' }, { transform: 'translateY(0%)' }], 460);
+    }
+    async function selectPage(index) {
+      if (busy || index === order[0]) return;
+      busy = true; controls(true); highlight(index); await setClip(true);
+      while (order[0] !== index) await cycleSheet();
+      await setClip(false); busy = false; describe(); controls(false);
+    }
+    tabs.forEach(function (tab, index) { tab.addEventListener('click', function () { selectPage(index); }); });
+    replay.addEventListener('click', function () { if (!busy) openFolder(); });
+    // Form controls live inside their paper articles and are never rebuilt on a page change.
+    form.querySelectorAll('input[type="number"]').forEach(function (input) { input.min = '0'; input.max = '100'; });
+    form.querySelectorAll('input[type="range"]').forEach(function (input) {
+      input.addEventListener('input', function () { input.dataset.touched = 'true'; });
+    });
+    function collectLetter() {
+      var lines = ['ЗАПРОС НА РАЗРАБОТКУ ДИЗАЙН-ПРОЕКТА', 'TRIPCHILLER / БРИФ', ''];
+      sheets.forEach(function (sheet, index) {
+        lines.push('ЛИСТ 0' + (index + 1) + ' / 04 — ' + ['СТАРТ', 'ПРОЕКТ', 'ДЕТАЛИ', 'ФИНАЛ'][index], '');
+        sheet.querySelectorAll('.tc-brief-section').forEach(function (section) {
+          lines.push(section.querySelector('legend').textContent);
+          var groups = new Map();
+          section.querySelectorAll('input,textarea,select').forEach(function (field) {
+            var key = field.dataset.question;
+            if (!groups.has(key)) groups.set(key, []);
+            if ((field.type === 'checkbox' || field.type === 'radio') && !field.checked) return;
+            var value = field.type === 'range' && !field.dataset.touched ? '' : field.value.trim();
+            if (value) groups.get(key).push(field.type === 'range' ? value + ' / 100' : value);
+          });
+          groups.forEach(function (answers, question) { lines.push(question + ':', answers.length ? answers.join('; ') : 'Не заполнено', ''); });
+        });
+        lines.push('');
+      });
+      return lines.join('\n');
+    }
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      if (busy) return;
+      var invalid = Array.from(form.querySelectorAll('input,textarea,select')).find(function (field) { return !field.validity.valid; });
+      if (invalid) {
+        var page = Number(invalid.closest('.tc-folder-sheet').dataset.page) - 1;
+        await selectPage(page); invalid.focus(); invalid.reportValidity(); return;
+      }
+      letterText = collectLetter();
+      letter.textContent = letterText;
+      preview.showModal();
+    });
+    function closePreview() { preview.close(); send.focus(); }
+    root.querySelector('.tc-brief-close').addEventListener('click', closePreview);
+    root.querySelector('.tc-brief-back').addEventListener('click', closePreview);
+    root.querySelector('.tc-brief-download').addEventListener('click', function () {
+      var bytes = new TextEncoder().encode(letterText);
+      var binary = Array.from(bytes, function (byte) { return String.fromCharCode(byte); }).join('');
+      var encoded = btoa(binary).match(/.{1,76}/g).join('\r\n');
+      var subject = btoa(unescape(encodeURIComponent('Бриф дизайн-проекта / TRIPCHILLER')));
+      var eml = 'To: trip.chiller@gmail.com\r\nSubject: =?UTF-8?B?' + subject + '?=\r\nX-Unsent: 1\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n' + encoded;
+      var url = URL.createObjectURL(new Blob([eml], { type: 'message/rfc822' }));
+      var link = document.createElement('a'); link.href = url; link.download = 'TRIPCHILLER-brief.eml'; link.click();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    });
+    controls(true); place(); status.textContent = 'Загрузка папки…';
+    var images = Array.from(root.querySelectorAll('img[data-asset]')).map(function (img) {
+      var asset = img.dataset.asset;
+      img.src = root.dataset.assetBase + asset + (asset.indexOf('.') === -1 ? '.webp' : '');
+      return img.decode();
+    });
+    Promise.all(images.concat(document.fonts.load('16px "TC Brief Corona"'))).then(function () {
+      var observer = new IntersectionObserver(function (entries) {
+        if (!entries.some(function (entry) { return entry.isIntersecting; })) return;
+        observer.disconnect(); openFolder();
+      }, { threshold: .2 });
+      observer.observe(stage);
+    }).catch(function (error) { console.error('TC brief assets:', error); status.textContent = 'Не удалось загрузить графику или шрифт. Обновите страницу.'; });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initFolder);
+  else initFolder();
+})();
