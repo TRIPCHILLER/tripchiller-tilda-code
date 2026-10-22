@@ -524,6 +524,7 @@ body.tc-custom-header-enabled .tc-menu-eye-logo {
     will-change: transform;
   }
   .tc-eye-glints :is(.tn-atom, img, svg) {
+    display: block !important;
     width: 100% !important;
     height: 100% !important;
     filter: none !important;
